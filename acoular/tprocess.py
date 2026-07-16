@@ -30,6 +30,10 @@ Implement blockwise processing in the time domain.
     FiltOctave
     TimeExpAverage
     FiltFreqWeight
+    NotchFilter
+    AdaptiveNotchFilter
+    ZeroPhaseNotchFilter
+    CascadeNotchFilter
     OctaveFilterBank
     WriteWAV
     WriteH5
@@ -37,8 +41,10 @@ Implement blockwise processing in the time domain.
 """
 
 # imports from other packages
+import contextlib
 import wave
 from abc import abstractmethod
+from collections import deque
 from datetime import UTC, datetime
 from os import path
 from warnings import warn as _warn
@@ -51,15 +57,21 @@ from .h5files import _get_h5file_class
 from .internal import digest, ldigest
 from .microphones import MicGeom
 from .process import Cache
+from .tfastfuncs import (
+    iir_harmonic_cascade_lms_kernel,
+    iir_lms_kernel,
+    iir_time_varying_kernel,
+)
 
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
-from scipy.fft import irfft, rfft
+from scipy.fft import irfft, rfft, rfftfreq
 from scipy.interpolate import CloughTocher2DInterpolator, CubicSpline, LinearNDInterpolator, Rbf, splev, splrep
-from scipy.signal import bilinear, butter, sosfilt, sosfiltfilt, tf2sos
+from scipy.signal import bilinear, butter, lfilter, lfilter_zi, sosfilt, sosfiltfilt, tf2sos
 from scipy.spatial import Delaunay
 from traits.api import (
+    Any,
     Bool,
     CArray,
     CInt,
@@ -2883,3 +2895,2217 @@ def _spectral_sum(out, fdl, kb):  # pragma: no cover
                 out[b, n] += fdl[i, b, n] * kb[i, b, n]
 
     return out
+
+
+def find_spectral_peaks(
+    signal_1d,
+    sample_freq,
+    n_peaks=None,
+    freq_hint=None,
+    fft_tolerance=0.2,
+    threshold_db=20.0,
+):
+    """FFT-based spectral peak detection with parabolic interpolation.
+
+    Computes the power spectrum of a 1-D signal, identifies local maxima
+    above a noise-relative threshold, and refines each peak location via
+    three-point parabolic interpolation for sub-bin accuracy.
+
+    Parameters
+    ----------
+    signal_1d : numpy.ndarray
+        Input signal, shape ``(num_samples,)``.
+    sample_freq : float
+        Sampling frequency in Hz.
+    n_peaks : int or None
+        Maximum number of peaks to return.  ``None`` returns all.
+    freq_hint : float or None
+        If given, only peaks within ``freq_hint * (1 +- fft_tolerance)``
+        are considered.
+    fft_tolerance : float
+        Fractional tolerance for the *freq_hint* search window
+        (default 0.2 = +-20 %).
+    threshold_db : float
+        Minimum dB above the median power-spectrum level for a peak to
+        be considered (default 20 dB).
+
+    Returns
+    -------
+    list of tuple
+        ``(freq_hz, power_db)`` pairs sorted by descending power.
+
+    References
+    ----------
+    .. [1] Jacobsen, E. and Kootsookos, P. (2007). Fast, Accurate Frequency
+           Estimators [DSP Tips & Tricks]. IEEE Signal Processing Magazine,
+           24(3), 123-125. https://doi.org/10.1109/MSP.2007.361611
+    .. [2] Smith, J.O. (2011). Spectral Audio Signal Processing. W3K Publishing.
+           Parabolic peak interpolation:
+           https://ccrma.stanford.edu/~jos/sasp/Peak_Detection_Steps_3.html
+    """
+    fft_values = rfft(signal_1d)
+    fft_freqs = rfftfreq(len(signal_1d), 1.0 / sample_freq)
+    power_db = 10.0 * np.log10(np.abs(fft_values) ** 2 + 1e-12)
+    threshold = np.median(power_db) + threshold_db
+
+    peaks = []
+    for i in range(1, len(power_db) - 1):
+        if power_db[i] > power_db[i - 1] and power_db[i] > power_db[i + 1] and power_db[i] > threshold:
+            y0, y1, y2 = power_db[i - 1], power_db[i], power_db[i + 1]
+            denom = y0 - 2.0 * y1 + y2
+            if abs(denom) > 1e-10:
+                # Three-point parabolic interpolation: d = 0.5*(y0 - y2)/(y0 - 2*y1 + y2)
+                # Achieves sub-bin frequency accuracy from three dB-scale FFT samples.
+                # (Jacobsen & Kootsookos 2007; Smith SASP appendix C.2)
+                delta = 0.5 * (y0 - y2) / denom
+                refined = fft_freqs[i] + delta * (fft_freqs[1] - fft_freqs[0])
+                peaks.append((refined, y1))
+
+    if not peaks:
+        return []
+
+    # Filter by frequency hint if provided
+    if freq_hint is not None and abs(freq_hint) > 1e-6:
+        lo = freq_hint * (1.0 - fft_tolerance)
+        hi = freq_hint * (1.0 + fft_tolerance)
+        nearby = [(f, p) for f, p in peaks if lo <= f <= hi]
+        if nearby:
+            peaks = nearby
+
+    peaks.sort(key=lambda x: x[1], reverse=True)
+    if n_peaks is not None:
+        peaks = peaks[:n_peaks]
+    return peaks
+
+
+class NotchFilter(Filter):
+    r"""Second-order IIR notch filter with configurable center frequency.
+
+    Implements the transfer function:
+
+    .. math::
+
+        H(z) = \frac{1 - 2\cos(\theta)z^{-1} + z^{-2}}
+               {1 - 2r\cos(\theta)z^{-1} + r^2 z^{-2}}
+
+    where :math:`\theta = 2\pi f_{\text{notch}}/f_s` is the normalized notch
+    frequency and *r* is the pole radius controlling notch width.
+
+    The filter places zeros on the unit circle at the notch frequency
+    and poles inside the unit circle for stability. This achieves sharp
+    tonal suppression while preserving other frequency components.
+
+    The notch biquad is exposed as a single second-order section via the
+    :attr:`~acoular.tprocess.Filter.sos` property, so streaming and
+    per-channel state handling are inherited from
+    :class:`~acoular.tprocess.Filter` (:func:`scipy.signal.sosfilt`).
+
+    The filter bank this class belongs to follows :cite:`Harvey2019`; for the
+    notch (antiresonance) biquad itself see :cite:`Smith2007`.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : Notch filter with time-varying frequency.
+    :class:`ZeroPhaseNotchFilter` : Phase-preserving notch filter.
+    :class:`CascadeNotchFilter` : Bank of notches for harmonic series.
+
+    Examples
+    --------
+    >>> import acoular as ac
+    >>> from acoular import NotchFilter
+    >>> source = ac.TimeSamples(name='measurement.h5')  # doctest: +SKIP
+    >>> filt = NotchFilter(f_notch=440.0, pole_radius=0.95, source=source)  # doctest: +SKIP
+    """
+
+    #: Center frequency of the notch in Hz. Must be less than the Nyquist
+    #: frequency (sample_freq / 2).
+    f_notch = Float()
+
+    #: Pole radius controlling notch width (0 < r < 1, default 0.99).
+    #: Closer to 1 gives a narrower notch; closer to 0 gives a wider notch.
+    pole_radius = Float(0.99)
+
+    #: Second-order sections representation of the notch biquad, a single
+    #: ``(1, 6)`` section derived from :attr:`f_notch` and :attr:`pole_radius`.
+    sos = Property(depends_on=['source.digest', 'f_notch', 'pole_radius'])
+
+    #: A unique identifier for the filter, based on its properties. (read-only)
+    digest = Property(depends_on=['source.digest', 'f_notch', 'pole_radius'])
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @cached_property
+    def _get_sos(self):
+        # Single second-order section [b0, b1, b2, a0, a1, a2] for the notch
+        # biquad; consumed by the inherited Filter.result() via scipy.sosfilt.
+        b, a = self._compute_coefficients()
+        return np.hstack([b, a]).reshape(1, 6)
+
+    def _compute_coefficients_for_freq(self, f_notch):
+        """Compute IIR coefficients for an arbitrary notch frequency.
+
+        Parameters
+        ----------
+        f_notch : float
+            Notch center frequency in Hz.
+
+        Returns
+        -------
+        b : numpy.ndarray
+            Numerator coefficients [1, -2*cos(theta), 1].
+        a : numpy.ndarray
+            Denominator coefficients [1, -2*r*cos(theta), r**2].
+        """
+        # Zeros at e^{+-j theta} (on unit circle) -> complete cancellation at f_notch.
+        # Poles at r*e^{+-j theta} (inside unit circle) -> BIBO stability.
+        # Narrow notch for r -> 1; wider notch for r -> 0.
+        # H(z) = (1 - 2cos(theta)z^-1 + z^-2) / (1 - 2r*cos(theta)z^-1 + r^2 z^-2)
+        # See: https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html
+        theta = 2 * np.pi * f_notch / self.sample_freq
+        r = self.pole_radius
+        b = np.array([1.0, -2.0 * np.cos(theta), 1.0])
+        a = np.array([1.0, -2.0 * r * np.cos(theta), r * r])
+        return b, a
+
+    def _compute_coefficients(self):
+        """Compute IIR filter coefficients from the current :attr:`f_notch`.
+
+        Returns
+        -------
+        b : numpy.ndarray
+            Numerator coefficients.
+        a : numpy.ndarray
+            Denominator coefficients.
+        """
+        return self._compute_coefficients_for_freq(self.f_notch)
+
+    @property
+    def coefficients(self):
+        """Filter coefficients for frequency response analysis.
+
+        Returns
+        -------
+        tuple of numpy.ndarray
+            ``(b, a)`` where *b* is the numerator and *a* the denominator.
+        """
+        b, a = self._compute_coefficients()
+        return b.copy(), a.copy()
+
+
+class AdaptiveNotchFilter(NotchFilter):
+    """Adaptive notch filter with time-varying frequency tracking.
+
+    Extends :class:`NotchFilter` with dynamic frequency updating based on
+    either external frequency trajectories (external mode) or autonomous LMS
+    adaptation (auto mode). Supports multi-channel input.
+
+    With no *freq_source* and ``mode=None``, behaves identically to
+    :class:`NotchFilter`.
+
+    Notes
+    -----
+    External mode updates filter coefficients dynamically based on
+    *freq_source* blocks while preserving filter state across frequency
+    changes to maintain signal continuity.
+
+    Filter coefficients are recomputed per sample when the frequency changes,
+    which is expected behaviour for time-varying filters. State preservation
+    ensures no discontinuities at frequency transitions.
+
+    In auto mode the frequency is tracked with a normalised LMS update of the
+    recursive gradient after :cite:`Nehorai1985`; drift is monitored and reset
+    by a global FFT search following :cite:`TanJiang2009`. The overall approach
+    follows :cite:`Harvey2019`.
+
+    See Also
+    --------
+    :class:`NotchFilter` : Static notch filter, the base class.
+    :class:`ZeroPhaseNotchFilter` : Phase-preserving variant.
+    """
+
+    #: Streaming frequency source for external-mode frequency tracking.
+    #: Must be an object with a ``result(num)`` method yielding
+    #: ``(num_samples,)`` frequency arrays. Works for both offline
+    #: (wrap a pre-computed array) and real-time scenarios.
+    freq_source = Instance(SamplesGenerator)
+
+    #: Adaptation mode. ``None`` infers from *freq_source* (external if
+    #: provided, static otherwise). ``'external'`` uses direct frequency
+    #: control. ``'auto'`` uses autonomous LMS adaptation.
+    mode = Enum(None, 'external', 'auto')
+
+    #: LMS step size for auto mode. A single float or a list of step sizes.
+    mu = Union(Float, List)
+
+    #: Moving-average window for frequency smoothing in auto mode.
+    smooth_window = Int(256)
+
+    #: Leak factor for the recursive gradient (0 = instantaneous,
+    #: 1 = full recursive). Recommended 0.95 for single-tone tracking with
+    #: ``mu`` ~ 0.06 and ``pole_radius`` ~ 0.95.
+    gradient_leak = Float(0.0)
+
+    # Internal per-channel processing state (transient, not part of digest).
+    # Allocated lazily in _ensure_states and reset at the start of result().
+    _zi = Any()
+    _beta_state = Any()
+    _current_freq_per_ch = Any()
+    _freq_history = Any()
+    _freq_history_sum = Any()
+    _f0_per_ch = Any()
+    _learned_frequencies = Any(np.zeros(0))
+    _initialized = Bool(False)
+    _current_position = Int(0)
+
+    #: A unique identifier for the filter, based on its properties. (read-only)
+    digest = Property(
+        depends_on=[
+            'source.digest',
+            'f_notch',
+            'pole_radius',
+            'freq_source.digest',
+            'mode',
+            'mu',
+            'smooth_window',
+            'gradient_leak',
+        ]
+    )
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @property
+    def learned_frequencies(self):
+        """Per-sample frequency estimate of the most recently processed block.
+
+        Only meaningful in auto mode, where it holds the frequency the LMS
+        update tracked for every sample of the last block yielded by
+        :meth:`result`, shape ``(num,)``. It is taken from the first channel;
+        in other modes it stays empty.
+
+        Note that this covers the last block only -- collect it while
+        iterating over :meth:`result` to obtain the full trajectory.
+        """
+        return self._learned_frequencies
+
+    def _ensure_states(self, num_channels):
+        """Allocate per-channel state arrays if not yet sized correctly."""
+        zi = self._zi
+        if zi is None or zi.shape[0] != num_channels:
+            self._zi = np.zeros((num_channels, 2))
+            self._beta_state = np.zeros((num_channels, 5))
+            self._current_freq_per_ch = np.full(num_channels, self.f_notch)
+            self._freq_history = np.tile(
+                np.full(self.smooth_window, self.f_notch),
+                (num_channels, 1),
+            )
+            self._freq_history_sum = np.full(
+                num_channels,
+                self.f_notch * self.smooth_window,
+            )
+            self._f0_per_ch = np.full(num_channels, self.f_notch)
+
+    def _get_effective_mode(self):
+        """Infer mode from *freq_source* if not set explicitly.
+
+        Returns
+        -------
+        str or None
+            ``'external'``, ``'auto'``, or ``None`` (static mode).
+        """
+        if self.mode is not None:
+            return self.mode
+        if self.freq_source is not None:
+            return 'external'
+        return None
+
+    def _resolve_step_size(self):
+        """Resolve LMS step size from the :attr:`mu` trait."""
+        if isinstance(self.mu, list):
+            return self.mu[0] if self.mu else 0.001
+        if self.mu is not None:
+            return float(self.mu)
+        return 0.001
+
+    def _filter_block(self, data, freq_trajectory=None):
+        """Process one multi-channel block.
+
+        Called by :class:`CascadeNotchFilter` to apply this filter to all
+        *K* channels.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input block, shape ``(num_samples, num_channels)``.
+        freq_trajectory : numpy.ndarray or None
+            Per-sample frequency, shape ``(num_samples,)``.
+            If given, time-varying filtering is applied.
+            If ``None`` and ``mode == 'auto'``, LMS adaptation is used.
+            Otherwise, static filtering with the current :attr:`f_notch`.
+
+        Returns
+        -------
+        numpy.ndarray
+            Filtered block, same shape as *data*.
+        """
+        num_channels = data.shape[1]
+        self._ensure_states(num_channels)
+
+        if freq_trajectory is not None:
+            cos_theta = np.cos(
+                2.0 * np.pi * np.ascontiguousarray(freq_trajectory, dtype=np.float64) / self.sample_freq,
+            )
+            data_c = np.ascontiguousarray(data, dtype=np.float64)
+            return iir_time_varying_kernel(
+                data_c,
+                cos_theta,
+                self.pole_radius,
+                self._zi,
+            )
+
+        if self.mode == 'auto':
+            step_size = self._resolve_step_size()
+            data_c = np.ascontiguousarray(data, dtype=np.float64)
+            output, learned, _ = iir_lms_kernel(
+                data_c,
+                self.pole_radius,
+                self.sample_freq,
+                step_size,
+                self.smooth_window,
+                self._zi,
+                self._current_freq_per_ch,
+                self._beta_state,
+                self._freq_history,
+                self._freq_history_sum,
+                gradient_leak=self.gradient_leak,
+            )
+            self._learned_frequencies = learned
+            return output
+
+        # Static mode - per-channel lfilter
+        b, a = self._compute_coefficients()
+        output = np.zeros_like(data)
+        for ch in range(num_channels):
+            output[:, ch], self._zi[ch] = lfilter(
+                b,
+                a,
+                data[:, ch],
+                zi=self._zi[ch],
+            )
+        return output
+
+    def result(self, num):
+        """Apply adaptive filter to input signal blocks.
+
+        Dispatches based on the effective mode (inferred or explicit).
+
+        Parameters
+        ----------
+        num : int
+            Number of samples per output block.
+
+        Yields
+        ------
+        numpy.ndarray
+            Filtered signal blocks with shape ``(num, num_channels)``.
+            The final block may contain fewer than *num* samples.
+
+        Raises
+        ------
+        ValueError
+            If mode is ``'external'`` but no *freq_source* is provided.
+        """
+        # Reset transient per-channel state at the start of each pass.
+        self._zi = None
+        self._beta_state = None
+        self._current_freq_per_ch = None
+        self._freq_history = None
+        self._freq_history_sum = None
+        self._f0_per_ch = None
+        self._learned_frequencies = np.zeros(0)
+        self._initialized = False
+        self._current_position = 0
+
+        effective_mode = self._get_effective_mode()
+
+        if effective_mode == 'external' and self.freq_source is None:
+            msg = "mode is 'external' but no freq_source provided. Set freq_source or use mode='auto' / None."
+            raise ValueError(msg)
+
+        if effective_mode is None:
+            yield from super().result(num)
+        elif effective_mode == 'external':
+            yield from self._result_external(num)
+        elif effective_mode == 'auto':
+            yield from self._result_auto(num)
+
+    def _result_external(self, num):
+        """Process signal in external RPM mode.
+
+        Pulls frequency blocks from *freq_source* in lockstep with signal
+        blocks and applies time-varying filtering with state preservation.
+        """
+        freq_iter = self.freq_source.result(num)
+
+        for source_block in self.source.result(num):
+            num_samples = source_block.shape[0]
+            num_channels = source_block.shape[1]
+            self._ensure_states(num_channels)
+
+            try:
+                block_freq_traj = np.asarray(next(freq_iter)).ravel()
+            except StopIteration:
+                msg = 'freq_source exhausted before source finished yielding blocks.'
+                raise ValueError(msg) from None
+            if len(block_freq_traj) != num_samples:
+                msg = (
+                    f'freq_source block size {len(block_freq_traj)} does not match '
+                    f'source block size {num_samples}. Both must yield blocks of the same size.'
+                )
+                raise ValueError(msg)
+
+            output = self._filter_block(source_block, block_freq_traj)
+            self._current_position = self._current_position + num_samples
+            yield output
+
+    def _apply_time_varying_filter(self, data, freq_trajectory, ch):
+        """Apply time-varying IIR filtering to one channel.
+
+        Thin wrapper around the vectorised kernel used by
+        :class:`ZeroPhaseNotchFilter` for single-channel passes.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data, shape ``(num_samples,)``.
+        freq_trajectory : numpy.ndarray
+            Frequency at each sample, shape ``(num_samples,)``.
+        ch : int
+            Channel index.
+
+        Returns
+        -------
+        numpy.ndarray
+            Filtered data, shape ``(num_samples,)``.
+        """
+        data_2d = np.ascontiguousarray(data[:, np.newaxis], dtype=np.float64)
+        cos_theta = np.cos(
+            2.0 * np.pi * np.ascontiguousarray(freq_trajectory, dtype=np.float64) / self.sample_freq,
+        )
+        zi_slice = self._zi[ch : ch + 1].copy()
+        output = iir_time_varying_kernel(
+            data_2d,
+            cos_theta,
+            self.pole_radius,
+            zi_slice,
+        )
+        self._zi[ch] = zi_slice[0]
+        return output[:, 0]
+
+    def _result_auto(self, num):
+        """Process signal in autonomous LMS mode.
+
+        Performs FFT-based initialisation on the first block, then
+        continuously adapts filter frequencies using the referenceless LMS
+        algorithm.
+        """
+        for source_block in self.source.result(num):
+            num_samples = source_block.shape[0]
+            num_channels = source_block.shape[1]
+            self._ensure_states(num_channels)
+
+            if not self._initialized:
+                self._initialize_from_fft(source_block)
+                self._initialized = True
+                init_f = self.f_notch
+                self._current_freq_per_ch[:] = init_f
+                self._freq_history[:] = init_f
+                self._freq_history_sum[:] = init_f * self.smooth_window
+
+            output = self._filter_block(source_block)
+            self._monitor_and_reset(source_block)
+            self._current_position = self._current_position + num_samples
+            yield output
+
+    def _initialize_from_fft(self, initial_block, fft_tolerance=0.2, *, global_search=False):
+        """Initialise filter frequency using FFT peak detection near *f_notch*.
+
+        Uses parabolic interpolation to refine peak frequency estimates
+        beyond FFT bin resolution for sub-Hz accuracy.
+
+        Parameters
+        ----------
+        initial_block : numpy.ndarray
+            Initial signal block with shape ``(num_samples, num_channels)``.
+        fft_tolerance : float
+            Fractional tolerance for peak search around *f_notch*
+            (default 0.2 = +-20 %).
+        global_search : bool
+            If ``True``, pick the globally strongest peak instead of
+            restricting to the region around *f_notch*.
+        """
+        hint = None if global_search else self.f_notch
+        peaks = find_spectral_peaks(
+            initial_block[:, 0],
+            self.sample_freq,
+            n_peaks=1,
+            freq_hint=hint,
+            fft_tolerance=fft_tolerance,
+        )
+        if not peaks:
+            return
+
+        init_freq = peaks[0][0]
+        self.f_notch = init_freq
+        if self._f0_per_ch is not None and self._f0_per_ch.shape[0] > 0:
+            self._f0_per_ch[:] = init_freq
+
+    def _monitor_and_reset(self, current_block):
+        """Check global-minimum drift and reset if needed.
+
+        Implements the monitoring strategy of Tan & Jiang (2009, section II).
+        When the smoothed frequency drifts beyond
+        ``0.25 * (1 - r) * fs / pi`` from the last initialisation frequency,
+        a global FFT search and reset is triggered.
+
+        Parameters
+        ----------
+        current_block : numpy.ndarray
+            Raw input block, shape ``(num_samples, num_channels)``.
+        """
+        if self._current_freq_per_ch is None or self._current_freq_per_ch.shape[0] == 0:
+            return
+        # Maximum allowable frequency drift before a global-search reset.
+        # Derived from the notch bandwidth: BW ~= (1-r)*fs/pi  (-3 dB points),
+        # so delta_f_max = 0.25*BW ensures the LMS gradient is still well-defined
+        # at the current estimate. (Tan & Jiang 2009, section II; DOI: 10.1109/MSP.2009.934189)
+        delta_f_max = 0.25 * (1.0 - self.pole_radius) * self.sample_freq / np.pi
+        if abs(self._current_freq_per_ch[0] - self._f0_per_ch[0]) > delta_f_max:
+            prev_f0 = self._f0_per_ch[0]
+            self._initialize_from_fft(current_block, global_search=True)
+            if abs(self._f0_per_ch[0] - prev_f0) > 1e-6:
+                new_f = self.f_notch
+                self._current_freq_per_ch[:] = new_f
+                self._freq_history[:] = new_f
+                self._freq_history_sum[:] = new_f * self.smooth_window
+                self._beta_state[:] = 0.0
+
+
+class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
+    """Zero-phase notch filter using forward-backward (filtfilt) algorithm.
+
+    Inherits the full trait set and per-channel state machinery from
+    :class:`AdaptiveNotchFilter` (which itself inherits from
+    :class:`NotchFilter`).  The only responsibility of this class is to
+    replace the causal :meth:`_filter_block` with a forward-backward
+    implementation and to expose :meth:`_process_signal` / :meth:`result`
+    helpers that collect the full signal first (required by any non-causal
+    algorithm).
+
+    Notes
+    -----
+    * Forward-backward filtering is a batch (non-causal) operation.  Both
+      :meth:`_process_signal` and :meth:`result` therefore collect the entire
+      source signal before processing.
+    * The static path pads the signal with odd-extension (matching
+      :func:`scipy.signal.filtfilt`) so that boundary transients are
+      suppressed.
+    * The external and auto paths initialise the forward and backward
+      filter states from :func:`scipy.signal.lfilter_zi` scaled by the
+      first / last sample of the (unpadded) signal - no explicit padding is
+      needed because the trajectory already defines the filter at every
+      sample.
+
+    The boundary states follow :cite:`Gustafsson1996`, the method also used by
+    :func:`scipy.signal.filtfilt`; see :cite:`Smith2007` for forward-backward
+    filtering in general and :cite:`Harvey2019` for the application to
+    propeller noise.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : The causal base class.
+    :class:`FiltFiltOctave` : Zero-phase octave band filter.
+    """
+
+    #: Core block size used when iterating in overlapping blocks (static /
+    #: external modes inside :meth:`result`).
+    block_size = Int(4096)
+
+    #: Multiplier applied to the single-filter settling time to compute
+    #: the overlap margin on each side of a core block.
+    overlap_factor = Float(2.0)
+
+    #: Number of future blocks buffered for the backward pass in streaming
+    #: mode.  Higher values improve boundary accuracy at the cost of latency
+    #: and memory.
+    num_lookahead_blocks = Int(1)
+
+    #: When ``True``, collect the entire signal before processing
+    #: (full-signal batch processing).  When ``False`` (default), use
+    #: deque-based streaming with ``num_lookahead_blocks`` of latency.
+    batch_mode = Bool(False)
+
+    # Internal state for the zero-phase passes (transient, not in digest).
+    # Reset at the start of result(); the streaming buffers hold the
+    # forward-pass output awaiting the backward pass.
+    _learned_trajectory = Any(np.array([]))
+    _stream_fwd_zi = Any()
+    _stream_prev_fwd = Any()
+    _stream_prev_traj = Any()
+    _stream_prev_learned = Any()
+
+    #: A unique identifier for the filter, based on its properties. (read-only)
+    digest = Property(
+        depends_on=[
+            'source.digest',
+            'f_notch',
+            'pole_radius',
+            'freq_source.digest',
+            'mode',
+            'mu',
+            'smooth_window',
+            'gradient_leak',
+            'block_size',
+            'overlap_factor',
+            'num_lookahead_blocks',
+            'batch_mode',
+        ]
+    )
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @property
+    def overlap_samples(self):
+        """Overlap margin for block-based iteration.
+
+        ``overlap = overlap_factor * settling``, where
+        ``settling = 7 / |ln(pole_radius)|``.
+        For ``pole_radius = 0.95`` and ``overlap_factor = 2.0`` this gives
+        ~ 274 samples.
+        """
+        tau = -1.0 / np.log(self.pole_radius)
+        settling = int(7 * tau)
+        return int(self.overlap_factor * settling)
+
+    def _compute_padlen(self):
+        """Return the padding length matching :func:`scipy.signal.filtfilt`."""
+        b, a = self._compute_coefficients()
+        return 3 * max(len(b), len(a))
+
+    def _pad_signal(self, x):
+        """Odd-extension padding at both ends of a 1-D signal.
+
+        Reflects the signal anti-symmetrically about each boundary:
+        ``pad[k] = 2*x[0] - x[k]`` (front) and ``2*x[-1] - x[-k]`` (back).
+        This forces continuity of the signal at the endpoints, suppressing
+        start-up and end transients in the forward-backward pass.
+        Matches the padding used by :func:`scipy.signal.filtfilt`.
+        (Gustafsson 1996, section III; DOI: 10.1109/78.492552)
+        """
+        padlen = self._compute_padlen()
+        front_pad = 2 * x[0] - x[padlen:0:-1]
+        back_pad = 2 * x[-1] - x[-2 : -padlen - 2 : -1]
+        return np.concatenate([front_pad, x, back_pad])
+
+    def _unpad_signal(self, x, original_length):
+        """Strip the odd-extension padding."""
+        padlen = self._compute_padlen()
+        return x[padlen : padlen + original_length]
+
+    def _forward_pass(self, x, b, a, zi=None):
+        """Forward lfilter with fixed coefficients.
+
+        If *zi* is ``None`` (first block) the initial condition is derived
+        from :func:`scipy.signal.lfilter_zi` scaled by ``x[0]``.
+        """
+        if zi is None:
+            zi = lfilter_zi(b, a) * x[0]
+        return lfilter(b, a, x, zi=zi)
+
+    def _backward_pass(self, x, b, a, zi=None):
+        """Time-reverse -> lfilter -> time-reverse (fixed coefficients)."""
+        x_reversed = x[::-1]
+        if zi is None:
+            zi = lfilter_zi(b, a) * x_reversed[0]
+        y_reversed, zf = lfilter(b, a, x_reversed, zi=zi)
+        return y_reversed[::-1], zf
+
+    def _process_channel(self, x, b, a):
+        """Full padded forward-backward pass for one channel (static mode)."""
+        original_length = len(x)
+        x_padded = self._pad_signal(x)
+
+        zi = lfilter_zi(b, a)
+        y_forward, _ = self._forward_pass(x_padded, b, a, zi * x_padded[0])
+
+        zi_backward = lfilter_zi(b, a)
+        y_backward, _ = self._backward_pass(y_forward, b, a, zi_backward * y_forward[-1])
+
+        return self._unpad_signal(y_backward, original_length)
+
+    def _forward_pass_adaptive(self, x, freq_trajectory, zi=None):
+        """Sample-by-sample forward pass with time-varying coefficients.
+
+        Returns ``(output, zi_final)`` for stateful block chaining.
+        """
+        x_2d = np.ascontiguousarray(x[:, np.newaxis], dtype=np.float64)
+        cos_theta = np.cos(
+            2.0 * np.pi * np.ascontiguousarray(freq_trajectory, dtype=np.float64) / self.sample_freq,
+        )
+
+        if zi is None:
+            b, a = self._compute_coefficients_for_freq(freq_trajectory[0])
+            zi = lfilter_zi(b, a) * x[0]
+
+        zi_2d = np.ascontiguousarray(zi[np.newaxis, :], dtype=np.float64)
+        output_2d = iir_time_varying_kernel(
+            x_2d,
+            cos_theta,
+            self.pole_radius,
+            zi_2d,
+        )
+
+        return output_2d[:, 0], zi_2d[0]
+
+    def _backward_pass_adaptive(self, x, freq_trajectory, zi=None):
+        """Time-reverse -> sample-by-sample filter -> time-reverse.
+
+        *freq_trajectory* must already be reversed by the caller.
+        Returns ``(output, zi_final)``.
+        """
+        x_reversed = x[::-1]
+        x_2d = np.ascontiguousarray(x_reversed[:, np.newaxis], dtype=np.float64)
+        cos_theta = np.cos(
+            2.0 * np.pi * np.ascontiguousarray(freq_trajectory, dtype=np.float64) / self.sample_freq,
+        )
+
+        if zi is None:
+            b, a = self._compute_coefficients_for_freq(freq_trajectory[0])
+            zi = lfilter_zi(b, a) * x_reversed[0]
+
+        zi_2d = np.ascontiguousarray(zi[np.newaxis, :], dtype=np.float64)
+        output_2d = iir_time_varying_kernel(
+            x_2d,
+            cos_theta,
+            self.pole_radius,
+            zi_2d,
+        )
+
+        return output_2d[::-1, 0], zi_2d[0]
+
+    def _forward_pass_lms(self, x, ch, zi=None):
+        """LMS-adapting forward pass for one channel.
+
+        Returns ``(output, learned_trajectory, zi_final)``.
+        """
+        step_size = self._resolve_step_size()
+        x_2d = np.ascontiguousarray(x[:, np.newaxis], dtype=np.float64)
+
+        zi_slice = self._zi[ch : ch + 1].copy()
+        freq_slice = self._current_freq_per_ch[ch : ch + 1].copy()
+        beta_slice = self._beta_state[ch : ch + 1].copy()
+        hist_slice = self._freq_history[ch : ch + 1].copy()
+        sum_slice = self._freq_history_sum[ch : ch + 1].copy()
+
+        if zi is not None:
+            zi_slice[0] = zi
+        else:
+            b, a = self._compute_coefficients_for_freq(freq_slice[0])
+            zi_init = lfilter_zi(b, a) * x[0]
+            zi_slice[0] = zi_init
+
+        output_2d, learned, _ = iir_lms_kernel(
+            x_2d,
+            self.pole_radius,
+            self.sample_freq,
+            step_size,
+            self.smooth_window,
+            zi_slice,
+            freq_slice,
+            beta_slice,
+            hist_slice,
+            sum_slice,
+            gradient_leak=self.gradient_leak,
+        )
+
+        # Write back per-channel state
+        self._zi[ch] = zi_slice[0]
+        self._current_freq_per_ch[ch] = freq_slice[0]
+        self._beta_state[ch] = beta_slice[0]
+        self._freq_history[ch] = hist_slice[0]
+        self._freq_history_sum[ch] = sum_slice[0]
+
+        return output_2d[:, 0], learned, zi_slice[0]
+
+    def _process_channel_external(self, x, traj):
+        """External-mode zero-phase for one channel."""
+        y_forward, _ = self._forward_pass_adaptive(x, traj)
+        y_backward, _ = self._backward_pass_adaptive(y_forward, traj[::-1])
+        return y_backward
+
+    def _process_channel_auto(self, x, ch):
+        """Auto-mode zero-phase for one channel."""
+        y_forward, learned, _ = self._forward_pass_lms(x, ch)
+        self._learned_trajectory = learned
+        y_backward, _ = self._backward_pass_adaptive(y_forward, learned[::-1])
+        return y_backward
+
+    def _filter_block(self, data, freq_trajectory=None):
+        """Zero-phase forward-backward filtering of one multi-channel block.
+
+        This is the method called by :class:`CascadeNotchFilter` to push
+        data through a single stage of the serial chain.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input block, shape ``(num_samples, num_channels)``.
+        freq_trajectory : numpy.ndarray or None
+            Per-sample frequency for external mode, shape ``(num_samples,)``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Zero-phase filtered block, same shape as *data*.
+        """
+        num_channels = data.shape[1]
+        self._ensure_states(num_channels)
+
+        if self.mode == 'auto' and not self._initialized:
+            self._initialize_from_fft(data)
+            self._initialized = True
+            # Sync per-channel state with FFT-detected frequency
+            init_f = self.f_notch
+            self._current_freq_per_ch[:] = init_f
+            self._freq_history[:] = init_f
+            self._freq_history_sum[:] = init_f * self.smooth_window
+
+        b, a = self._compute_coefficients()
+        output = np.zeros_like(data)
+        for ch in range(num_channels):
+            if freq_trajectory is not None:
+                output[:, ch] = self._process_channel_external(
+                    data[:, ch],
+                    freq_trajectory,
+                )
+            elif self.mode == 'auto':
+                output[:, ch] = self._process_channel_auto(data[:, ch], ch)
+            else:
+                output[:, ch] = self._process_channel(data[:, ch], b, a)
+
+        if self.mode == 'auto':
+            self._learned_frequencies = self._learned_trajectory
+
+        return output
+
+    def _resolve_trajectory(self):
+        """Resolve the effective frequency trajectory.
+
+        Priority:
+        1. *freq_source* (streaming) - exhausted into an array.
+        2. ``None`` - static or auto mode handles internally.
+        """
+        if self.freq_source is not None:
+            blocks = list(self.freq_source.result(self.num_samples))
+            return np.concatenate([np.asarray(b).ravel() for b in blocks])
+
+        return None
+
+    def _process_signal(self):
+        """Process the entire signal with zero-phase filtering.
+
+        Collects all blocks from *source*, resolves the frequency
+        trajectory (if any), and delegates to :meth:`_filter_block`.
+
+        Returns
+        -------
+        numpy.ndarray
+            Filtered signal, shape ``(num_samples, num_channels)``.
+        """
+        blocks = list(self.source.result(self.num_samples))
+        signal = np.vstack(blocks)
+
+        traj = self._resolve_trajectory()
+        if traj is not None:
+            traj = traj[: signal.shape[0]]
+
+        return self._filter_block(signal, freq_trajectory=traj)
+
+    def _reset_streaming(self):
+        """Initialise (or reset) the internal state for streaming mode.
+
+        Must be called before the first :meth:`_filter_block_streaming`
+        call.
+
+        The backward pass needs future samples to settle.  Each call to
+        :meth:`_filter_block_streaming` uses the *current* block as a
+        one-block settling pad and returns the zero-phase output for the
+        *previous* block.  Output is therefore delayed by exactly one
+        block.  After the last block, call :meth:`_flush_streaming` to
+        retrieve the final block.
+        """
+        self._stream_fwd_zi = None
+        self._stream_prev_fwd = None
+        self._stream_prev_traj = None
+        self._stream_prev_learned = None
+
+    def _filter_block_streaming(self, data, freq_trajectory=None):
+        """Streaming zero-phase forward-backward filter for one block.
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            New input block, shape ``(num_samples, num_channels)``.
+        freq_trajectory : numpy.ndarray or None
+            Per-sample frequency for this block (external mode only).
+
+        Returns
+        -------
+        numpy.ndarray or None
+            Zero-phase filtered output for the **previous** block (same
+            shape as *data*), or ``None`` on the very first call when the
+            block is still being buffered.
+        """
+        num_samples, num_channels = data.shape
+        self._ensure_states(num_channels)
+
+        if self.mode == 'auto' and not self._initialized:
+            self._initialize_from_fft(data)
+            self._initialized = True
+
+        if self._stream_fwd_zi is None:
+            self._stream_fwd_zi = [None] * num_channels
+
+        # Forward pass (streaming, state carried)
+        fwd_out = np.zeros_like(data)
+        cur_learned = None
+
+        for ch in range(num_channels):
+            if self.mode == 'auto':
+                fwd_out[:, ch], learned_ch, self._stream_fwd_zi[ch] = self._forward_pass_lms(
+                    data[:, ch], ch, self._stream_fwd_zi[ch]
+                )
+                if cur_learned is None:
+                    cur_learned = np.zeros((num_samples, num_channels))
+                cur_learned[:, ch] = learned_ch
+            elif freq_trajectory is not None:
+                fwd_out[:, ch], self._stream_fwd_zi[ch] = self._forward_pass_adaptive(
+                    data[:, ch],
+                    freq_trajectory,
+                    self._stream_fwd_zi[ch],
+                )
+            else:
+                b, a = self._compute_coefficients()
+                fwd_out[:, ch], self._stream_fwd_zi[ch] = self._forward_pass(data[:, ch], b, a, self._stream_fwd_zi[ch])
+
+        # First block: buffer only, no output yet
+        if self._stream_prev_fwd is None:
+            self._stream_prev_fwd = fwd_out
+            self._stream_prev_traj = freq_trajectory
+            self._stream_prev_learned = cur_learned
+            return None
+
+        # Backward pass: zero-phase the *previous* block
+        prev_num_samples = self._stream_prev_fwd.shape[0]
+        b, a = self._compute_coefficients()
+        output = np.zeros_like(self._stream_prev_fwd)
+
+        for ch in range(num_channels):
+            context = np.concatenate(
+                [
+                    self._stream_prev_fwd[:, ch],
+                    fwd_out[:, ch],
+                ]
+            )
+
+            if self.mode == 'auto':
+                traj_context = np.concatenate(
+                    [
+                        self._stream_prev_learned[:, ch],
+                        cur_learned[:, ch],
+                    ]
+                )
+                bwd, _ = self._backward_pass_adaptive(context, traj_context[::-1])
+            elif self._stream_prev_traj is not None and freq_trajectory is not None:
+                traj_context = np.concatenate(
+                    [
+                        self._stream_prev_traj,
+                        freq_trajectory,
+                    ]
+                )
+                bwd, _ = self._backward_pass_adaptive(context, traj_context[::-1])
+            elif self._stream_prev_traj is not None:
+                hold = np.full(num_samples, self._stream_prev_traj[-1])
+                traj_context = np.concatenate([self._stream_prev_traj, hold])
+                bwd, _ = self._backward_pass_adaptive(context, traj_context[::-1])
+            else:
+                bwd, _ = self._backward_pass(context, b, a)
+
+            output[:, ch] = bwd[:prev_num_samples]
+
+        self._stream_prev_fwd = fwd_out
+        self._stream_prev_traj = freq_trajectory
+        self._stream_prev_learned = cur_learned
+
+        return output
+
+    def _flush_streaming(self):
+        """Retrieve the final buffered block after no more input arrives.
+
+        Returns
+        -------
+        numpy.ndarray or None
+            Zero-phase output for the last block, or ``None`` if the
+            streaming buffer is already empty.
+        """
+        if self._stream_prev_fwd is None:
+            return None
+
+        num_channels = self._stream_prev_fwd.shape[1]
+        b, a = self._compute_coefficients()
+        output = np.zeros_like(self._stream_prev_fwd)
+
+        for ch in range(num_channels):
+            x = self._stream_prev_fwd[:, ch]
+
+            if self.mode == 'auto' and self._stream_prev_learned is not None:
+                bwd, _ = self._backward_pass_adaptive(
+                    x,
+                    self._stream_prev_learned[:, ch][::-1],
+                )
+            elif self._stream_prev_traj is not None:
+                bwd, _ = self._backward_pass_adaptive(
+                    x,
+                    self._stream_prev_traj[::-1],
+                )
+            else:
+                bwd, _ = self._backward_pass(x, b, a)
+
+            output[:, ch] = bwd
+
+        self._stream_prev_fwd = None
+        self._stream_prev_traj = None
+        self._stream_prev_learned = None
+
+        return output
+
+    def _filter_signal_two_pass(self, signal, traj):
+        """Forward + backward sweep with state propagation across blocks.
+
+        Produces results identical to single-shot filtfilt while keeping
+        the per-block working set small.  For static mode the signal is
+        odd-extension padded *once* at the signal boundaries (not per block)
+        and unpadded after the backward sweep.
+
+        Parameters
+        ----------
+        signal : numpy.ndarray
+            Input signal, shape ``(total_samples, num_channels)``.
+        traj : numpy.ndarray or None
+            Per-sample frequency trajectory, shape ``(total_samples,)``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Filtered signal, same shape as *signal*.
+        """
+        total_samples, num_channels = signal.shape
+        block = self.block_size
+        is_static = traj is None
+        b, a = self._compute_coefficients()
+
+        if is_static:
+            padlen = self._compute_padlen()
+            signal_work = np.column_stack([self._pad_signal(signal[:, ch]) for ch in range(num_channels)])
+        else:
+            padlen = 0
+            signal_work = signal
+
+        work_len = signal_work.shape[0]
+
+        # Forward sweep (left -> right)
+        forward_out = np.empty_like(signal_work)
+        fwd_zi = [None] * num_channels
+
+        for start in range(0, work_len, block):
+            end = min(start + block, work_len)
+            for ch in range(num_channels):
+                x = signal_work[start:end, ch]
+                if is_static:
+                    forward_out[start:end, ch], fwd_zi[ch] = self._forward_pass(x, b, a, fwd_zi[ch])
+                else:
+                    forward_out[start:end, ch], fwd_zi[ch] = self._forward_pass_adaptive(x, traj[start:end], fwd_zi[ch])
+
+        # Backward sweep (right -> left)
+        output_work = np.empty_like(signal_work)
+        bwd_zi = [None] * num_channels
+
+        for start in reversed(range(0, work_len, block)):
+            end = min(start + block, work_len)
+            for ch in range(num_channels):
+                x = forward_out[start:end, ch]
+                if is_static:
+                    output_work[start:end, ch], bwd_zi[ch] = self._backward_pass(x, b, a, bwd_zi[ch])
+                else:
+                    output_work[start:end, ch], bwd_zi[ch] = self._backward_pass_adaptive(
+                        x,
+                        traj[start:end][::-1],
+                        bwd_zi[ch],
+                    )
+
+        if is_static:
+            return output_work[padlen : padlen + total_samples]
+        return output_work
+
+    def result(self, num):
+        """Yield zero-phase filtered signal in chunks of *num* samples.
+
+        By default a streaming approach is used: source blocks are
+        forward-filtered and buffered; once ``num_lookahead_blocks``
+        blocks of future context are available the backward pass is
+        executed on the oldest block and the result yielded.
+
+        Set ``batch_mode=True`` to collect the full signal before
+        processing (original behaviour, required for very short signals
+        or when exact :func:`scipy.signal.filtfilt` equivalence is
+        needed).
+
+        Parameters
+        ----------
+        num : int
+            Requested samples per yielded block.
+
+        Yields
+        ------
+        numpy.ndarray
+            Filtered blocks, shape ``(n, num_channels)`` with ``n <= num``.
+        """
+        # Reset transient state at the start of each pass.
+        self._zi = None
+        self._beta_state = None
+        self._current_freq_per_ch = None
+        self._freq_history = None
+        self._freq_history_sum = None
+        self._f0_per_ch = None
+        self._learned_frequencies = np.zeros(0)
+        self._learned_trajectory = np.array([])
+        self._initialized = False
+        self._current_position = 0
+
+        if self.batch_mode:
+            yield from self._result_batch(num)
+            return
+
+        # Settling-time warning
+        settling = int(7 / abs(np.log(self.pole_radius)))
+        buffer_length = self.num_lookahead_blocks * num
+        if settling > buffer_length:
+            _warn(
+                f'Settling time ({settling} samples) exceeds lookahead '
+                f'buffer ({buffer_length} samples). Consider increasing '
+                f'num_lookahead_blocks or using batch_mode=True.',
+                stacklevel=2,
+            )
+
+        yield from self._result_streaming(num)
+
+    def _result_batch(self, num):
+        """Batch path: collect entire signal, process, yield chunks."""
+        blocks = list(self.source.result(self.num_samples))
+        signal = np.vstack(blocks)
+        total_samples = signal.shape[0]
+
+        traj = self._resolve_trajectory()
+        if traj is not None:
+            traj = traj[:total_samples]
+
+        # Auto mode or short signal: single-shot
+        if self.mode == 'auto' or total_samples <= self.block_size:
+            output = self._filter_block(signal, freq_trajectory=traj)
+            for i in range(0, output.shape[0], num):
+                yield output[i : i + num]
+            return
+
+        # Static / external: stateful two-pass sweep
+        output = self._filter_signal_two_pass(signal, traj)
+        for i in range(0, total_samples, num):
+            yield output[i : i + num]
+
+    def _result_streaming(self, num):
+        """Streaming path: deque-based forward-backward with lookahead.
+
+        Forward-filters each source block (keeping IIR state across
+        blocks) and appends the result to a deque.  Once the deque holds
+        more than ``num_lookahead_blocks`` entries, the oldest block is
+        backward-filtered using all newer entries as settling context and
+        yielded.  Remaining blocks are flushed at the end.
+        """
+        L = self.num_lookahead_blocks
+        fwd_buffer = deque()
+        traj_buffer = deque()
+        learned_buffer = deque()
+
+        fwd_zi = None
+        b, a = self._compute_coefficients()
+
+        # Per-block trajectory iteration
+        freq_iter = None
+        if self.freq_source is not None:
+            freq_iter = self.freq_source.result(num)
+
+        for source_block in self.source.result(num):
+            n_samp, n_ch = source_block.shape
+            self._ensure_states(n_ch)
+
+            if fwd_zi is None:
+                fwd_zi = [None] * n_ch
+
+            # Trajectory slice for this block
+            traj_slice = None
+            if freq_iter is not None:
+                with contextlib.suppress(StopIteration):
+                    traj_slice = np.asarray(next(freq_iter)).ravel()
+
+            # Auto-mode FFT init on first block
+            if self.mode == 'auto' and not self._initialized:
+                self._initialize_from_fft(source_block)
+                self._initialized = True
+                init_f = self.f_notch
+                self._current_freq_per_ch[:] = init_f
+                self._freq_history[:] = init_f
+                self._freq_history_sum[:] = init_f * self.smooth_window
+
+            # Forward pass (stateful across blocks)
+            fwd_out = np.zeros_like(source_block)
+            cur_learned = None
+
+            for ch in range(n_ch):
+                if self.mode == 'auto':
+                    fwd_out[:, ch], learned_ch, fwd_zi[ch] = self._forward_pass_lms(
+                        source_block[:, ch],
+                        ch,
+                        fwd_zi[ch],
+                    )
+                    if cur_learned is None:
+                        cur_learned = np.zeros((n_samp, n_ch))
+                    cur_learned[:, ch] = learned_ch
+                elif traj_slice is not None:
+                    fwd_out[:, ch], fwd_zi[ch] = self._forward_pass_adaptive(
+                        source_block[:, ch],
+                        traj_slice,
+                        fwd_zi[ch],
+                    )
+                else:
+                    fwd_out[:, ch], fwd_zi[ch] = self._forward_pass(
+                        source_block[:, ch],
+                        b,
+                        a,
+                        fwd_zi[ch],
+                    )
+
+            fwd_buffer.append(fwd_out)
+            traj_buffer.append(traj_slice)
+            learned_buffer.append(cur_learned)
+
+            # Yield oldest block once buffer exceeds lookahead
+            if len(fwd_buffer) > L:
+                yield self._backward_pass_buffered(
+                    fwd_buffer,
+                    traj_buffer,
+                    learned_buffer,
+                    b,
+                    a,
+                )
+
+        # Flush remaining buffered blocks
+        while fwd_buffer:
+            yield self._backward_pass_buffered(
+                fwd_buffer,
+                traj_buffer,
+                learned_buffer,
+                b,
+                a,
+            )
+
+    def _backward_pass_buffered(self, fwd_buffer, traj_buffer, learned_buffer, b, a):
+        """Pop oldest block from buffer and backward-pass with context.
+
+        Uses all remaining blocks in the buffer as settling context for
+        the backward IIR pass, then returns the output trimmed to the
+        oldest block's length.
+        """
+        oldest_fwd = fwd_buffer.popleft()
+        oldest_traj = traj_buffer.popleft()
+        oldest_learned = learned_buffer.popleft()
+
+        n_oldest = oldest_fwd.shape[0]
+        n_ch = oldest_fwd.shape[1]
+
+        # Context: oldest + all remaining (lookahead) blocks
+        context = np.vstack([oldest_fwd] + list(fwd_buffer)) if fwd_buffer else oldest_fwd
+
+        output = np.zeros((n_oldest, n_ch), dtype=oldest_fwd.dtype)
+
+        for ch in range(n_ch):
+            if self.mode == 'auto' and oldest_learned is not None:
+                parts = [oldest_learned[:, ch]]
+                for lb in learned_buffer:
+                    if lb is not None:
+                        parts.append(lb[:, ch])
+                learned_ctx = np.concatenate(parts)
+                bwd, _ = self._backward_pass_adaptive(
+                    context[:, ch],
+                    learned_ctx[::-1],
+                )
+            elif oldest_traj is not None:
+                parts = [oldest_traj]
+                for tb in traj_buffer:
+                    if tb is not None:
+                        parts.append(tb)
+                traj_ctx = np.concatenate(parts)
+                bwd, _ = self._backward_pass_adaptive(
+                    context[:, ch],
+                    traj_ctx[::-1],
+                )
+            else:
+                bwd, _ = self._backward_pass(context[:, ch], b, a)
+
+            output[:, ch] = bwd[:n_oldest]
+
+        return output
+
+
+class CascadeNotchFilter(TimeOut):
+    """S x M serial cascade of notch filters across K channels.
+
+    Manages a bank of filters to suppress multiple harmonics from multiple
+    sources simultaneously. Supports both static (fixed frequencies) and
+    adaptive (time-varying) modes.
+
+    The filter bank applies S x M notch filters to each of K channels,
+    where:
+
+    - *S* = number of independent tonal sources
+    - *M* = number of harmonics per source
+    - *K* = number of input channels
+
+    Internally holds a list of S x M :class:`AdaptiveNotchFilter` instances.
+    The :meth:`result` method passes each block through the chain in
+    sequence: each filter's output feeds the next.  Per-channel filter
+    states are maintained inside each child filter.
+
+    Notes
+    -----
+    Serial cascade provides sharper notch response but accumulates phase
+    delay (for single-pass filtering).  When using zero-phase filtering
+    (``zero_phase=True``), phase considerations are moot.
+
+    The filter bank is initialised lazily on the first call to
+    :meth:`result`.
+
+    The cascade and its joint optimisation follow :cite:`Harvey2019`; the
+    per-stage LMS update is based on :cite:`Nehorai1985` with the drift
+    monitoring of :cite:`TanJiang2009`.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : The single-notch building block.
+    :class:`ZeroPhaseNotchFilter` : Used as child when ``zero_phase=True``.
+    """
+
+    #: Number of independent tonal sources (*S*).
+    num_sources = Int(1)
+
+    #: Number of harmonics per source (*M*).
+    harmonics_per_source = Int(1)
+
+    #: Initial / static center frequencies with shape ``(S, M)`` in Hz.
+    #: For source *s* and harmonic *m*: ``frequencies[s, m]``.
+    frequencies = CArray(dtype=np.float64)
+
+    #: Streaming frequency source for external-mode frequency tracking.
+    #: Must have a ``result(num)`` method yielding
+    #: ``(num_samples, S*M)`` frequency blocks.
+    freq_source = Instance(SamplesGenerator)
+
+    #: Pole radius controlling notch width (0 < r < 1, default 0.95).
+    #:
+    #: Accepts either a scalar (applied to every cascade stage) or an
+    #: array specifying per-stage values.  Accepted array shapes are
+    #: ``(harmonics_per_source,)`` - same schedule for every source - or
+    #: ``(num_sources, harmonics_per_source)`` for full per-stage control.
+    #: Per-stage values are only honoured in external and static modes;
+    #: auto (LMS) mode falls back to the array mean.
+    pole_radius = Union(Float(0.95), CArray(dtype=np.float64))
+
+    #: Adaptation mode. ``None`` infers from *freq_source*.
+    mode = Enum(None, 'external', 'auto')
+
+    #: LMS step size (float) or per-source schedule (list).
+    mu = Union(Float, List)
+
+    #: Leak factor for recursive LMS gradient
+    #: (0 = instantaneous, 1 = full recursive).
+    gradient_leak = Float(0.0)
+
+    #: Moving-average window for frequency smoothing in auto mode.
+    smooth_window = Int(256)
+
+    #: When ``True``, children are :class:`ZeroPhaseNotchFilter` instances.
+    zero_phase = Bool(False)
+
+    #: Core block size for zero-phase block iteration.
+    block_size = Int(4096)
+
+    #: Number of lookahead blocks used as settling context in
+    #: streaming zero-phase mode.  Higher values improve backward-pass
+    #: settling at the cost of increased latency (``num_lookahead_blocks``
+    #: blocks).  A value of 1 is sufficient when ``block_size`` exceeds the
+    #: IIR settling time (about ``7 / abs(log(pole_radius))`` samples).
+    num_lookahead_blocks = Int(1)
+
+    #: Use thesis-aligned harmonic cascade LMS
+    #: (shared theta per source, joint optimisation).
+    joint_lms = Bool(False)
+
+    # Internal state (transient, not part of digest). The child filter
+    # bank and the joint-LMS working arrays are (re)built in result().
+    _filters = List()
+    _filters_initialized = Bool(False)
+    _current_position = Int(0)
+    _jl_current_freq = Any()
+    _jl_zi = Any()
+    _jl_source_state = Any()
+    _jl_harm_grad_state = Any()
+    _jl_grad_prop_zi = Any()
+    _jl_freq_history = Any()
+    _jl_freq_history_sum = Any()
+    _jl_step_sizes = Any()
+    _jl_f0 = Any()
+    _jl_learned = Any()
+    _jl_initialized = Bool(False)
+    _stream_fwd_zi = Any()
+    _stream_jl_initialized = Bool(False)
+    _stream_fwd_buf = Any()
+    _stream_buf_full = Bool(False)
+
+    #: A unique identifier for the filter, based on its properties. (read-only)
+    digest = Property(
+        depends_on=[
+            'source.digest',
+            'num_sources',
+            'harmonics_per_source',
+            'frequencies',
+            'freq_source.digest',
+            'pole_radius',
+            'mode',
+            'mu',
+            'smooth_window',
+            'gradient_leak',
+            'zero_phase',
+            'block_size',
+            'num_lookahead_blocks',
+            'joint_lms',
+        ]
+    )
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    @property
+    def learned_frequencies(self):
+        """Per-sample learned frequencies from the last block.
+
+        When :attr:`joint_lms` is ``True`` and joint LMS was used, returns a
+        list of length *S* where each element is the fundamental frequency
+        trajectory for that source, shape ``(N,)``.
+
+        Otherwise returns one array per filter in the cascade (length S x M).
+        """
+        if self.joint_lms and self._jl_learned is not None:
+            return [self._jl_learned[s, :] for s in range(self.num_sources)]
+        return [f._learned_frequencies for f in self._filters]
+
+    def _pole_radii(self):
+        """Return the per-stage pole radii as an ``(S, M)`` ``float64`` array.
+
+        Broadcasts a scalar :attr:`pole_radius` to all stages; accepts
+        ``(M,)`` (same schedule per source) or ``(S, M)`` arrays.
+        """
+        S = self.num_sources
+        M = self.harmonics_per_source
+        pr = self.pole_radius
+        if np.isscalar(pr) or (isinstance(pr, np.ndarray) and pr.shape == ()):
+            return np.full((S, M), float(pr), dtype=np.float64)
+        arr = np.asarray(pr, dtype=np.float64)
+        if arr.ndim == 1 and arr.shape[0] == M:
+            return np.broadcast_to(arr[np.newaxis, :], (S, M)).copy()
+        if arr.ndim == 2 and arr.shape == (S, M):
+            return arr.astype(np.float64, copy=True)
+        msg = f'pole_radius array shape {arr.shape} does not match ({M},) or ({S}, {M})'
+        raise ValueError(msg)
+
+    def _scalar_pole_radius(self):
+        """Return a representative scalar for kernels that don't support per-stage r.
+
+        Used by the joint-LMS kernels and by ``_monitor_and_reset_joint``.
+        """
+        pr = self.pole_radius
+        if np.isscalar(pr) or (isinstance(pr, np.ndarray) and pr.shape == ()):
+            return float(pr)
+        return float(np.asarray(pr, dtype=np.float64).mean())
+
+    def _initialize_joint_lms_state(self, num_channels):
+        """Allocate state arrays for the joint harmonic cascade LMS kernel."""
+        S = self.num_sources
+        M = self.harmonics_per_source
+        K = num_channels
+        W = self.smooth_window
+
+        fundamentals = np.zeros(S, dtype=np.float64)
+        freqs = self.frequencies
+        if freqs.size > 0:
+            for s in range(S):
+                fundamentals[s] = freqs[s, 0]
+        else:
+            fundamentals[:] = 100.0
+
+        self._jl_current_freq = fundamentals.copy()
+        self._jl_zi = np.zeros((S, M, K, 2), dtype=np.float64)
+        self._jl_source_state = np.zeros((S, 1), dtype=np.float64)
+        self._jl_harm_grad_state = np.zeros((S, M, K, 4), dtype=np.float64)
+        self._jl_grad_prop_zi = np.zeros((S, S, M, K, 2), dtype=np.float64)
+
+        self._jl_freq_history = np.zeros((S, W), dtype=np.float64)
+        self._jl_freq_history_sum = np.zeros(S, dtype=np.float64)
+        for s in range(S):
+            self._jl_freq_history[s, :] = fundamentals[s]
+            self._jl_freq_history_sum[s] = fundamentals[s] * W
+
+        step_sizes = np.zeros(S, dtype=np.float64)
+        if isinstance(self.mu, list):
+            for s in range(S):
+                step_sizes[s] = self.mu[s] if s < len(self.mu) else self.mu[0]
+        elif self.mu is not None:
+            step_sizes[:] = float(self.mu)
+
+        self._jl_step_sizes = step_sizes
+        self._jl_f0 = fundamentals.copy()
+        self._jl_initialized = True
+
+    def _get_effective_mode(self):
+        """Infer mode for cascade operation."""
+        if self.mode is not None:
+            return self.mode
+        if self.freq_source is not None:
+            return 'external'
+        return None
+
+    def _find_spectral_peaks(self, block, n_peaks=4):
+        """FFT-based spectral peak detection with parabolic interpolation.
+
+        Parameters
+        ----------
+        block : numpy.ndarray
+            Input signal, shape ``(num_samples, num_channels)``.
+            Only channel 0 is used.
+        n_peaks : int
+            Maximum number of peaks to return.
+
+        Returns
+        -------
+        list of tuple
+            ``(freq_hz, power_db)`` pairs sorted by descending power.
+        """
+        return find_spectral_peaks(
+            block[:, 0],
+            self.sample_freq,
+            n_peaks=n_peaks,
+        )
+
+    def _monitor_and_reset_joint(self, current_block):
+        """Global-minimum monitoring and reset for joint LMS.
+
+        Implements the strategy of Tan & Jiang (2009, section 2.2).  For each
+        source whose smoothed fundamental frequency has drifted beyond
+        ``delta_f_max``, performs an FFT peak search and resets that source's
+        frequency tracking state to the closest detected peak.
+
+        Parameters
+        ----------
+        current_block : numpy.ndarray
+            Raw input block, shape ``(num_samples, num_channels)``.
+        """
+        if self._jl_f0 is None or self._jl_current_freq is None:
+            return
+        S = self.num_sources
+        W = self.smooth_window
+        # delta_f_max = 0.25*(1-r)*fs/pi  (quarter of the notch -3 dB bandwidth).
+        # Beyond this drift the LMS gradient becomes unreliable and a global
+        # FFT search is triggered. (Tan & Jiang 2009, section II; DOI: 10.1109/MSP.2009.934189)
+        delta_f_max = 0.25 * (1.0 - self._scalar_pole_radius()) * self.sample_freq / np.pi
+
+        needs_reset = [s for s in range(S) if abs(self._jl_current_freq[s] - self._jl_f0[s]) > delta_f_max]
+        if not needs_reset:
+            return
+
+        peaks = self._find_spectral_peaks(
+            current_block,
+            n_peaks=max(S, len(needs_reset)) * 2,
+        )
+
+        for s in needs_reset:
+            if not peaks:
+                break
+            f_ref = self._jl_f0[s]
+            closest_idx = min(range(len(peaks)), key=lambda i: abs(peaks[i][0] - f_ref))
+            new_freq = peaks[closest_idx][0]
+            peaks.pop(closest_idx)
+
+            self._jl_current_freq[s] = new_freq
+            self._jl_freq_history[s, :] = new_freq
+            self._jl_freq_history_sum[s] = new_freq * W
+            self._jl_harm_grad_state[s, :, :, :] = 0.0
+            self._jl_f0[s] = new_freq
+
+    def _initialize_filters(self):
+        """Create S x M filter instances."""
+        if self._filters_initialized:
+            return
+
+        effective_mode = self._get_effective_mode()
+        filter_cls = ZeroPhaseNotchFilter if self.zero_phase else AdaptiveNotchFilter
+        freqs = self.frequencies
+        radii = self._pole_radii()  # (S, M)
+
+        for s in range(self.num_sources):
+            for m in range(self.harmonics_per_source):
+                filter_idx = s * self.harmonics_per_source + m
+                r_sm = float(radii[s, m])
+
+                init_freq = freqs[s, m] if freqs.size > 0 else 100.0 * (m + 1)
+
+                if effective_mode == 'auto':
+                    if isinstance(self.mu, list):
+                        step = self.mu[filter_idx] if filter_idx < len(self.mu) else self.mu[0]
+                    elif self.mu is not None:
+                        step = self.mu
+                    else:
+                        step = 0.001
+                    f = filter_cls(
+                        f_notch=init_freq,
+                        pole_radius=r_sm,
+                        mode='auto',
+                        mu=step,
+                        gradient_leak=self.gradient_leak,
+                        smooth_window=self.smooth_window,
+                        source=self.source,
+                    )
+                elif effective_mode == 'external':
+                    f = filter_cls(
+                        f_notch=init_freq,
+                        pole_radius=r_sm,
+                        mode='external',
+                        source=self.source,
+                    )
+                else:
+                    f = filter_cls(
+                        f_notch=init_freq,
+                        pole_radius=r_sm,
+                        mode=None,
+                        source=self.source,
+                    )
+
+                self._filters.append(f)
+
+        self._filters_initialized = True
+
+    def _result_zero_phase(self, num):
+        """Zero-phase result path: full-signal batch processing.
+
+        Collects the entire signal, applies the forward cascade, then
+        the backward cascade.  No streaming latency - the full signal
+        must be available before processing begins.
+
+        Parameters
+        ----------
+        num : int
+            Samples per yielded output block.
+
+        Yields
+        ------
+        numpy.ndarray
+            Filtered blocks, shape ``(n, num_channels)`` with ``n <= num``.
+        """
+        effective_mode = self._get_effective_mode()
+
+        signal = np.vstack(list(self.source.result(self.num_samples)))
+        total_samples = signal.shape[0]
+
+        full_freq = None
+        if effective_mode == 'external':
+            freq_blocks = list(self.freq_source.result(self.num_samples))
+            full_freq = np.vstack([np.asarray(b) for b in freq_blocks])
+            if full_freq.ndim == 1:
+                full_freq = full_freq[:, np.newaxis]
+
+        # Auto mode
+        if effective_mode == 'auto':
+            if self.joint_lms:
+                num_channels = signal.shape[1]
+                self._initialize_joint_lms_state(num_channels)
+                S = self.num_sources
+                M = self.harmonics_per_source
+
+                r_scalar = self._scalar_pole_radius()
+                data_c = np.ascontiguousarray(signal, dtype=np.float64)
+                output_forward, learned = iir_harmonic_cascade_lms_kernel(
+                    data_c,
+                    S,
+                    M,
+                    r_scalar,
+                    self.sample_freq,
+                    self._jl_step_sizes,
+                    self.smooth_window,
+                    self._jl_zi,
+                    self._jl_current_freq,
+                    self._jl_source_state,
+                    self._jl_freq_history,
+                    self._jl_freq_history_sum,
+                    self._jl_harm_grad_state,
+                    self._jl_grad_prop_zi,
+                    gradient_leak=self.gradient_leak,
+                )
+                self._jl_learned = learned
+
+                # Backward pass: reverse the signal, apply S*M time-varying
+                # notch filters with the reversed learned frequency trajectories,
+                # then reverse again - the two phase shifts cancel, giving
+                # zero net phase distortion (forward-backward / filtfilt principle).
+                # See: https://ccrma.stanford.edu/~jos/filters/
+                radii = self._pole_radii()  # (S, M) - honoured per harmonic in backward pass
+                data = output_forward[::-1].copy()
+                for s in range(S):
+                    freq_s_rev = learned[s, ::-1]
+                    for m in range(1, M + 1):
+                        cos_theta = np.cos(
+                            2.0 * np.pi * m * freq_s_rev / self.sample_freq,
+                        )
+                        zi_back = np.zeros((num_channels, 2), dtype=np.float64)
+                        data = iir_time_varying_kernel(
+                            data,
+                            cos_theta,
+                            float(radii[s, m - 1]),
+                            zi_back,
+                        )
+                output_zp = data[::-1]
+
+                for i in range(0, total_samples, num):
+                    yield output_zp[i : i + num]
+                return
+
+            # Fallback: serial greedy cascade
+            data = signal.copy()
+            for f in self._filters:
+                data = f._filter_block(data, freq_trajectory=None)
+
+            for i in range(0, total_samples, num):
+                yield data[i : i + num]
+            return
+
+        # Static / external: sequential two-pass per filter
+        data = signal.copy()
+        for filter_idx, f in enumerate(self._filters):
+            freq_traj = full_freq[:, filter_idx] if full_freq is not None else None
+            data = f._filter_signal_two_pass(data, freq_traj)
+
+        for i in range(0, total_samples, num):
+            yield data[i : i + num]
+
+    def result(self, num):
+        """Apply serial cascade filter to input signal blocks.
+
+        When :attr:`zero_phase` is ``True`` the entire signal is collected
+        first and processed via the zero-phase path.  Otherwise blocks
+        stream through the causal filter chain.
+
+        Parameters
+        ----------
+        num : int
+            Number of samples per output block.
+
+        Yields
+        ------
+        numpy.ndarray
+            Filtered signal blocks with shape ``(num, num_channels)``.
+
+        Raises
+        ------
+        ValueError
+            If mode is ``'external'`` but no *freq_source* is provided, or
+            if *freq_source* yields blocks with wrong shape or runs out
+            early.
+        """
+        effective_mode = self._get_effective_mode()
+
+        if effective_mode == 'external' and self.freq_source is None:
+            msg = "mode is 'external' but no freq_source provided. Set freq_source or use mode='auto' / None."
+            raise ValueError(msg)
+
+        # Reset transient state at the start of each pass.
+        self._filters = []
+        self._filters_initialized = False
+        self._current_position = 0
+        self._jl_zi = None
+        self._jl_current_freq = None
+        self._jl_source_state = None
+        self._jl_freq_history = None
+        self._jl_freq_history_sum = None
+        self._jl_harm_grad_state = None
+        self._jl_grad_prop_zi = None
+        self._jl_learned = None
+        self._jl_step_sizes = None
+        self._jl_f0 = None
+        self._jl_initialized = False
+
+        self._initialize_filters()
+
+        if self.zero_phase:
+            yield from self._result_zero_phase(num)
+            return
+
+        # Causal streaming - joint LMS
+        if effective_mode == 'auto' and self.joint_lms:
+            first_block = True
+            for source_block in self.source.result(num):
+                num_samples = source_block.shape[0]
+                num_channels = source_block.shape[1]
+                if first_block:
+                    self._initialize_joint_lms_state(num_channels)
+                    first_block = False
+
+                S = self.num_sources
+                M = self.harmonics_per_source
+                data_c = np.ascontiguousarray(source_block, dtype=np.float64)
+                block_output, block_learned = iir_harmonic_cascade_lms_kernel(
+                    data_c,
+                    S,
+                    M,
+                    self._scalar_pole_radius(),
+                    self.sample_freq,
+                    self._jl_step_sizes,
+                    self.smooth_window,
+                    self._jl_zi,
+                    self._jl_current_freq,
+                    self._jl_source_state,
+                    self._jl_freq_history,
+                    self._jl_freq_history_sum,
+                    self._jl_harm_grad_state,
+                    self._jl_grad_prop_zi,
+                    gradient_leak=self.gradient_leak,
+                )
+                self._jl_learned = block_learned
+                self._monitor_and_reset_joint(source_block)
+                self._current_position = self._current_position + num_samples
+                yield block_output
+            return
+
+        # Causal streaming - serial cascade
+        num_filters = self.num_sources * self.harmonics_per_source
+        freq_iter = self.freq_source.result(num) if effective_mode == 'external' else None
+
+        for source_block in self.source.result(num):
+            num_samples = source_block.shape[0]
+
+            freq_block = None
+            if freq_iter is not None:
+                try:
+                    freq_block = np.asarray(next(freq_iter))
+                except StopIteration:
+                    msg = 'freq_source exhausted before source finished yielding blocks.'
+                    raise ValueError(msg) from None
+                if freq_block.ndim == 1:
+                    freq_block = freq_block[:, np.newaxis]
+                if freq_block.shape != (num_samples, num_filters):
+                    msg = (
+                        f'freq_source block shape {freq_block.shape} does not match '
+                        f'expected ({num_samples}, {num_filters}).'
+                    )
+                    raise ValueError(msg)
+
+            data = source_block.copy()
+            for filter_idx, f in enumerate(self._filters):
+                freq_traj = freq_block[:, filter_idx] if freq_block is not None else None
+                data = f._filter_block(data, freq_trajectory=freq_traj)
+
+            self._current_position = self._current_position + num_samples
+            yield data
+
+    def _reset_streaming(self):
+        """Initialise streaming state for unified zero-phase cascade.
+
+        Must be called before the first :meth:`_filter_block_streaming`
+        call.  The entire S x M cascade shares a configurable lookahead
+        buffer (:attr:`num_lookahead_blocks`), so total pipeline latency
+        is ``num_lookahead_blocks`` blocks (independent of S and M).
+
+        The forward cascade is processed as a unit for each incoming
+        block.  The backward cascade uses the lookahead blocks' forward
+        outputs as settling context - mirroring the batch-mode
+        implementation in :meth:`_result_zero_phase`.
+        """
+        self._initialize_filters()
+        if not self.zero_phase:
+            msg = '_reset_streaming() requires zero_phase=True'
+            raise RuntimeError(msg)
+
+        L = self.num_lookahead_blocks
+        # Forward-pass IIR state for each of S*M filters, shape (K, 2) each
+        self._stream_fwd_zi = None  # list of (K, 2) arrays, one per filter
+        # Joint LMS forward state (initialised on first block if needed)
+        self._stream_jl_initialized = False
+        # Ring buffer of forward cascade outputs + trajectories (length L+1)
+        # Once full, the oldest entry is backward-processed using the
+        # remaining L entries as settling context.
+        self._stream_fwd_buf = deque(maxlen=L + 1)  # (fwd_output, traj)
+        self._stream_buf_full = False
+
+    def _forward_cascade(self, data, freq_block=None):
+        """Run the full forward cascade on one block.
+
+        Returns ``(forward_output, learned_or_freq_trajectories)``.
+        The forward IIR state is carried across calls via
+        ``_stream_fwd_zi`` / joint-LMS state arrays.
+        """
+        effective_mode = self._get_effective_mode()
+        num_channels = data.shape[1]
+        S = self.num_sources
+        M = self.harmonics_per_source
+
+        # --- Joint LMS auto mode ---
+        if effective_mode == 'auto' and self.joint_lms:
+            if not self._stream_jl_initialized:
+                self._initialize_joint_lms_state(num_channels)
+                self._stream_jl_initialized = True
+
+            data_c = np.ascontiguousarray(data, dtype=np.float64)
+            fwd_out, learned = iir_harmonic_cascade_lms_kernel(
+                data_c,
+                S,
+                M,
+                self._scalar_pole_radius(),
+                self.sample_freq,
+                self._jl_step_sizes,
+                self.smooth_window,
+                self._jl_zi,
+                self._jl_current_freq,
+                self._jl_source_state,
+                self._jl_freq_history,
+                self._jl_freq_history_sum,
+                self._jl_harm_grad_state,
+                self._jl_grad_prop_zi,
+                gradient_leak=self.gradient_leak,
+            )
+            self._jl_learned = learned
+            self._monitor_and_reset_joint(data)
+            return fwd_out, learned  # learned shape (S, N)
+
+        # --- Serial forward cascade (static / external / non-joint auto) ---
+        if self._stream_fwd_zi is None:
+            self._stream_fwd_zi = [None] * len(self._filters)
+
+        current = data.copy()
+        num_filters = len(self._filters)
+        trajectories = np.zeros((num_filters, data.shape[0]), dtype=np.float64)
+        radii_flat = self._pole_radii().reshape(-1)  # (S*M,) row-major s,m
+
+        for filter_idx, f in enumerate(self._filters):
+            freq_traj = freq_block[:, filter_idx] if effective_mode == 'external' and freq_block is not None else None
+
+            # Forward pass per channel using child filter helpers
+            fwd_out = np.zeros_like(current)
+            zi = self._stream_fwd_zi[filter_idx]
+            if zi is None:
+                zi = np.zeros((num_channels, 2), dtype=np.float64)
+            r_stage = float(radii_flat[filter_idx])
+
+            if freq_traj is not None:
+                # Time-varying forward pass
+                cos_theta = np.cos(
+                    2.0 * np.pi * np.ascontiguousarray(freq_traj, dtype=np.float64) / self.sample_freq,
+                )
+                zi_c = np.ascontiguousarray(zi, dtype=np.float64)
+                fwd_out = iir_time_varying_kernel(
+                    np.ascontiguousarray(current, dtype=np.float64),
+                    cos_theta,
+                    r_stage,
+                    zi_c,
+                )
+                self._stream_fwd_zi[filter_idx] = zi_c
+                trajectories[filter_idx, :] = freq_traj
+            else:
+                # Static coefficients
+                b, a = f._compute_coefficients()
+                for ch in range(num_channels):
+                    zi_ch = lfilter_zi(b, a) * current[0, ch] if np.all(zi[ch] == 0.0) else zi[ch]
+                    fwd_out[:, ch], zi[ch] = lfilter(b, a, current[:, ch], zi=zi_ch)
+                self._stream_fwd_zi[filter_idx] = zi
+
+            current = fwd_out
+
+        return current, trajectories  # trajectories shape (S*M, N)
+
+    def _backward_cascade(self, target_fwd, target_traj, context_entries):
+        """Backward cascade with lookahead settling context.
+
+        Concatenates ``[target_fwd, *context_fwds]``, reverses, applies
+        all S x M notch filters, reverses back, and returns only the
+        ``target_fwd``-sized portion.
+
+        Parameters
+        ----------
+        target_fwd : numpy.ndarray
+            Forward cascade output of the block to be zero-phase filtered.
+        target_traj : numpy.ndarray
+            Learned/external frequency trajectories for the target block.
+        context_entries : list of (fwd, traj) tuples
+            Lookahead blocks used as settling context (in chronological
+            order, i.e. immediately following the target block).
+        """
+        num_channels = target_fwd.shape[1]
+        target_len = target_fwd.shape[0]
+        effective_mode = self._get_effective_mode()
+        S = self.num_sources
+        M = self.harmonics_per_source
+
+        # Concatenate target + all context blocks, then reverse
+        fwd_parts = [target_fwd] + [e[0] for e in context_entries]
+        context = np.concatenate(fwd_parts, axis=0)
+        data = context[::-1].copy()
+
+        radii = self._pole_radii()  # (S, M)
+
+        if effective_mode == 'auto' and self.joint_lms:
+            # trajectories are (S, N) each
+            for s in range(S):
+                traj_parts = [target_traj[s]] + [e[1][s] for e in context_entries]
+                traj_s = np.concatenate(traj_parts)
+                freq_s_rev = traj_s[::-1]
+                for m in range(1, M + 1):
+                    cos_theta = np.cos(
+                        2.0 * np.pi * m * freq_s_rev / self.sample_freq,
+                    )
+                    zi_back = np.zeros((num_channels, 2), dtype=np.float64)
+                    data = iir_time_varying_kernel(
+                        data,
+                        cos_theta,
+                        float(radii[s, m - 1]),
+                        zi_back,
+                    )
+        elif effective_mode == 'external':
+            # trajectories are (S*M, N) each.  Cascade stages are ordered
+            # (source-major, harmonic-minor) - same ordering as _pole_radii().
+            num_filters = S * M
+            radii_flat = radii.reshape(-1)
+            for filter_idx in range(num_filters):
+                traj_parts = [target_traj[filter_idx]] + [e[1][filter_idx] for e in context_entries]
+                traj = np.concatenate(traj_parts)
+                freq_rev = traj[::-1]
+                cos_theta = np.cos(
+                    2.0 * np.pi * freq_rev / self.sample_freq,
+                )
+                zi_back = np.zeros((num_channels, 2), dtype=np.float64)
+                data = iir_time_varying_kernel(
+                    data,
+                    cos_theta,
+                    float(radii_flat[filter_idx]),
+                    zi_back,
+                )
+        else:
+            # Static mode: apply each filter's fixed coefficients
+            for f in self._filters:
+                b, a = f._compute_coefficients()
+                for ch in range(num_channels):
+                    zi_ch = lfilter_zi(b, a) * data[0, ch]
+                    data[:, ch], _ = lfilter(b, a, data[:, ch], zi=zi_ch)
+
+        output = data[::-1]
+        return output[:target_len]
+
+    def _filter_block_streaming(self, data, freq_block=None):
+        """Push one block through the unified streaming cascade.
+
+        The entire S x M forward cascade is applied first.  Once
+        ``num_lookahead_blocks`` future blocks have been buffered, the
+        oldest block is backward-processed using the buffered blocks as
+        settling context.
+
+        Pipeline latency is ``num_lookahead_blocks`` blocks (independent
+        of S and M).
+
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input block, shape ``(num_samples, num_channels)``.
+        freq_block : numpy.ndarray or None
+            Per-sample frequency block for external mode, shape
+            ``(num_samples, S*M)``.
+
+        Returns
+        -------
+        numpy.ndarray or None
+            Zero-phase filtered output for a previous block, or
+            ``None`` while the lookahead buffer is still filling.
+        """
+        L = self.num_lookahead_blocks
+        buf = self._stream_fwd_buf  # deque(maxlen=L+1)
+
+        # Forward cascade through all S*M filters
+        cur_fwd, cur_traj = self._forward_cascade(data, freq_block)
+        buf.append((cur_fwd, cur_traj))
+
+        # Buffer still filling (need L+1 entries: 1 target + L context)
+        if len(buf) < L + 1:
+            return None
+
+        # Oldest entry is the target; remaining L entries are context
+        target_fwd, target_traj = buf[0]
+        context_entries = [buf[i] for i in range(1, len(buf))]
+
+        output = self._backward_cascade(target_fwd, target_traj, context_entries)
+
+        # Remove oldest (processed) entry
+        buf.popleft()
+
+        return output
+
+    def _flush_streaming(self):
+        """Drain the lookahead buffer after the last input block.
+
+        Each remaining entry is backward-processed with whatever
+        context is still available (shrinking as the buffer drains).
+
+        Returns
+        -------
+        list of numpy.ndarray
+            Up to ``num_lookahead_blocks`` remaining output blocks.
+        """
+        buf = self._stream_fwd_buf
+        if not buf:
+            return []
+
+        outputs = []
+        while buf:
+            target_fwd, target_traj = buf[0]
+            context_entries = [buf[i] for i in range(1, len(buf))]
+            output = self._backward_cascade(target_fwd, target_traj, context_entries)
+            outputs.append(output)
+            buf.popleft()
+
+        return outputs

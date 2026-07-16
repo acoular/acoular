@@ -44,6 +44,9 @@ authors:
     family-names: "Schumacher"
     affiliation: "Deutsches Zentrum für Luft- und Raumfahrt (DLR)"
     orcid: "https://orcid.org/0000-0001-8349-2570"
+  - given-names: "Steffen"
+    family-names: "Büchholz"
+    affiliation: "Department of Engineering Acoustics, TU Berlin"
 identifiers:
   - description: "acoular: all versions"
     type: "doi"

@@ -174,6 +174,7 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 "acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
 "acoular/fbeamform.py" = ["N806", "B023"]
 "acoular/sources.py" = ["N806"]
+"acoular/tfastfuncs.py" = ["N806"] # DSP math convention: N, K, S, M
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
 # "docs/generate_switcher_json.py" = ["S603"]
@@ -182,6 +183,8 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 ]
 "tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
+# ported notch-filter tests: DSP naming (N806) and assert-message style only
+"tests/unittests/notch/*" = ["ARG001", "ARG002", "B905", "C408", "E501", "ISC002", "N806", "UP028"]
 "examples/*" = [
   "A001",
   "B007",

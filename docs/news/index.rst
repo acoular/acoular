@@ -3,6 +3,16 @@ What's new
 
 Upcoming
 ------------------------
+    **New features**
+        * adds :class:`~acoular.tprocess.NotchFilter`, a second-order IIR notch for suppressing a single tonal component
+        * adds :class:`~acoular.tprocess.AdaptiveNotchFilter`, which tracks a time-varying tone either from an external frequency source (e.g. RPM data) or autonomously via LMS
+        * adds :class:`~acoular.tprocess.ZeroPhaseNotchFilter`, a forward-backward notch that preserves the phase relations needed for beamforming
+        * adds :class:`~acoular.tprocess.CascadeNotchFilter`, a bank of notches for removing harmonic series of one or several tonal sources
+
+    **Documentation**
+        * new *Notch filtering of tonal noise* section in the user guide
+        * new *Notch filtering of tonal noise* example
+
     **Internal**
         * Fix several sphinx attribute links in the docstrings that lead to build warnings
 
