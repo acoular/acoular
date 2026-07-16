@@ -3000,14 +3000,14 @@ class NotchFilter(Filter):
     per-channel state handling are inherited from
     :class:`~acoular.tprocess.Filter` (:func:`scipy.signal.sosfilt`).
 
-    References
-    ----------
-    .. [1] Harvey, D. (2019). Signal Processing Methods for the Detection and
-           Localization of Acoustic Sources via Unmanned Aerial Vehicles.
-           PhD Thesis, University of Southampton.
-    .. [2] Smith, J.O. (2007). Introduction to Digital Filters with Audio
-           Applications. W3K Publishing. Notch / antiresonance biquad:
-           https://ccrma.stanford.edu/~jos/filters/Peaking_Equalizers.html
+    The filter bank this class belongs to follows :cite:`Harvey2019`; for the
+    notch (antiresonance) biquad itself see :cite:`Smith2007`.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : Notch filter with time-varying frequency.
+    :class:`ZeroPhaseNotchFilter` : Phase-preserving notch filter.
+    :class:`CascadeNotchFilter` : Bank of notches for harmonic series.
 
     Examples
     --------
@@ -3114,19 +3114,15 @@ class AdaptiveNotchFilter(NotchFilter):
     which is expected behaviour for time-varying filters. State preservation
     ensures no discontinuities at frequency transitions.
 
-    References
-    ----------
-    .. [1] Harvey, D. (2019). Signal Processing Methods for the Detection and
-           Localization of Acoustic Sources via Unmanned Aerial Vehicles.
-           PhD Thesis, University of Southampton.
-    .. [2] Nehorai, A. (1985). A minimal parameter adaptive notch filter with
-           constrained poles and zeros. IEEE Transactions on Acoustics, Speech,
-           and Signal Processing, 33(4), 983-996.
-           https://doi.org/10.1109/TASSP.1985.1164643
-    .. [3] Tan, L. and Jiang, J. (2009). Novel adaptive IIR filter for
-           frequency estimation and tracking [DSP Tips & Tricks]. IEEE Signal
-           Processing Magazine, 26(6), 186-189.
-           https://doi.org/10.1109/MSP.2009.934189
+    In auto mode the frequency is tracked with a normalised LMS update of the
+    recursive gradient after :cite:`Nehorai1985`; drift is monitored and reset
+    by a global FFT search following :cite:`TanJiang2009`. The overall approach
+    follows :cite:`Harvey2019`.
+
+    See Also
+    --------
+    :class:`NotchFilter` : Static notch filter, the base class.
+    :class:`ZeroPhaseNotchFilter` : Phase-preserving variant.
     """
 
     #: Streaming frequency source for external-mode frequency tracking.
@@ -3184,6 +3180,20 @@ class AdaptiveNotchFilter(NotchFilter):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    @property
+    def learned_frequencies(self):
+        """Per-sample frequency estimate of the most recently processed block.
+
+        Only meaningful in auto mode, where it holds the frequency the LMS
+        update tracked for every sample of the last block yielded by
+        :meth:`result`, shape ``(num,)``. It is taken from the first channel;
+        in other modes it stays empty.
+
+        Note that this covers the last block only -- collect it while
+        iterating over :meth:`result` to obtain the full trajectory.
+        """
+        return self._learned_frequencies
 
     def _ensure_states(self, num_channels):
         """Allocate per-channel state arrays if not yet sized correctly."""
@@ -3516,17 +3526,15 @@ class ZeroPhaseNotchFilter(AdaptiveNotchFilter):
       needed because the trajectory already defines the filter at every
       sample.
 
-    References
-    ----------
-    .. [1] Harvey, D. (2019). Signal Processing Methods for the Detection and
-           Localization of Acoustic Sources via Unmanned Aerial Vehicles.
-           PhD Thesis, University of Southampton.
-    .. [2] Gustafsson, F. (1996). Determining the initial states in
-           forward-backward filtering. IEEE Transactions on Signal Processing,
-           44(4), 988-992. https://doi.org/10.1109/78.492552
-    .. [3] Smith, J.O. (2007). Introduction to Digital Filters with Audio
-           Applications. W3K Publishing. Forward-backward (zero-phase) filtering:
-           https://ccrma.stanford.edu/~jos/filters/
+    The boundary states follow :cite:`Gustafsson1996`, the method also used by
+    :func:`scipy.signal.filtfilt`; see :cite:`Smith2007` for forward-backward
+    filtering in general and :cite:`Harvey2019` for the application to
+    propeller noise.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : The causal base class.
+    :class:`FiltFiltOctave` : Zero-phase octave band filter.
     """
 
     #: Core block size used when iterating in overlapping blocks (static /
@@ -4294,19 +4302,14 @@ class CascadeNotchFilter(TimeOut):
     The filter bank is initialised lazily on the first call to
     :meth:`result`.
 
-    References
-    ----------
-    .. [1] Harvey, D. (2019). Signal Processing Methods for the Detection
-           and Localization of Acoustic Sources via Unmanned Aerial
-           Vehicles. PhD Thesis, University of Southampton.
-    .. [2] Nehorai, A. (1985). A minimal parameter adaptive notch filter
-           with constrained poles and zeros. IEEE Trans. Acoustics, Speech,
-           Signal Processing, 33(4), 983-996.
-           https://doi.org/10.1109/TASSP.1985.1164643
-    .. [3] Tan, L. and Jiang, J. (2009). Novel adaptive IIR filter for
-           frequency estimation and tracking [DSP Tips & Tricks]. IEEE
-           Signal Processing Magazine, 26(6), 186-189.
-           https://doi.org/10.1109/MSP.2009.934189
+    The cascade and its joint optimisation follow :cite:`Harvey2019`; the
+    per-stage LMS update is based on :cite:`Nehorai1985` with the drift
+    monitoring of :cite:`TanJiang2009`.
+
+    See Also
+    --------
+    :class:`AdaptiveNotchFilter` : The single-notch building block.
+    :class:`ZeroPhaseNotchFilter` : Used as child when ``zero_phase=True``.
     """
 
     #: Number of independent tonal sources (*S*).
@@ -4365,7 +4368,7 @@ class CascadeNotchFilter(TimeOut):
     #: streaming zero-phase mode.  Higher values improve backward-pass
     #: settling at the cost of increased latency (``num_lookahead_blocks``
     #: blocks).  A value of 1 is sufficient when ``block_size`` exceeds the
-    #: IIR settling time (~ 7 / |ln(pole_radius)| samples).
+    #: IIR settling time (about ``7 / abs(log(pole_radius))`` samples).
     num_lookahead_blocks = Int(
         1, desc='number of lookahead blocks for streaming zero-phase settling context',
     )
