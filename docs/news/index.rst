@@ -3,8 +3,11 @@ What's new
 
 Upcoming
 ------------------------
+    **Documentation**
+        * updates documentation for several classes to clarify the shape of the result
+
     **Internal**
-        * Fix several sphinx attribute links in the docstrings that lead to build warnings
+        * fixes several sphinx attribute links in the docstrings that lead to build warnings
         * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
 
 26.04
