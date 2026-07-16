@@ -5,6 +5,7 @@ Upcoming
 ------------------------
     **Internal**
         * Fix several sphinx attribute links in the docstrings that lead to build warnings
+        * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
 
 26.04
 ------------------------
@@ -19,6 +20,7 @@ Upcoming
 
     **Internal**
         * improves inheritance and class structure of :class:`~acoular.sources.MaskedTimeSamples`.
+        * Removed deprecated traits :attr:`~acoular.environments.RotatingFlow.rpm`, :attr:`~acoular.grids.Grid.extend`, and :attr:`~acoular.tprocess.MaskedTimeOut.basename`.
         * drops support for Python 3.10 and adds support for Python 3.14
 
 26.01
