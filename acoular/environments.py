@@ -331,21 +331,6 @@ class UniformFlowEnvironment(Environment):
             rm = rm[:, 0]
         return rm
 
-    def _r(self, gpos, mpos=0.0):
-        """Compute the apparent distances between two sets of points.
-
-        .. deprecated:: 26.04
-            This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
-            Please use :meth:`apparent_r` instead.
-        """
-        _warn(
-            "Deprecated use of '_r' method (will be removed in version 27.01). "
-            "Please use the 'apparent_r' method instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.apparent_r(gpos, mpos)
-
 
 class FlowField(ABCHasStrictTraits):
     """An abstract base class for a spatial flow field."""
@@ -895,21 +880,6 @@ class GeneralFlowEnvironment(Environment):
         if gt.shape[1] == 1:
             gt = gt[:, 0]
         return c * gt  # return distance along ray
-
-    def _r(self, gpos, mpos=0.0):
-        """Compute the apparent distances between two sets of points.
-
-        .. deprecated:: 26.04
-            This method has been renamed to :meth:`apparent_r` and will be removed in version 27.01.
-            Please use :meth:`apparent_r` instead.
-        """
-        _warn(
-            "Deprecated use of '_r' method (will be removed in version 27.01). "
-            "Please use the 'apparent_r' method instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.apparent_r(gpos, mpos)
 
     def get_interpolator(self, roi, x0):
         """
