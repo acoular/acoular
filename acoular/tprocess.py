@@ -2229,7 +2229,7 @@ class FilterBank(TimeOut):
         ------
         :obj:`numpy.ndarray`
             Two-dimensional filtered time data block with shape
-            (n, :attr:`num_bands` ``*`` ``source.num_channels``), where ``n`` is the
+            ``(n, num_bands * source.num_channels)``, where ``n`` is the
             number of samples in the yielded block and is at most ``num``. The final
             block may contain fewer than ``num`` samples.
 

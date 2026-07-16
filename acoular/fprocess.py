@@ -144,7 +144,7 @@ class RFFT(BaseSpectra, SpectraOut):
         ------
         :class:`numpy.ndarray`
             Two-dimensional spectral data block with shape
-            (n, :attr:`num_freqs` ``*`` :attr:`num_channels`), where ``n`` is the
+            ``(n, num_freqs * source.num_channels)``, where ``n`` is the
             number of snapshots in the yielded block and is at most ``num``. The final
             block may contain fewer than ``num`` snapshots.
 
