@@ -2223,15 +2223,19 @@ class FilterBank(TimeOut):
         Parameters
         ----------
         num : :obj:`int`
-            Number of samples per block.
+            Maximum number of time samples per block to yield.
 
         Yields
         ------
         :obj:`numpy.ndarray`
-            An array of shape (``num``, :attr:`num_channels`), delivering the filtered
-            samples for each band.
-            The last block may contain fewer samples if the total number of samples is not
-            a multiple of ``num``.
+            Two-dimensional filtered time data block with shape
+            ``(n, num_bands * source.num_channels)``, where ``n`` is the
+            number of samples in the yielded block and is at most ``num``. The final
+            block may contain fewer than ``num`` samples.
+
+            The second axis stores the filtered channels grouped by frequency band.
+            Reshaping a block with ``block.reshape(n, num_bands, source.num_channels)``
+            gives direct access to the data by sample, band, and source channel.
 
         Notes
         -----
