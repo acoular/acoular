@@ -149,14 +149,22 @@ class SpectraGenerator(Generator):
 
         Parameters
         ----------
-        num : integer
-            This parameter defines the size of the number of snapshots to be yielded.
+        num : int, optional
+            Maximum number of spectral snapshots per block to yield.
             Defaults to 1.
 
         Yields
         ------
         numpy.ndarray
-            A two-dimensional block of shape (num, num_channels * num_freqs).
+            Two-dimensional spectral data block with shape
+            (n, :attr:`num_freqs` ``*`` :attr:`num_channels`), where ``n`` is the
+            number of snapshots in the yielded block and is at most ``num``. The final
+            block may contain fewer than ``num`` snapshots.
+
+            The second axis stores the spectra in frequency-major order with channels
+            interlaced for each frequency bin. Reshaping a block with
+            ``block.reshape(n, num_freqs, num_channels)`` gives direct access to the
+            data by snapshot, frequency, and channel.
         """
 
 
@@ -250,17 +258,24 @@ class SpectraOut(SpectraGenerator):
 
         This method needs to be implemented by the derived classes.
 
-        num : integer
-            This parameter defines the the number of snapshots to be yielded.
+        Parameters
+        ----------
+        num : int, optional
+            Maximum number of spectral snapshots per block to yield.
             Defaults to 1.
 
         Yields
         ------
         numpy.ndarray
-            A two-dimensional array shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`).
-            Spectra for the individual channels are interlaced in the second dimension so that 
-            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
-            access to individual channel data.
+            Two-dimensional spectral data block with shape
+            (n, :attr:`num_freqs` ``*`` :attr:`num_channels`), where ``n`` is the
+            number of snapshots in the yielded block and is at most ``num``. The final
+            block may contain fewer than ``num`` snapshots.
+
+            The second axis stores the spectra in frequency-major order with channels
+            interlaced for each frequency bin. Reshaping a block with
+            ``block.reshape(n, num_freqs, num_channels)`` gives direct access to the
+            data by snapshot, frequency, and channel.
         """
 
 

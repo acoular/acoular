@@ -137,25 +137,27 @@ class RFFT(BaseSpectra, SpectraOut):
         Parameters
         ----------
         num : :class:`int`, optional
-            Number of multi-channel spectra (snapshots) per block to return. Default is ``1``.
+            Maximum number of multi-channel spectra (snapshots) per block to yield.
+            Default is ``1``.
 
         Yields
         ------
         :class:`numpy.ndarray`
-            A two-dimensional array with shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`). 
-            Spectra for the individual channels are interlaced in the second dimension so that 
-            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
-            access to individual channel data.
+            Two-dimensional spectral data block with shape
+            (n, :attr:`num_freqs` ``*`` :attr:`num_channels`), where ``n`` is the
+            number of snapshots in the yielded block and is at most ``num``. The final
+            block may contain fewer than ``num`` snapshots.
 
-            The final block may contain fewer than ``num`` spectra if the input data is insufficient
-            to fill the last block.           
+            The second axis stores the spectra in frequency-major order with channels
+            interlaced for each frequency bin. Reshaping a block with
+            ``block.reshape(n, num_freqs, num_channels)`` gives direct access to the
+            data by snapshot, frequency, and channel.
 
         Notes
         -----
         - The generator compensates for energy or amplitude loss based on the :attr:`scaling`
           attribute.
-        - If the input data source provides fewer samples than required for a complete block,
-          the remaining spectra are padded or adjusted accordingly.
+        - Only complete input sample blocks are transformed into spectra.
         """
         wind = self.window_(self.block_size)
         if self.scaling in {'none', 'energy'}:  # only compensate for the window
@@ -335,17 +337,20 @@ class AutoPowerSpectra(SpectraOut):
         Parameters
         ----------
         num : :class:`int`, optional
-            Number of snapshots in each output block. Default is ``1``.
+            Maximum number of spectral snapshots per block to yield. Default is ``1``.
 
         Yields
         ------
         :class:`numpy.ndarray`
-            A two-dimensional array with shape (num, :attr:`num_freqs` ``*`` :attr:`num_channels`). 
-            Spectra for the individual channels are interlaced in the second dimension so that 
-            ``reshape(num, num_freqs, num_channels)`` would produce a three-dimensional array with 
-            access to individual channel data.        
-            The last block may contain fewer
-            snapshots if the input data does not completely fill the requested block size.
+            Two-dimensional spectral data block with shape
+            (n, :attr:`num_freqs` ``*`` :attr:`num_channels`), where ``n`` is the
+            number of snapshots in the yielded block and is at most ``num``. The final
+            block may contain fewer than ``num`` snapshots.
+
+            The second axis stores the spectra in frequency-major order with channels
+            interlaced for each frequency bin. Reshaping a block with
+            ``block.reshape(n, num_freqs, num_channels)`` gives direct access to the
+            data by snapshot, frequency, and channel.
 
         Notes
         -----
