@@ -9,24 +9,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
+      deploy: true
+      package: acoular
+      version: dev
       artifact_name: build-docs-dev
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/dev/"
       docs_version_match: "dev"
-
-  deploy:
-    needs: build
-    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
-    with:
-      artifact_name: build-docs-dev
-      artifact_path: ./docs/_build/html
-      destination_dir: acoular/dev
-      package_path: /acoular
       min_version: v26.01
       deploy_switcher: true
-      switcher_destination_dir: acoular/_static
     secrets:
       website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
