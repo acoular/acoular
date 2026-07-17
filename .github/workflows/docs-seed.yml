@@ -76,14 +76,28 @@ jobs:
 
   deploy:
     needs: build
-    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
-    with:
-      artifact_name: build-docs-${{ inputs.version_tag }}
-      artifact_path: ./docs/_build/html
-      destination_dir: acoular/${{ inputs.version_tag }}
-      package_path: /acoular
-      min_version: v26.01
-      deploy_switcher: true
-      switcher_destination_dir: acoular/_static
-    secrets:
-      website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare payload
+        run: mkdir -p "./payload/acoular/${{ inputs.version_tag }}"
+      - name: Generate switcher.json
+        uses: acoular/ci/.github/actions/generate-switcher@main
+        with:
+          package-path: acoular
+          min-version: v26.01
+          output: payload/acoular/_static/switcher.json
+      - name: Download build artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: build-docs-${{ inputs.version_tag }}
+          path: ./payload/acoular/${{ inputs.version_tag }}
+      - name: Deploy package documentation to website gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          external_repository: acoular/website
+          publish_branch: gh-pages
+          personal_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
+          publish_dir: payload/acoular
+          destination_dir: acoular
+          keep_files: true
+          enable_jekyll: false

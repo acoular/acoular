@@ -11,41 +11,28 @@ jobs:
     with:
       deploy: true
 
-  docs_build_versioned:
+  docs_versioned:
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
+      deploy: true
+      package: acoular
+      version: ${{ github.ref_name }}
       artifact_name: build-docs-versioned
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/${{ github.ref_name }}/"
-
-  docs_build_stable:
-    uses: acoular/ci/.github/workflows/docs.yml@main
-    with:
-      artifact_name: build-docs-stable
-      artifact_path: ./docs/_build/html
-      html_baseurl: "https://acoular.org/acoular/"
-
-  docs_deploy_versioned:
-    needs: docs_build_versioned
-    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
-    with:
-      artifact_name: build-docs-versioned
-      artifact_path: ./docs/_build/versioned-html
-      destination_dir: acoular/${{ github.ref_name }}
-      package_path: /acoular
       min_version: v26.01
       deploy_switcher: true
-      switcher_destination_dir: acoular/_static
     secrets:
       website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
 
-  docs_deploy_stable:
-    needs: docs_build_stable
-    uses: acoular/ci/.github/workflows/package-docs-deploy.yml@main
+  docs_stable:
+    uses: acoular/ci/.github/workflows/docs.yml@main
     with:
+      deploy: true
+      package: acoular
       artifact_name: build-docs-stable
-      artifact_path: ./docs/_build/stable-html
-      destination_dir: acoular
+      artifact_path: ./docs/_build/html
+      html_baseurl: "https://acoular.org/acoular/"
     secrets:
       website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
 

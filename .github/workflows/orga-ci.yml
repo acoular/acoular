@@ -17,6 +17,11 @@ jobs:
 
   docs:
     uses: acoular/ci/.github/workflows/docs.yml@main
+    with:
+      artifact_name: build-docs-dev
+      artifact_path: ./docs/_build/html
+      html_baseurl: "https://acoular.org/acoular/dev/"
+      docs_version_match: dev
 
   linting:
     uses: acoular/ci/.github/workflows/linting.yml@main
