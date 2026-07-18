@@ -54,9 +54,10 @@ Contents:
       - Description of the different download and installation options to get 
         Acoular running on your system.
 
-    * - :doc:`user_guide/get_started` 
+    * - :doc:`user_guide/index` 
 
-      - The basics for using Acoular, explained with a simple example.
+      - The basics for using Acoular, explained with a simple example, and
+        guides to important concepts such as lazy evaluation and caching.
 
     * - :doc:`api_ref/index`
 

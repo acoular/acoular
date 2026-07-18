@@ -5,6 +5,7 @@ Upcoming
 ------------------------
     **Documentation**
         * updates documentation for several classes to clarify the shape of the result
+        * adds user guide sections on lazy evaluation and caching
 
     **Internal**
         * fixes several sphinx attribute links in the docstrings that lead to build warnings

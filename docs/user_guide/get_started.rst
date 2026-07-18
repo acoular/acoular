@@ -58,7 +58,7 @@ The beamforming shall be done in the frequency domain. In this case the cross sp
 
     In [1]: ps = acoular.PowerSpectra( source=ts, block_size=128, window='Hanning' )
 
-The data for the calculation is to be taken from the ts object that was created before. Because the calculation of the cross spectral matrix is a time consuming process, no calculation is performed at the moment, but is **delayed** until the result is actually needed. This concept of **"lazy evaluation"** is applied wherever possible throughout the Acoular library. This prevents unnecessary time-consuming computations. Another option to set the parameters for the Welch method would have been to first create a 'blank' or 'default' :class:`~acoular.spectra.PowerSpectra` object and set the parameters, or traits of the object, afterwards:
+The data for the calculation is to be taken from the ts object that was created before. Because the calculation of the cross spectral matrix is a time consuming process, no calculation is performed at the moment, but is **delayed** until the result is actually needed. This concept of :ref:`lazy_evaluation` is applied wherever possible throughout the Acoular library. This prevents unnecessary time-consuming computations. Another option to set the parameters for the Welch method would have been to first create a 'blank' or 'default' :class:`~acoular.spectra.PowerSpectra` object and set the parameters, or traits of the object, afterwards:
 
 .. ipython::
 

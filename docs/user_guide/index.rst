@@ -7,3 +7,5 @@ This guide is an overview and explains important features of Acoular.
    :maxdepth: 2
 
    get_started
+   lazy_evaluation
+   caching
