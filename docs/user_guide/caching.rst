@@ -13,6 +13,9 @@ Lazy evaluation decides when a calculation is needed. Caching decides whether
 Acoular can reuse data from an earlier calculation. This chapter explains the
 file-based caching controls.
 
+The code snippets below are taken from
+:doc:`../auto_examples/introductory_examples/example_caching`.
+
 What Is Cached
 --------------
 
@@ -41,16 +44,27 @@ setting, which is available as ``ac.config.cache_dir``. If no cache directory is
 set explicitly, Acoular creates and uses a directory named ``cache`` below the
 current working directory when the cache is first needed.
 
-.. code-block:: python
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Configure cache directory, backend, and global mode.
+   :end-before: # Define shared geometry and input data.
 
-    import acoular as ac
+The remaining examples on this page use the standard introductory setup:
 
-    ac.config.cache_dir = "my_cache"
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Define shared geometry and input data.
+   :end-before: # Use object-level caching controls.
 
 Cache files use the suffix ``_cache.h5``. Where possible, the file name is based
 on the original source data. For example, processing data from
 ``three_sources.h5`` typically creates a cache file named
 ``three_sources_cache.h5``.
+
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Check the generated cache file.
+   :end-before: # Force recalculation in overwrite mode.
 
 Inside a cache file, Acoular stores results under names that include a digest.
 The digest is calculated from the class and the traits that affect the result,
@@ -92,6 +106,13 @@ result to be recalculated. Use ``"readonly"`` when working with a shared or
 archived cache directory that should not be modified. Use ``"overwrite"`` when
 you deliberately want to refresh existing cache entries.
 
+The following example shows ``"overwrite"`` in use:
+
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Force recalculation in overwrite mode.
+   :end-before: # Explicitly cache a time-domain processing chain.
+
 Object-Level Caching
 --------------------
 
@@ -99,12 +120,10 @@ Some classes also provide a ``cached`` trait. In the default
 ``global_caching="individual"`` mode, this trait controls whether that object
 uses the file cache.
 
-.. code-block:: python
-
-    ps = ac.PowerSpectra(source=ts, block_size=128, window="Hanning")
-    ps.cached = False  # calculate PowerSpectra results without using file cache
-
-    bb = ac.BeamformerBase(freq_data=ps, steer=st, cached=True)
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Use object-level caching controls.
+   :end-before: # Check the generated cache file.
 
 The object-level ``cached`` trait is ignored by the global ``"all"``,
 ``"none"``, ``"readonly"``, and ``"overwrite"`` modes. Those modes are intended
@@ -118,15 +137,9 @@ a block-wise generator and will be consumed more than once. It is often used in
 time-domain processing chains, where repeating all upstream calculations would
 be expensive.
 
-.. code-block:: python
-
-    fft = ac.RFFT(source=ts, block_size=1024)
-    cached_fft = ac.Cache(source=fft)
-
-    for block in cached_fft.result(num=8):
-        # The first pass calculates blocks and writes them to the cache.
-        # Later passes can read the same blocks from the cache.
-        pass
+.. literalinclude:: ../../examples/introductory_examples/example_caching.py
+   :language: python
+   :start-after: # Explicitly cache a time-domain processing chain.
 
 If a :class:`~acoular.process.Cache` object finds an incomplete cache entry, it
 continues safely according to the global cache mode. In normal writable modes,
@@ -139,11 +152,6 @@ Choosing The HDF5 Backend
 Acoular can use either PyTables or h5py for HDF5 cache files. The backend is
 selected with the :attr:`~acoular.configuration.Config.h5library` setting, which
 is available as ``ac.config.h5library``.
-
-.. code-block:: python
-
-    ac.config.h5library = "pytables"  # default when PyTables is available
-    ac.config.h5library = "h5py"
 
 Both backends write HDF5 files. PyTables is preferred when available; if it is
 not installed, Acoular uses h5py.

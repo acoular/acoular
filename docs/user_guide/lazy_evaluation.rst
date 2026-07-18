@@ -13,6 +13,10 @@ beamforming maps, and time-domain processing chains. Lazy evaluation lets you
 assemble and adjust such a setup without repeatedly reading data or recalculating
 intermediate results.
 
+The code snippets below are taken from
+:doc:`../auto_examples/introductory_examples/example_basic_beamforming` and
+:doc:`../auto_examples/introductory_examples/example_lazy_evaluation`.
+
 The Basic Idea
 --------------
 
@@ -20,12 +24,10 @@ Most Acoular objects describe one processing step and hold references to their
 input objects. The objects form a graph or chain, but the graph is idle until a
 result is pulled from it.
 
-.. code-block:: python
-
-    import acoular as ac
-
-    ts = ac.TimeSamples(file="three_sources.h5")
-    ps = ac.PowerSpectra(source=ts, block_size=128, window="Hanning")
+.. literalinclude:: ../../examples/introductory_examples/example_basic_beamforming.py
+   :language: python
+   :start-after: # Import packages.
+   :end-before: # Calculate beamforming result.
 
 At this point, the time data is not loaded into memory and the cross-spectral
 matrix has not been calculated. The :class:`~acoular.sources.TimeSamples` object
@@ -35,9 +37,10 @@ knows how the spectra should be calculated.
 The calculation starts when a result property, method, or generator output is
 requested:
 
-.. code-block:: python
-
-    csm = ps.csm
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Request the cross-spectral matrix.
+   :end-before: # Request a single frequency line from the lazy result object.
 
 This access asks :class:`~acoular.spectra.PowerSpectra` for its cross-spectral
 matrix. Only then does Acoular read the source data block by block and calculate
@@ -63,42 +66,28 @@ Example: Frequency-Domain Beamforming
 -------------------------------------
 
 The frequency-domain beamforming workflow in the getting-started tutorial is a
-good example. First, define the input data and spectral processing:
+good example. First, define the input data and spectral processing, then define
+the focus grid, microphone geometry, and steering vector. No beamforming map has
+been calculated yet.
 
-.. code-block:: python
+The beamformer result itself is also lazy per frequency. Accessing
+``bb.result`` prepares a lazy result object. Individual frequency lines are
+calculated only when they are indexed:
 
-    ts = ac.TimeSamples(file="three_sources.h5")
-    ps = ac.PowerSpectra(source=ts, block_size=128, window="Hanning")
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Request a single frequency line from the lazy result object.
+   :end-before: # Trigger the beamforming map calculation.
 
-Then define the focus grid, microphone geometry, and steering vector:
+In the usual workflow, the first full calculation is triggered by asking for a
+map at a frequency or frequency band:
 
-.. code-block:: python
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Trigger the beamforming map calculation.
+   :end-before: # Change a parameter and request the result again.
 
-    rg = ac.RectGrid(
-        x_min=-0.2,
-        x_max=0.2,
-        y_min=-0.2,
-        y_max=0.2,
-        z=-0.3,
-        increment=0.01,
-    )
-    mg = ac.MicGeom(file="array_64.xml")
-    st = ac.SteeringVector(grid=rg, mics=mg)
-
-Finally, create the frequency-domain beamformer:
-
-.. code-block:: python
-
-    bb = ac.BeamformerBase(freq_data=ps, steer=st)
-
-No beamforming map has been calculated yet. In the usual workflow, the first
-calculation is triggered by asking for a map at a frequency or frequency band:
-
-.. code-block:: python
-
-    pm = bb.synthetic(8000, 3)
-
-This single line pulls the required upstream results:
+This single request pulls the required upstream results:
 
 * :class:`~acoular.spectra.PowerSpectra` calculates the cross-spectral matrix if
   it is not already available.
@@ -106,16 +95,6 @@ This single line pulls the required upstream results:
   needed for the requested third-octave band.
 * The return value is reshaped to the grid shape and contains the beamforming
   map for that band.
-
-The beamformer result itself is also lazy per frequency. Accessing
-``bb.result`` prepares a lazy result object. Individual frequency lines are
-calculated only when they are indexed:
-
-.. code-block:: python
-
-    result = bb.result
-    one_line = result[10]      # calculates frequency index 10 if needed
-    several = result[10:20]    # calculates missing indices in that slice
 
 If file caching is active, calculated frequency-domain results can also be
 stored and reused. Lazy evaluation decides *when* a calculation is needed;
@@ -134,25 +113,25 @@ The following chain performs time-domain delay-and-sum beamforming with
 signal per grid point. The chain then filters the beamformer output, squares it,
 and averages it block-wise to create source maps.
 
-.. code-block:: python
-
-    bt = ac.BeamformerTime(source=ts, steer=st)
-    ft = ac.FiltOctave(source=bt, band=4000)
-    pt = ac.TimePower(source=ft)
-    avg = ac.Average(source=pt, num_per_average=1024)
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Build a lazy time-domain processing chain.
+   :end-before: # Create the generator.
 
 The chain is now configured, but no samples have been processed. Even the next
 line only creates a generator object:
 
-.. code-block:: python
-
-    blocks = avg.result(num=1)
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Create the generator.
+   :end-before: # Pull the first block from the generator.
 
 The first processing work starts when output is pulled from the generator:
 
-.. code-block:: python
-
-    first_map = next(blocks)
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Pull the first block from the generator.
+   :end-before: # Add explicit caching to the lazy chain.
 
 To create ``first_map``, Acoular pulls one averaged block from
 :class:`~acoular.process.Average`. That object pulls the required number of
@@ -160,15 +139,6 @@ blocks from :class:`~acoular.tprocess.TimePower`, which pulls from
 :class:`~acoular.tprocess.FiltOctave`, which pulls from
 :class:`~acoular.tbeamform.BeamformerTime`, which finally pulls time samples
 from ``ts``.
-
-Iterating over the generator continues the chain block by block:
-
-.. code-block:: python
-
-    for maps in avg.result(num=1):
-        # maps contains one averaged beamforming map per output block.
-        # Each loop iteration pulls only the data needed for that block.
-        pass
 
 This pull-based model keeps memory use bounded for long recordings. The full
 time history does not need to be present in memory at once.
@@ -180,10 +150,9 @@ Lazy evaluation and caching are often used together in time-domain workflows.
 Adding :class:`~acoular.process.Cache` at the end of the chain stores blocks
 while they are pulled for the first time:
 
-.. code-block:: python
-
-    cached_avg = ac.Cache(source=avg)
-    first_map = next(cached_avg.result(num=1))
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Add explicit caching to the lazy chain.
 
 The chain is still lazy. The cache does not force calculation when it is created;
 it only changes what happens when blocks are requested. On the first pass,
@@ -197,10 +166,10 @@ Because Acoular objects are trait based, changing a relevant trait changes the
 state of the processing object. The next request uses the new settings and
 recalculates the affected result.
 
-.. code-block:: python
-
-    ps.block_size = 256
-    pm = bb.synthetic(8000, 3)
+.. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
+   :language: python
+   :start-after: # Change a parameter and request the result again.
+   :end-before: # Build a lazy time-domain processing chain.
 
 Here, changing ``ps.block_size`` changes the spectral processing. The next
 request for ``bb.synthetic`` must use a cross-spectral matrix calculated with the
