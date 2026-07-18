@@ -16,6 +16,7 @@ Beamforming and generates a map of the three sources.
 from pathlib import Path
 
 import acoular as ac
+
 import matplotlib.pyplot as plt
 
 # Define paths to geometry and data.

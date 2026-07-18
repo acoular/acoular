@@ -1,6 +1,5 @@
-from pathlib import Path
 import re
-
+from pathlib import Path
 
 DOCS_ROOT = Path(__file__).resolve().parents[2] / 'docs' / 'user_guide'
 USER_GUIDE_PAGES = sorted(p for p in DOCS_ROOT.glob('*.rst') if p.name != 'index.rst')
