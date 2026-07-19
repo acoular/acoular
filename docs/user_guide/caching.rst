@@ -47,14 +47,14 @@ current working directory when the cache is first needed.
 .. literalinclude:: ../../examples/introductory_examples/example_caching.py
    :language: python
    :start-after: # Configure cache directory, backend, and global mode.
-   :end-before: # Define shared geometry and input data.
+   :end-before: # %%
 
 The remaining examples on this page use the standard introductory setup:
 
 .. literalinclude:: ../../examples/introductory_examples/example_caching.py
    :language: python
    :start-after: # Define shared geometry and input data.
-   :end-before: # Use object-level caching controls.
+   :end-before: # %%
 
 Cache files use the suffix ``_cache.h5``. Where possible, the file name is based
 on the original source data. For example, processing data from
@@ -64,7 +64,7 @@ on the original source data. For example, processing data from
 .. literalinclude:: ../../examples/introductory_examples/example_caching.py
    :language: python
    :start-after: # Check the generated cache file.
-   :end-before: # Force recalculation in overwrite mode.
+   :end-before: # %%
 
 Inside a cache file, Acoular stores results under names that include a digest.
 The digest is calculated from the class and the traits that affect the result,
@@ -111,7 +111,7 @@ The following example shows ``"overwrite"`` in use:
 .. literalinclude:: ../../examples/introductory_examples/example_caching.py
    :language: python
    :start-after: # Force recalculation in overwrite mode.
-   :end-before: # Explicitly cache a time-domain processing chain.
+   :end-before: # %%
 
 Object-Level Caching
 --------------------
@@ -123,8 +123,8 @@ uses the file cache.
 .. literalinclude:: ../../examples/introductory_examples/example_caching.py
    :language: python
    :start-after: # Use object-level caching controls.
-   :end-before: # Check the generated cache file.
-
+   :end-before: # %%
+   
 The object-level ``cached`` trait is ignored by the global ``"all"``,
 ``"none"``, ``"readonly"``, and ``"overwrite"`` modes. Those modes are intended
 for session-wide control.

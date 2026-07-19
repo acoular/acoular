@@ -40,7 +40,7 @@ requested:
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Request the cross-spectral matrix.
-   :end-before: # Request a single frequency line from the lazy result object.
+   :end-before: # %%
 
 This access asks :class:`~acoular.spectra.PowerSpectra` for its cross-spectral
 matrix. Only then does Acoular read the source data block by block and calculate
@@ -77,7 +77,7 @@ calculated only when they are indexed:
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Request a single frequency line from the lazy result object.
-   :end-before: # Trigger the beamforming map calculation.
+   :end-before: # %%
 
 In the usual workflow, the first full calculation is triggered by asking for a
 map at a frequency or frequency band:
@@ -85,8 +85,7 @@ map at a frequency or frequency band:
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Trigger the beamforming map calculation.
-   :end-before: # Change a parameter and request the result again.
-
+   :end-before: # %%
 This single request pulls the required upstream results:
 
 * :class:`~acoular.spectra.PowerSpectra` calculates the cross-spectral matrix if
@@ -116,22 +115,20 @@ and averages it block-wise to create source maps.
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Build a lazy time-domain processing chain.
-   :end-before: # Create the generator.
-
+   :end-before: # %%
 The chain is now configured, but no samples have been processed. Even the next
 line only creates a generator object:
 
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Create the generator.
-   :end-before: # Pull the first block from the generator.
-
+   :end-before: # %%
 The first processing work starts when output is pulled from the generator:
 
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Pull the first block from the generator.
-   :end-before: # Add explicit caching to the lazy chain.
+   :end-before: # %%
 
 To create ``first_map``, Acoular pulls one averaged block from
 :class:`~acoular.process.Average`. That object pulls the required number of
@@ -169,7 +166,7 @@ recalculates the affected result.
 .. literalinclude:: ../../examples/introductory_examples/example_lazy_evaluation.py
    :language: python
    :start-after: # Change a parameter and request the result again.
-   :end-before: # Build a lazy time-domain processing chain.
+   :end-before: # %%
 
 Here, changing ``ps.block_size`` changes the spectral processing. The next
 request for ``bb.synthetic`` must use a cross-spectral matrix calculated with the
