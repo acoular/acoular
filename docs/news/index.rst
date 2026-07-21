@@ -9,7 +9,8 @@ Upcoming
 
     **Internal**
         * fixes several sphinx attribute links in the docstrings that lead to build warnings
-        * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * renames :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * fixes :meth:`~acoular.process.Average.result` to fetch smaller blocks in order not to demand too much memory in the processing of its source
 
 26.04
 ------------------------
