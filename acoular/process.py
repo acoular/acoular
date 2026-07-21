@@ -159,8 +159,8 @@ class Average(InOut):
         ----------
         num : :class:`int`
             The number of averaged blocks to yield at a time. Each block contains the average over
-            :attr:`num_per_average` time samples or frequency snapshots. The last block may be
-            shorter than the specified size if the remaining data is insufficient.
+            :attr:`num_per_average` time samples or frequency snapshots. The last yielded block
+            may contain fewer than ``num`` averages.
 
         Yields
         ------
@@ -180,14 +180,34 @@ class Average(InOut):
               :attr:`num_per_average` frequency snapshots.
         - The generator will stop yielding when the source data is exhausted.
         - If the source provides fewer than ``num * num_per_average`` samples,
-          the final block may be smaller than the requested ``num`` size.
+          the final yielded block may be smaller than the requested ``num`` size.
+        - If the source provides a final block with fewer than :attr:`num_per_average` samples,
+          these samples are discarded. If the source provides fewer than
+          :attr:`num_per_average` samples in total, nothing is yielded.
         """
         nav = self.num_per_average
-        for temp in self.source.result(num * nav):
+        out = None
+        outnum = 0
+        # fetches data blocks from source, nav must not be too large
+        for temp in self.source.result(nav):
             ns, nc = temp.shape
-            nso = int(ns / nav)
-            if nso > 0:
-                yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
+            # is this a complete block of `nav` samples ?
+            if ns == nav:
+                avg = temp.mean(axis=0)
+                # create accumulator if not exists
+                if out is None:
+                    out = np.empty((num, nc), dtype=avg.dtype)
+                # add one output sample
+                out[outnum] = avg
+                outnum += 1
+                # block complete -> yield it and create new one
+                if outnum == num:
+                    yield out
+                    out = np.empty_like(out)
+                    outnum = 0
+        # last block of data
+        if outnum:
+            yield out[:outnum]
 
 
 class Cache(InOut):
