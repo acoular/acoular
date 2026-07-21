@@ -26,16 +26,19 @@ Source Location        Level
 
 """
 
+# Import packages.
 from pathlib import Path
 
 import acoular as ac
 
+# Define simulation setup.
 sfreq = 51200
 duration = 1
 num_samples = duration * sfreq
 micgeofile = Path(ac.__file__).parent / 'xml' / 'array_64.xml'
 h5savefile = Path('three_sources.h5')
 
+# Generate and store the example data.
 m = ac.MicGeom(file=micgeofile)
 n1 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=1)
 n2 = ac.WNoiseGenerator(sample_freq=sfreq, num_samples=num_samples, seed=2, rms=0.7)
