@@ -561,7 +561,39 @@ class PolarGrid(Grid):
             # maybe even more stupid parameter combinations need to be caught before _get_pos is called.
 
 
+    def _get_pos(self):
+        """
+        Calculates cartesian grid coordinates for the PolarGrid.
 
+        Returns
+        -------
+        array of floats of shape (3, [gridsize])
+            The grid point (x, y, z)-coordinates in one array.
+        """
+
+        # first validate input parameter before calculating grid positions:
+        self.__validate_input_radii_and_angles()
+        
+        # mgrid[{start} : {stop} : {nsteps}j ]
+        bpos = np.mgrid[
+            self.r_min : self.r_max : self.nrsteps * 1j,
+            self.phi_min : self.phi_max : self.nphisteps * 1j,
+            self.z : self.z + 0.1,
+        ]
+        bpos.resize((3, self.size)) # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
+        
+        # catch identical points with r_min = 0 and various phi values...
+
+        #if self.r_min == 0:
+            
+
+        # transform cylindrical to cartesian coordinates
+        xpos = np.empty((3, self.size))
+        xpos[0, :] = bpos[0, :] * np.cos(bpos[1, :] / 180.0 * np.pi)
+        xpos[1, :] = bpos[0, :] * np.sin(bpos[1, :] / 180.0 * np.pi)
+        xpos[2, :] = bpos[2, :]
+
+        return xpos
 
 
 #===============================================================================================#
