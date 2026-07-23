@@ -471,7 +471,7 @@ class RectGrid(Grid):
         return np.array(xis), np.array(yis)
         # return np.arange(self.size)[inds]
 
-#===============================================================================================#
+
 class PolarGrid(Grid):
     """
     Provides a 2D polar grid for the beamforming results.
@@ -514,9 +514,12 @@ class PolarGrid(Grid):
         depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi']
         )
 
-    @property_depends_on('nrsteps, nphisteps')
+    @property_depends_on('nrsteps, nphisteps, r_min')
     def _get_size(self):
-        return self.nrsteps * self.nphisteps
+        if self.r_min == 0:
+            return self.nrsteps * self.nphisteps - self.nphisteps + 1
+        else: 
+            return self.nrsteps * self.nphisteps
 
     @property_depends_on('nrsteps, nphisteps')
     def _get_shape(self):
@@ -581,11 +584,10 @@ class PolarGrid(Grid):
             self.z : self.z + 0.1,
         ]
         bpos.resize((3, self.size)) # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
-        
-        # catch identical points with r_min = 0 and various phi values...
 
-        #if self.r_min == 0:
-            
+        # all points (r=0,phi,z) map to (0,0,z), therefore keep just one point with r=0
+        if self.r_min == 0:
+            bpos = np.delete(bpos,[col for col in range(self.nphisteps-1)],1)
 
         # transform cylindrical to cartesian coordinates
         xpos = np.empty((3, self.size))
@@ -596,7 +598,6 @@ class PolarGrid(Grid):
         return xpos
 
 
-#===============================================================================================#
 
 class RectGrid3D(RectGrid):
     """
