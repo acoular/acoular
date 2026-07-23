@@ -472,9 +472,9 @@ class RectGrid(Grid):
         # return np.arange(self.size)[inds]
 
 #===============================================================================================#
-class CircGrid(Grid):
+class PolarGrid(Grid):
     """
-    Provides a circular 2D grid for the beamforming results.
+    Provides a 2D polar grid for the beamforming results.
 
     The grid has circular-sector-like cells with four corners and
     is on a plane perpendicular to the z-axis.
@@ -509,8 +509,6 @@ class CircGrid(Grid):
     #: Number of grid points along phi; is set automatically. (read only)
     nphisteps = Property()
 
-    # is the extent property needed later ?????
-
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
         depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi']
@@ -524,34 +522,8 @@ class CircGrid(Grid):
     def _get_shape(self):
         return (self.nrsteps, self.nphisteps)
 
-    @property_depends_on('r_min, r_max, dr')
-    def _get_nrsteps(self):
-        i = abs(self.dr)
-        if i != 0:
-            return int(round((abs(self.r_max - self.r_min) + i) / i))
-        return 1
-
-    @property_depends_on('phi_min, phi_max, dphi')
-    def _get_nphisteps(self):
-        diff = self.phi_max - self.phi_min
-        i = abs(self.dphi)
-        if diff == 360.0:
-            diff -= i
-        else:
-            diff = diff % 360
-
-        if i != 0:
-            return int(round((diff % 360.0 + i) / i))
-        return 1
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
 
 #===============================================================================================#
-
-
 
 class RectGrid3D(RectGrid):
     """
