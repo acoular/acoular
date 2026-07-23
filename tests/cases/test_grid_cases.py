@@ -68,6 +68,9 @@ class Grids:
             ]
         )
 
+    def case_PolarGrid(self):
+        return ac.PolarGrid(r_min=0, r_max=0.5, phi_min=0, phi_max=360, z=1, dr=0.1, dphi=45)
+
 
 if len(GRIDS_DEFAULT) > 0:
 
