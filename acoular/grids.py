@@ -543,7 +543,25 @@ class PolarGrid(Grid):
     @cached_property
     def _get_digest(self):
         return digest(self)
-    
+
+    def __validate_input_radii_and_angles(self):
+        """Validates the user input parameter (radii and angles)."""
+        if self.r_max < self.r_min:
+            msg = 'r_max needs to be greater than or equal to r_min!'
+            raise ValueError(msg)
+        if self.phi_max < self.phi_min:
+            msg = 'phi_max needs to be greater than or equal to phi_min!'
+        bool_list = [param >= 0 for param in (self.r_max, self.r_min,self.dr,self.phi_max,self.phi_min,self.dphi)]
+        if not all(bool_list):
+            msg = 'A negative value was provided!'
+            raise ValueError(msg)
+        if self.phi_max > 360 or self.phi_min > 360:
+            msg = 'Angles must not exceed 360 degrees!'
+            raise ValueError(msg)
+            # maybe even more stupid parameter combinations need to be caught before _get_pos is called.
+
+
+
 
 
 #===============================================================================================#
