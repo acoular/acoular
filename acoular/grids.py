@@ -514,24 +514,24 @@ class PolarGrid(Grid):
         depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi']
         )
 
-    @property_depends_on('nrsteps, nphisteps, r_min')
+    @property_depends_on(['nrsteps', 'nphisteps', 'r_min'])
     def _get_size(self):
         if self.r_min == 0:
             return self.nrsteps * self.nphisteps - self.nphisteps + 1
         return self.nrsteps * self.nphisteps
 
-    @property_depends_on('nrsteps, nphisteps')
+    @property_depends_on(['nrsteps', 'nphisteps'])
     def _get_shape(self):
         return (self.nrsteps, self.nphisteps)
 
-    @property_depends_on('r_min, r_max, dr')
+    @property_depends_on(['r_min', 'r_max', 'dr'])
     def _get_nrsteps(self):
         dr_abs = abs(self.dr)
         if dr_abs != 0:
             return round((abs(self.r_max - self.r_min) + dr_abs) / dr_abs)
         return 1
 
-    @property_depends_on('phi_min, phi_max, dphi')
+    @property_depends_on(['phi_min', 'phi_max', 'dphi'])
     def _get_nphisteps(self):
         diff = self.phi_max - self.phi_min
         dphi_abs = abs(self.dphi)
@@ -563,6 +563,7 @@ class PolarGrid(Grid):
             # all problematic parameter values considered?
 
 
+    @property_depends_on(['r_min', 'r_max', 'phi_min', 'phi_max', 'dr', 'dphi'])
     def _get_pos(self):
         """
         Calculates cartesian grid coordinates for the PolarGrid.
