@@ -522,6 +522,29 @@ class PolarGrid(Grid):
     def _get_shape(self):
         return (self.nrsteps, self.nphisteps)
 
+    @property_depends_on('r_min, r_max, dr')
+    def _get_nrsteps(self):
+        dr_abs = abs(self.dr)
+        if dr_abs != 0:
+            return int(round((abs(self.r_max - self.r_min) + dr_abs) / dr_abs))
+        return 1
+
+    @property_depends_on('phi_min, phi_max, dphi')
+    def _get_nphisteps(self):
+        diff = self.phi_max - self.phi_min
+        dphi_abs = abs(self.dphi)
+        if diff == 360.0:
+            diff -= dphi_abs
+        
+        if dphi_abs != 0:
+            return int(round((diff + dphi_abs) / dphi_abs))
+        return 1
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+    
+
 
 #===============================================================================================#
 
