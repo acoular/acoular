@@ -979,6 +979,9 @@ class PointSpreadFunction(HasStrictTraits):
     #: Frequency to evaluate the PSF for; defaults to 1.0.
     freq = Float(1.0)
 
+    #: Boolean flag, if 'True' (default), the result is cached in h5 files.
+    cached = Bool(True)
+
     # hdf5 cache file
     _h5f = Instance(H5CacheFileBase, transient=True)
 
@@ -1034,8 +1037,9 @@ class PointSpreadFunction(HasStrictTraits):
         if not self.grid_indices.size:
             self.grid_indices = np.arange(gs)
 
-        if config.global_caching != 'none':
-            #            print("get filecache..")
+        if not (  # if result caching is active
+            config.global_caching == 'none' or (config.global_caching == 'individual' and not self.cached)
+        ):
             (ac, gp) = self._get_filecache()
             if ac and gp:
                 #                print("cached data existent")
