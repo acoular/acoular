@@ -518,8 +518,7 @@ class PolarGrid(Grid):
     def _get_size(self):
         if self.r_min == 0:
             return self.nrsteps * self.nphisteps - self.nphisteps + 1
-        else: 
-            return self.nrsteps * self.nphisteps
+        return self.nrsteps * self.nphisteps
 
     @property_depends_on('nrsteps, nphisteps')
     def _get_shape(self):
@@ -529,7 +528,7 @@ class PolarGrid(Grid):
     def _get_nrsteps(self):
         dr_abs = abs(self.dr)
         if dr_abs != 0:
-            return int(round((abs(self.r_max - self.r_min) + dr_abs) / dr_abs))
+            return round((abs(self.r_max - self.r_min) + dr_abs) / dr_abs)
         return 1
 
     @property_depends_on('phi_min, phi_max, dphi')
@@ -538,9 +537,9 @@ class PolarGrid(Grid):
         dphi_abs = abs(self.dphi)
         if diff == 360.0:
             diff -= dphi_abs
-        
+
         if dphi_abs != 0:
-            return int(round((diff + dphi_abs) / dphi_abs))
+            return round((diff + dphi_abs) / dphi_abs)
         return 1
 
     @cached_property
@@ -561,7 +560,7 @@ class PolarGrid(Grid):
         if self.phi_max > 360 or self.phi_min > 360:
             msg = 'Angles must not exceed 360 degrees!'
             raise ValueError(msg)
-            # maybe even more stupid parameter combinations need to be caught before _get_pos is called.
+            # all problematic parameter values considered?
 
 
     def _get_pos(self):
@@ -573,10 +572,8 @@ class PolarGrid(Grid):
         array of floats of shape (3, [gridsize])
             The grid point (x, y, z)-coordinates in one array.
         """
-
         # first validate input parameter before calculating grid positions:
         self.__validate_input_radii_and_angles()
-        
         # mgrid[{start} : {stop} : {nsteps}j ]
         bpos = np.mgrid[
             self.r_min : self.r_max : self.nrsteps * 1j,
@@ -587,7 +584,8 @@ class PolarGrid(Grid):
 
         # all points (r=0,phi,z) map to (0,0,z), therefore keep just one point with r=0
         if self.r_min == 0:
-            bpos = np.delete(bpos,[col for col in range(self.nphisteps-1)],1)
+            del_columns = list(range(self.nphisteps-1))
+            bpos = np.delete(bpos,del_columns,1)
 
         # transform cylindrical to cartesian coordinates
         xpos = np.empty((3, self.size))
