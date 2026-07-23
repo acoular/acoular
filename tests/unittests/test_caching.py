@@ -94,8 +94,8 @@ def test_filecache_created(case, file_cache_options):
 
     expected_error = (
         isinstance(obj1, ac.PointSpreadFunction)
-        and caching_flag not in ['readonly', 'none']
         and obj1.calcmode == 'readonly'
+        and (caching_flag in ['overwrite', 'all'] or (caching_flag == 'individual' and obj1.cached))
     )
 
     # run calculation
