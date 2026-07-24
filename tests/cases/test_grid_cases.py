@@ -23,6 +23,7 @@ SECTOR_SKIP_DEFAULT = [
 GRIDS_SKIP_DEFAULT = [
     ac.Grid,
     ac.RectGrid,
+    ac.PolarGrid,
     ac.RectGrid3D,
     ac.LineGrid,
     ac.ImportGrid,

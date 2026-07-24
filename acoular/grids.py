@@ -7,6 +7,7 @@ Implement support for multidimensional grids and integration sectors.
 .. inheritance-diagram::
                 acoular.grids.Grid
                 acoular.grids.RectGrid
+                acoular.grids.PolarGrid
                 acoular.grids.RectGrid3D
                 acoular.grids.ImportGrid
                 acoular.grids.LineGrid
@@ -27,6 +28,7 @@ Implement support for multidimensional grids and integration sectors.
 
     Grid
     RectGrid
+    PolarGrid
     RectGrid3D
     ImportGrid
     LineGrid
