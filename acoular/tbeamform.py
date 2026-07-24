@@ -138,15 +138,13 @@ class BeamformerTime(TimeOut):
         n_index = np.arange(0, num + 1)[:, np.newaxis]
         c = self.steer.env.c / self.source.sample_freq
         amp = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
-        # delays = np.empty((1,self.steer.grid.size,num_mics),dtype=fdtype)
         d_index = np.empty((1, self.steer.grid.size, num_mics), dtype=idtype)
         d_interp2 = np.empty((1, self.steer.grid.size, num_mics), dtype=fdtype)
         steer_func(self.steer.rm[np.newaxis, :, :], self.steer.r0[np.newaxis, :], amp)
         _delays(self.steer.rm[np.newaxis, :, :], c, d_interp2, d_index)
-        amp.shape = amp.shape[1:]
-        # delays.shape = delays.shape[1:]
-        d_index.shape = d_index.shape[1:]
-        d_interp2.shape = d_interp2.shape[1:]
+        amp = amp.reshape(amp.shape[1:])
+        d_index = d_index.reshape(d_index.shape[1:])
+        d_interp2 = d_interp2.reshape(d_interp2.shape[1:])
         max_sample_delay = int((self.steer.rm / c).max()) + 2
         weights = self._get_weights()
 
