@@ -512,9 +512,7 @@ class PolarGrid(Grid):
     nphisteps = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
-    digest = Property(
-        depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi']
-        )
+    digest = Property(depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi'])
 
     @property_depends_on(['nrsteps', 'nphisteps', 'r_min'])
     def _get_size(self):
@@ -555,7 +553,7 @@ class PolarGrid(Grid):
             raise ValueError(msg)
         if self.phi_max < self.phi_min:
             msg = 'phi_max needs to be greater than or equal to phi_min!'
-        bool_list = [param >= 0 for param in (self.r_max, self.r_min,self.dr,self.phi_max,self.phi_min,self.dphi)]
+        bool_list = [param >= 0 for param in (self.r_max, self.r_min, self.dr, self.phi_max, self.phi_min, self.dphi)]
         if not all(bool_list):
             msg = 'A negative value was provided!'
             raise ValueError(msg)
@@ -563,7 +561,6 @@ class PolarGrid(Grid):
             msg = 'Angles must not exceed 360 degrees!'
             raise ValueError(msg)
             # all problematic parameter values considered?
-
 
     @property_depends_on(['r_min', 'r_max', 'phi_min', 'phi_max', 'dr', 'dphi'])
     def _get_pos(self):
@@ -583,12 +580,12 @@ class PolarGrid(Grid):
             self.phi_min : self.phi_max : self.nphisteps * 1j,
             self.z : self.z + 0.1,
         ]
-        bpos.resize((3, self.size)) # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
+        bpos.resize((3, self.size))  # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
 
         # all points (r=0,phi,z) map to (0,0,z), therefore keep just one point with r=0
         if self.r_min == 0:
-            del_columns = list(range(self.nphisteps-1))
-            bpos = np.delete(bpos,del_columns,1)
+            del_columns = list(range(self.nphisteps - 1))
+            bpos = np.delete(bpos, del_columns, 1)
 
         # transform cylindrical to cartesian coordinates
         xpos = np.empty((3, self.size))
@@ -597,7 +594,6 @@ class PolarGrid(Grid):
         xpos[2, :] = bpos[2, :]
 
         return xpos
-
 
 
 class RectGrid3D(RectGrid):
