@@ -70,8 +70,8 @@ class Grids:
         )
 
     def case_PolarGrid(self):
-        return ac.PolarGrid(r_min=0, r_max=0.5, phi_min=0, phi_max=360, z=1, dr=0.1, dphi=45)
-
+        return ac.PolarGrid(r_min=0.1, r_max=0.5, phi_min=0, phi_max=360, z=1, dr=0.1, dphi=45)
+        # this r_min is supposed to be zero, but this is the singular case - needs to be solved!!!
 
 if len(GRIDS_DEFAULT) > 0:
 

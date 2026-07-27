@@ -522,6 +522,8 @@ class PolarGrid(Grid):
 
     @property_depends_on(['nrsteps', 'nphisteps'])
     def _get_shape(self):
+        # if self.r_min == 0:
+        #     return (???)  # dimensional problem since it is not even with center point...
         return (self.nrsteps, self.nphisteps)
 
     @property_depends_on(['r_min', 'r_max', 'dr'])
@@ -580,7 +582,7 @@ class PolarGrid(Grid):
             self.phi_min : self.phi_max : self.nphisteps * 1j,
             self.z : self.z + 0.1,
         ]
-        bpos.resize((3, self.size))  # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
+        bpos.resize((3, self.nrsteps * self.nphisteps))  # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
 
         # all points (r=0,phi,z) map to (0,0,z), therefore keep just one point with r=0
         if self.r_min == 0:
