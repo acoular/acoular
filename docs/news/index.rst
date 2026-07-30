@@ -3,6 +3,9 @@ What's new
 
 Upcoming
 ------------------------
+    **New features**
+        * Extends functionality of :class:`~acoular.aiaa.TimeSamplesAIAABenchmark` to handle transposed data
+        
     **Documentation**
         * updates documentation for several classes to clarify the shape of the result
         * adds user guide sections on lazy evaluation and caching
@@ -10,6 +13,7 @@ Upcoming
     **Internal**
         * fixes several sphinx attribute links in the docstrings that lead to build warnings
         * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        
 
 26.04
 ------------------------
