@@ -26,6 +26,7 @@ Examples
 """  # noqa: W505
 
 import contextlib
+from warnings import warn as _warn
 
 from acoular.h5files import H5FileBase, _get_h5file_class
 from acoular.internal import digest
@@ -36,6 +37,7 @@ from acoular.tools.utils import get_file_basename
 
 import numpy as np
 from traits.api import (
+    Bool,
     File,
     Instance,
     Property,
@@ -55,17 +57,102 @@ class TimeSamplesAIAABenchmark(TimeSamples):
     objects.
     """
 
+    #: Boolean flag, if 'True', time data in the h5 file will be interpreted as being shaped
+    #: (:attr:`num_channels`, :attr:`num_samples`), allowing older revisions of the
+    #: AIAA benchmark file format. Default is 'False', i.e. interpretation of data as shaped
+    #: (:attr:`num_samples`, :attr:`num_channels`). This is automatically set when the h5 file
+    #: is loaded or data is set.
+    _data_transposed = Bool(False)
+
+    def _get__datachecksum(self):
+        if self._data_transposed:
+            return self.data[0, :].sum()
+        return self.data[:, 0].sum()
+
+    @observe('data')
+    def _load_shapes(self, event):  # noqa: ARG002
+        # Set :attr:`num_channels` and :attr:`num_samples` from data.
+        if self.data is not None:
+            data_shape = self.data.shape
+            self._data_transposed = (data_shape[0] < data_shape[1])
+            if self._data_transposed:
+                _warn(
+                    f'Data is of shape ({data_shape[0]}, {data_shape[1]}) and may be stored as '
+                    '(num_channels, num_samples). It will be transposed for further processing.',
+                    Warning,
+                    stacklevel=2
+                )
+                self.num_channels, self.num_samples = self.data.shape
+            else:
+                self.num_samples, self.num_channels = self.data.shape
+
     def _load_timedata(self):
-        """Loads timedata from .h5 file. Only for internal use."""
+        """Loads timedata from :attr:`.h5 file<file>`. Only for internal use."""
         self.data = self._h5f.get_data_by_reference('MicrophoneData/microphoneDataPa')
         self.sample_freq = self._h5f.get_node_attribute(self.data, 'sampleRateHz')
-        (self.num_samples, self.num_channels) = self.data.shape
 
     def _load_metadata(self):
-        """Loads metadata from .h5 file. Only for internal use."""
+        """Loads :attr:`metadata` from :attr:`.h5 file<file>`. Only for internal use."""
         self.metadata = {}
         if '/MetaData' in self._h5f:
             self.metadata = self._h5f.node_to_dict('/MetaData')
+
+    def result(self, num=128):
+        """
+        Generate blocks of time-domain data iteratively.
+
+        The :meth:`result` method is a Python generator that yields blocks of time-domain data
+        of the specified size. Data is either read from an HDF5 file (if :attr:`file` is set)
+        or from a NumPy array (if :attr:`data` is directly provided).
+
+        Parameters
+        ----------
+        num : :class:`int`, optional
+            The size of each block to be yielded, representing the number of time-domain
+            samples per block.
+
+        Yields
+        ------
+        :class:`numpy.ndarray`
+            A 2D array of shape (``num``, :attr:`num_channels`) representing a block of
+            time-domain data. The last block may have fewer than ``num`` samples if the total number
+            of samples is not a multiple of ``num``.
+
+        Raises
+        ------
+        :obj:`OSError`
+            If no samples are available (i.e., :attr:`num_samples` is ``0``).
+
+        Examples
+        --------
+        Create a generator and access blocks of data:
+
+        >>> import numpy as np
+        >>> from acoular.aiaa import TimeSamplesAIAABenchmark
+        >>> ts = TimeSamplesAIAABenchmark(data=np.random.rand(1000, 4), sample_freq=51200)
+        >>> generator = ts.result(num=256)
+        >>> for block in generator:
+        ...     print(block.shape)
+        (256, 4)
+        (256, 4)
+        (256, 4)
+        (232, 4)
+
+        Note that the last block may have fewer that ``num`` samples.
+        """
+        if self.num_samples == 0:
+            msg = 'no samples available'
+            raise OSError(msg)
+        self._datachecksum  # trigger checksum calculation # noqa: B018
+        i = 0
+        if self._data_transposed:
+            while i < self.num_samples:
+                yield self.data[:, i : num + i].transpose()
+                i += num
+        else:
+            while i < self.num_samples:
+                yield self.data[i : num + i]
+                i += num
 
 
 class TriggerAIAABenchmark(TimeSamplesAIAABenchmark):
