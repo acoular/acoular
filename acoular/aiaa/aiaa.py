@@ -74,13 +74,13 @@ class TimeSamplesAIAABenchmark(TimeSamples):
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             data_shape = self.data.shape
-            self._data_transposed = (data_shape[0] < data_shape[1])
+            self._data_transposed = data_shape[0] < data_shape[1]
             if self._data_transposed:
                 _warn(
                     f'Data is of shape ({data_shape[0]}, {data_shape[1]}) and may be stored as '
                     '(num_channels, num_samples). It will be transposed for further processing.',
                     Warning,
-                    stacklevel=2
+                    stacklevel=2,
                 )
                 self.num_channels, self.num_samples = self.data.shape
             else:
