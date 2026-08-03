@@ -1658,6 +1658,45 @@ class BeamformerCMF(BeamformerBase):
             )
             raise ImportError(msg)
 
+    #: Cached index masks (triangular + real/imag selection) for the CMF problem. 
+    msm_indices = Property(depends_on=['freq_data.num_channels', 'steer.digest', 'r_diag'])
+
+    @cached_property
+    def _get_msm_indices(self):
+        """Indices for the reduced Kronecker product / vectorized CSM entries."""
+        nc = self.freq_data.num_channels
+        ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
+        ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
+        if self.r_diag:
+            ind_reim = np.hstack([ind_im0, ind_im0])
+        else:
+            ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
+            ind_reim[0] = True  # why this ?
+        return ind, ind_reim
+
+    def _calc_sensing_matrix(self, f):
+        """Build the real-valued CMF sensing matrix (dictionary) for one frequency."""
+        ind, ind_reim = self.msm_indices
+        h = self.steer.transfer(f).T
+        nc = h.shape[0]
+        num_points = h.shape[1]
+
+        Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
+        Ac = Bc.reshape(nc * nc, num_points)
+
+        A = Ac[ind, :]
+        A = np.vstack([A.real, A.imag])[ind_reim, :]
+        return A
+    
+    def _vectorize_csm(self, csm):
+        """Vectorize one CSM using the same reduction as `_calc_sensing_matrix`."""
+        ind, ind_reim = self.msm_indices
+        nc = csm.shape[-1]
+        R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
+        R = np.vstack([R.real, R.imag])[ind_reim, :]
+        return R
+
+
     def _calc(self, ind):
         """
         Calculates the result for the frequencies defined by :attr:`freq_data`.
@@ -1677,40 +1716,13 @@ class BeamformerCMF(BeamformerBase):
         This method only returns values through :attr:`_ac` and :attr:`_fr`
         """
         f = self._f
-
-        # function to repack complex matrices to deal with them in real number space
-        def realify(matrix):
-            return np.vstack([matrix.real, matrix.imag])
-
-        # prepare calculation
-        nc = self.freq_data.num_channels
         num_points = self.steer.grid.size
         unit = self.unit_mult
 
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-
-            h = self.steer.transfer(f[i]).T
-
-            # reduced Kronecker product (only where solution matrix != 0)
-            Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
-            Ac = Bc.reshape(nc * nc, num_points)
-
-            # get indices for upper triangular matrices (use np.tril b/c transposed)
-            ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
-
-            ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
-            if self.r_diag:
-                # omit main diagonal for noise reduction
-                ind_reim = np.hstack([ind_im0, ind_im0])
-            else:
-                # take all real parts -- also main diagonal
-                ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
-                ind_reim[0] = True  # why this ?
-
-            A = realify(Ac[ind, :])[ind_reim, :]
-            # use csm.T for column stacking reshape!
-            R = realify(np.reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
+            A = self._calc_sensing_matrix(f[i])
+            R = self._vectorize_csm(csm) * unit          # scaling applied here now
             # choose method
             if self.method == 'LassoLars':
                 model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
