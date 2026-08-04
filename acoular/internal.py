@@ -4,7 +4,26 @@
 
 """Implements a digest function for caching of traits based on a unique identifier."""
 
+from functools import wraps
 from hashlib import blake2b
+
+
+def lazyjit(decorator):
+    """Delay applying a decorator until the wrapped function is first called."""
+
+    def decorate(func):
+        compiled = None
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal compiled
+            if compiled is None:
+                compiled = decorator(func)
+            return compiled(*args, **kwargs)
+
+        return wrapper
+
+    return decorate
 
 
 def digest(obj, name='digest'):

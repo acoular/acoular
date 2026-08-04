@@ -59,11 +59,7 @@ from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 import numpy as np
 import scipy.linalg as spla
 
-# check for sklearn version to account for incompatible behavior
-import sklearn
-from packaging.version import parse
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
-from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
 from traits.api import (
     Any,
     Bool,
@@ -84,9 +80,24 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
-sklearn_ndict = {}
-if parse(sklearn.__version__) < parse('1.4'):
-    sklearn_ndict['normalize'] = False  # pragma: no cover
+_SKLEARN_NDICT = None
+
+
+def _get_sklearn_linear_model(*names):
+    from sklearn import linear_model
+
+    return tuple(getattr(linear_model, name) for name in names)
+
+
+def _get_sklearn_ndict():
+    global _SKLEARN_NDICT  # noqa: PLW0603
+    if _SKLEARN_NDICT is None:
+        from importlib.metadata import version
+        import re
+
+        match = re.match(r'(\d+)\.(\d+)', version('scikit-learn'))
+        _SKLEARN_NDICT = {'normalize': False} if match and tuple(map(int, match.groups())) < (1, 4) else {}
+    return _SKLEARN_NDICT
 
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
@@ -1295,6 +1306,10 @@ class BeamformerDamasPlus(BeamformerDamas):
                 cT = -1 * psf.sum(1)  # turn the minimization into a maximization
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
+                LassoLars, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
+                    'LassoLars',
+                    'OrthogonalMatchingPursuitCV',
+                )
                 if self.method == 'LassoLars':
                     model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                 elif self.method == 'OMPCV':
@@ -1712,15 +1727,6 @@ class BeamformerCMF(BeamformerBase):
             # use csm.T for column stacking reshape!
             R = realify(np.reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
             # choose method
-            if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'OMPCV':
-                model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
-            elif self.method == 'NNLS':
-                model = LinearRegression(positive=True)
-
             if self.method == 'Split_Bregman' and config.have_pylops:
                 from pylops import Identity, MatrixMult
                 from pylops.optimization.sparsity import splitbregman
@@ -1792,6 +1798,21 @@ class BeamformerCMF(BeamformerBase):
 
                 self._ac[i] /= unit
             else:
+                sklearn_ndict = _get_sklearn_ndict()
+                LassoLars, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
+                    'LassoLars',
+                    'LassoLarsIC',
+                    'LinearRegression',
+                    'OrthogonalMatchingPursuitCV',
+                )
+                if self.method == 'LassoLars':
+                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
+                elif self.method == 'LassoLarsBIC':
+                    model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
+                elif self.method == 'OMPCV':
+                    model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
+                elif self.method == 'NNLS':
+                    model = LinearRegression(positive=True)
                 # from sklearn 1.2, normalize=True does not work the same way anymore and the
                 # pipeline approach with StandardScaler does scale in a different way, thus we
                 # monkeypatch the code and normalize ourselves to make results the same over
@@ -2163,6 +2184,15 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         unit = self.unit_mult
                         AB = np.vstack([np.hstack([A.real, -A.imag]), np.hstack([A.imag, A.real])])
                         R = np.hstack([emode.real.T, emode.imag.T]) * unit
+                        LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV = (
+                            _get_sklearn_linear_model(
+                                'LassoLars',
+                                'LassoLarsCV',
+                                'LassoLarsIC',
+                                'LinearRegression',
+                                'OrthogonalMatchingPursuitCV',
+                            )
+                        )
                         if self.method == 'LassoLars':
                             model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                         elif self.method == 'LassoLarsBIC':
