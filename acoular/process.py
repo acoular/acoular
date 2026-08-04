@@ -187,7 +187,6 @@ class Average(InOut):
         """
         nav = self.num_per_average
         out = None
-        dtype = None
         outnum = 0
         # fetches data blocks from source, nav must not be too large
         for temp in self.source.result(nav):
@@ -195,12 +194,9 @@ class Average(InOut):
             # is this a complete block of `nav` samples ?
             if ns != nav:
                 continue
-            # determine dtype of the mean once
-            if dtype is None:
-                dtype = np.empty((), dtype=temp.dtype).mean().dtype
             # create accumulator if not exists
             if out is None:
-                out = np.empty((num, nc), dtype=dtype)
+                out = np.empty((num, nc), dtype=temp.dtype)
             # add one output sample
             temp.mean(axis=0, out=out[outnum])
             outnum += 1
