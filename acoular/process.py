@@ -203,7 +203,7 @@ class Average(InOut):
                 # block complete -> yield it and create new one
                 if outnum == num:
                     yield out
-                    out = np.empty_like(out)
+                    out = None
                     outnum = 0
         # last block of data
         if outnum:
