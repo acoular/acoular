@@ -58,7 +58,6 @@ from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 import numpy as np
 import scipy.linalg as spla
-
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
 from traits.api import (
     Any,
@@ -84,7 +83,7 @@ _SKLEARN_NDICT = None
 
 
 def _get_sklearn_linear_model(*names):
-    from sklearn import linear_model
+    from sklearn import linear_model  # noqa: PLC0415
 
     return tuple(getattr(linear_model, name) for name in names)
 
@@ -92,8 +91,8 @@ def _get_sklearn_linear_model(*names):
 def _get_sklearn_ndict():
     global _SKLEARN_NDICT  # noqa: PLW0603
     if _SKLEARN_NDICT is None:
-        from importlib.metadata import version
-        import re
+        import re  # noqa: PLC0415
+        from importlib.metadata import version  # noqa: PLC0415
 
         match = re.match(r'(\d+)\.(\d+)', version('scikit-learn'))
         _SKLEARN_NDICT = {'normalize': False} if match and tuple(map(int, match.groups())) < (1, 4) else {}
