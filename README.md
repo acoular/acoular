@@ -19,7 +19,7 @@ It is aimed at (but not limited to) applications in acoustic testing. Multichann
 - **User Guide:** https://acoular.org/user_guide
 - **API Reference:** https://acoular.org/api_ref
 - **Examples:** https://acoular.org/auto_examples
-- **Contributing:** https://acoular.org/contributing
+- **Contributing:** https://acoular.org/contributing/
 - **Questions?:** https://github.com/orgs/acoular/discussions
 - **Bug Reports:** https://github.com/acoular/acoular/issues
 - **Report a Security Vulnerability:** https://github.com/acoular/acoular/security/advisories/new
