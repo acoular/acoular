@@ -3,24 +3,28 @@
 # ------------------------------------------------------------------------------
 """Contains NUMBA accelerated functions for time-domain beamformers."""
 
+from .internal import lazyjit
+
 import numba as nb
 import numpy as np
 
 
-@nb.njit(
-    [
-        (
-            nb.float64[:, ::1],
-            nb.int64[:, ::1],
-            nb.float64[:, ::1],
-            nb.float64[:, ::1],
-            nb.float64[:, ::1],
-            nb.float64[:, ::1],
-        ),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (
+                nb.float64[:, ::1],
+                nb.int64[:, ::1],
+                nb.float64[:, ::1],
+                nb.float64[:, ::1],
+                nb.float64[:, ::1],
+                nb.float64[:, ::1],
+            ),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
     """Performs one time step of delay and sum with output and additional autopower removal.
@@ -57,28 +61,30 @@ def _delayandsum4(data, offsets, ifactor2, steeramp, out, autopower):
                 autopower[n, gi] += r * r
 
 
-@nb.njit(
-    [
-        (
-            nb.float32[:, ::1],
-            nb.int32[:, :, ::1],
-            nb.float32[:, :, ::1],
-            nb.float32[:, :, ::1],
-            nb.float32[:, ::1],
-            nb.float32[:, ::1],
-        ),
-        (
-            nb.float64[:, ::1],
-            nb.int64[:, :, ::1],
-            nb.float64[:, :, ::1],
-            nb.float64[:, :, ::1],
-            nb.float64[:, ::1],
-            nb.float64[:, ::1],
-        ),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (
+                nb.float32[:, ::1],
+                nb.int32[:, :, ::1],
+                nb.float32[:, :, ::1],
+                nb.float32[:, :, ::1],
+                nb.float32[:, ::1],
+                nb.float32[:, ::1],
+            ),
+            (
+                nb.float64[:, ::1],
+                nb.int64[:, :, ::1],
+                nb.float64[:, :, ::1],
+                nb.float64[:, :, ::1],
+                nb.float64[:, ::1],
+                nb.float64[:, ::1],
+            ),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
     """Performs one time step of delay and sum with output and additional autopower removal.
@@ -120,14 +126,16 @@ def _delayandsum5(data, offsets, ifactor2, steeramp, out, autopower):
                 autopower[n, gi] += r * r
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
-        (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
+            (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _steer_I(rm, r0, amp):  # noqa: ARG001, N802
     num, gridsize, num_channels = rm.shape
@@ -139,14 +147,16 @@ def _steer_I(rm, r0, amp):  # noqa: ARG001, N802
                 amp[n, gi, mi] = nr
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
-        (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
+            (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _steer_II(rm, r0, amp):  # noqa: N802
     num, gridsize, num_channels = rm.shape
@@ -159,14 +169,16 @@ def _steer_II(rm, r0, amp):  # noqa: N802
                 amp[n, gi, mi] = rm[n, gi, mi] * rm2
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
-        (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
+            (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _steer_III(rm, r0, amp):  # noqa: N802
     num, gridsize, num_channels = rm.shape
@@ -182,14 +194,16 @@ def _steer_III(rm, r0, amp):  # noqa: N802
                 amp[n, gi, mi] = np.divide(rm1, rm[n, gi, mi] * rm2)
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
-        (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, :], nb.float32[:, :], nb.float32[:, :, :]),
+            (nb.float64[:, :, :], nb.float64[:, :], nb.float64[:, :, :]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _steer_IV(rm, r0, amp):  # noqa: ARG001, N802
     num, gridsize, num_channels = rm.shape
@@ -207,14 +221,16 @@ def _steer_IV(rm, r0, amp):  # noqa: ARG001, N802
                 amp[n, gi, mi] = np.divide(nr, rm[n, gi, mi] * rm2)
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, ::1], nb.float32, nb.float32[:, :, ::1], nb.int32[:, :, ::1]),
-        (nb.float64[:, :, ::1], nb.float64, nb.float64[:, :, ::1], nb.int64[:, :, ::1]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, ::1], nb.float32, nb.float32[:, :, ::1], nb.int32[:, :, ::1]),
+            (nb.float64[:, :, ::1], nb.float64, nb.float64[:, :, ::1], nb.int64[:, :, ::1]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _delays(rm, c, interp2, index):
     num, gridsize, num_channels = rm.shape
@@ -228,14 +244,16 @@ def _delays(rm, c, interp2, index):
                 interp2[n, gi, mi] = delays - nb.int64(delays)
 
 
-@nb.njit(
-    [
-        (nb.float32[:, :, :], nb.float32[:, :, :], nb.int32[:, :, :]),
-        (nb.float64[:, :, :], nb.float64[:, :, :], nb.int64[:, :, :]),
-    ],
-    cache=True,
-    parallel=True,
-    fastmath=True,
+@lazyjit(
+    nb.njit(
+        [
+            (nb.float32[:, :, :], nb.float32[:, :, :], nb.int32[:, :, :]),
+            (nb.float64[:, :, :], nb.float64[:, :, :], nb.int64[:, :, :]),
+        ],
+        cache=True,
+        parallel=True,
+        fastmath=True,
+    ),
 )
 def _modf(delays, interp2, index):
     num, gridsize, num_channels = delays.shape

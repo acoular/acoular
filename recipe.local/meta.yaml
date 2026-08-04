@@ -16,12 +16,12 @@ requirements:
     - hatchling
     - wheel
   run:
-    - python >=3.10
-    - scikit-learn 
+    - python >=3.11,<3.15
+    - scikit-learn
     - numba
     - numpy
-    - scipy
-    - traits
+    - scipy >=1.16.1
+    - traits >=6.0
     - pytables
 
 test:
@@ -32,6 +32,6 @@ test:
     - acoular
 
 about:
-  home: http://www.acoular.org
+  home: https://acoular.org
   license: BSD License
   summary: 'Library for acoustic beamforming'

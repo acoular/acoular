@@ -12,7 +12,9 @@ Upcoming
 
     **Internal**
         * fixes several sphinx attribute links in the docstrings that lead to build warnings
-        * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * renames :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * lazy import of sklearn to speed import of the package
+        * lazy numba jits to speed up import of the package
 
 26.04
 ------------------------
