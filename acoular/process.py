@@ -192,19 +192,19 @@ class Average(InOut):
         for temp in self.source.result(nav):
             ns, nc = temp.shape
             # is this a complete block of `nav` samples ?
-            if ns == nav:
-                avg = temp.mean(axis=0)
-                # create accumulator if not exists
-                if out is None:
-                    out = np.empty((num, nc), dtype=avg.dtype)
-                # add one output sample
-                out[outnum] = avg
-                outnum += 1
-                # block complete -> yield it and create new one
-                if outnum == num:
-                    yield out
-                    out = None
-                    outnum = 0
+            if ns != nav:
+                continue
+            # create accumulator if not exists
+            if out is None:
+                out = np.empty((num, nc), dtype=temp.dtype)
+            # add one output sample
+            temp.mean(axis=0, out=out[outnum])
+            outnum += 1
+            # block complete -> yield it and create new one
+            if outnum == num:
+                yield out
+                out = None
+                outnum = 0
         # last block of data
         if outnum:
             yield out[:outnum]
