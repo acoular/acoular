@@ -15,6 +15,7 @@ Upcoming
         * renames :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
         * lazy import of sklearn to speed import of the package
         * lazy numba jits to speed up import of the package
+        * fixes :meth:`~acoular.process.Average.result` to fetch smaller blocks in order not to demand too much memory in the processing of its source
 
 26.04
 ------------------------
