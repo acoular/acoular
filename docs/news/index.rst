@@ -3,7 +3,10 @@ What's new
 
 Upcoming
 ------------------------
-    **Documentation**
+    **New features**
+        * adds :attr:`~acoular.fbeamform.PointSpreadFunction.cached` attribute to control caching locally
+
+   **Documentation**
         * updates documentation for several classes to clarify the shape of the result
         * adds user guide sections on lazy evaluation and caching
 

@@ -53,18 +53,21 @@ class Caching:
 
         return pss, calc, cached
 
+    @parametrize('cached', [False, True], ids=['cached-False', 'cached-True'])
     @parametrize('calcmode', ['single', 'block', 'full', 'readonly'])
-    def case_caching_PointSpreadFunction(self, small_source_case, calcmode):
+    def case_caching_PointSpreadFunction(self, small_source_case, calcmode, cached):
         psfs = []
         for _ in range(3):
             psfs.append(
-                ac.PointSpreadFunction(calcmode=calcmode, steer=small_source_case.steer, freq=8000, grid_indices=[0, 1])
+                ac.PointSpreadFunction(
+                    calcmode=calcmode, steer=small_source_case.steer, freq=8000, grid_indices=[0, 1], cached=cached
+                )
             )
 
         def calc(point_spread_function):
             return point_spread_function.psf
 
-        return psfs, calc, True
+        return psfs, calc, cached
 
     def case_caching_time(self, create_time_data_source):
         source = create_time_data_source(num_channels=1, num_samples=2)
