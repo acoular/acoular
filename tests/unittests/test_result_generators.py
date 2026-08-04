@@ -33,8 +33,9 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
         ac.BeamformerTime: 'Issue #525',
         ac.IntegratorSectorTime: 'Issue #525',  # test case relies on BeamformerTime as source
     }
-    if reason := xfails.get(type(obj)):
-        pytest.xfail(reason)
+    for generator, reason in xfails.items():
+        if isinstance(obj, generator):
+            pytest.xfail(reason)
 
     blocks = get_result(obj, num=num, f=list)
     assert len(blocks) > 0, 'Generator did not yield any blocks.'
