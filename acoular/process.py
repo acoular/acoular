@@ -187,18 +187,22 @@ class Average(InOut):
         """
         nav = self.num_per_average
         out = None
+        dtype = None
         outnum = 0
         # fetches data blocks from source, nav must not be too large
         for temp in self.source.result(nav):
             ns, nc = temp.shape
             # is this a complete block of `nav` samples ?
-            if ns == nav:
-                avg = temp.mean(axis=0)
-                # create accumulator if not exists
-                if out is None:
-                    out = np.empty((num, nc), dtype=avg.dtype)
+            if ns != nav:
+                continue
+            # determine dtype of the mean once
+            if dtype is None:
+                dtype = np.empty((), dtype=temp.dtype).mean().dtype
+            # create accumulator if not exists
+            if out is None:
+                out = np.empty((num, nc), dtype=dtype)
                 # add one output sample
-                out[outnum] = avg
+                temp.mean(axis=0, out=out[outnum])
                 outnum += 1
                 # block complete -> yield it and create new one
                 if outnum == num:
