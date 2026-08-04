@@ -201,14 +201,14 @@ class Average(InOut):
             # create accumulator if not exists
             if out is None:
                 out = np.empty((num, nc), dtype=dtype)
-                # add one output sample
-                temp.mean(axis=0, out=out[outnum])
-                outnum += 1
-                # block complete -> yield it and create new one
-                if outnum == num:
-                    yield out
-                    out = None
-                    outnum = 0
+            # add one output sample
+            temp.mean(axis=0, out=out[outnum])
+            outnum += 1
+            # block complete -> yield it and create new one
+            if outnum == num:
+                yield out
+                out = None
+                outnum = 0
         # last block of data
         if outnum:
             yield out[:outnum]
