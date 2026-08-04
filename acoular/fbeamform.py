@@ -98,6 +98,7 @@ def _get_sklearn_ndict():
         _SKLEARN_NDICT = {'normalize': False} if match and tuple(map(int, match.groups())) < (1, 4) else {}
     return _SKLEARN_NDICT
 
+
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
 
