@@ -76,12 +76,19 @@ class Beamformer:
         )
 
     @case(id='Damas')
+    @parametrize(
+        'steer_type',
+        ['true level', 'classic', 'inverse', 'true location'],
+        ids=['true-level', 'classic', 'inverse', 'true-location'],
+    )
     @parametrize('r_diag', [False, True], ids=['rdiag-False', 'rdiag-True'])
-    def case_BeamformerDamas(self, r_diag, regression_source_case):
+    def case_BeamformerDamas(self, r_diag, steer_type, regression_source_case):
+        steer = deepcopy(regression_source_case.steer)
+        steer.steer_type = steer_type
         return ac.BeamformerDamas(
             freq_data=regression_source_case.freq_data_import,
             r_diag=r_diag,
-            steer=regression_source_case.steer,
+            steer=steer,
             n_iter=10,
             damp=0.98,
         )

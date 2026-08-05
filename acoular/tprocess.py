@@ -48,7 +48,7 @@ from .base import SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
-from .internal import digest, ldigest
+from .internal import digest, lazyjit, ldigest
 from .microphones import MicGeom
 from .process import Cache
 from .tools.utils import find_basename
@@ -2864,13 +2864,13 @@ class TimeConvolve(TimeOut):
         yield irfft(spec_sum, axis=0)[num : final_len + num]
 
 
-@nb.jit(nopython=True, cache=True)
+@lazyjit(nb.jit(nopython=True, cache=True))
 def _append_to_fdl(fdl, idx, numblocks_kernel, buff):  # pragma: no cover
     fdl[idx] = buff
     idx = int(idx + 1 % numblocks_kernel)
 
 
-@nb.jit(nopython=True, cache=True)
+@lazyjit(nb.jit(nopython=True, cache=True))
 def _spectral_sum(out, fdl, kb):  # pragma: no cover
     P, B, N = kb.shape
     for n in range(N):

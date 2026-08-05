@@ -3,14 +3,20 @@ What's new
 
 Upcoming
 ------------------------
-    **Documentation**
+    **New features**
+        * adds :attr:`~acoular.fbeamform.PointSpreadFunction.cached` attribute to control caching locally
+
+   **Documentation**
         * updates documentation for several classes to clarify the shape of the result
         * adds user guide sections on lazy evaluation and caching
 
     **Internal**
         * use machine epsilon as minimum value in :meth:`~acoular.fbeamform.L_p`
         * fixes several sphinx attribute links in the docstrings that lead to build warnings
-        * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * renames :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
+        * lazy import of sklearn to speed import of the package
+        * lazy numba jits to speed up import of the package
+        * fixes :meth:`~acoular.process.Average.result` to fetch smaller blocks in order not to demand too much memory in the processing of its source
 
 26.04
 ------------------------
