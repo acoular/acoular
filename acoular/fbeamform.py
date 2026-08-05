@@ -2393,8 +2393,7 @@ def L_p(x):  # noqa: N802
         The corresponding sound pressure levels in dB.
         If `x<0`, -350.0 dB is returned.
     """
-    # new version to prevent division by zero warning for float32 arguments
-    return 10 * np.log10(np.clip(x / 4e-10, 1e-35, None))
+    return 10 * np.log10(np.maximum(x / 4e-10, np.finfo(x.dtype).eps))
 
 
 #    return where(x>0, 10*np.log10(x/4e-10), -1000.)
