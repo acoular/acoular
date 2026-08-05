@@ -10,3 +10,5 @@ jobs:
     uses: acoular/ci/.github/workflows/conda.yml@main
     with:
       deploy: true
+    secrets:
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}

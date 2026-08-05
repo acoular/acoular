@@ -10,6 +10,8 @@ jobs:
     uses: acoular/ci/.github/workflows/conda.yml@main
     with:
       deploy: true
+    secrets:
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
 
   docs_versioned:
     uses: acoular/ci/.github/workflows/docs.yml@main
@@ -26,6 +28,7 @@ jobs:
       website_gh_pages_token: ${{ secrets.WEBSITE_GH_PAGES_TOKEN }}
 
   docs_stable:
+    needs: docs_versioned
     uses: acoular/ci/.github/workflows/docs.yml@main
     with:
       deploy: true
