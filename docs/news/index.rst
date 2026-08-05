@@ -8,6 +8,7 @@ Upcoming
         * adds user guide sections on lazy evaluation and caching
 
     **Internal**
+        * use machine epsilon as minimum value in :meth:`~acoular.fbeamform.L_p`
         * fixes several sphinx attribute links in the docstrings that lead to build warnings
         * Renamed :meth:`~acoular.environments.Environment._r` to :meth:`~acoular.environments.Environment.apparent_r`
 
