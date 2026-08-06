@@ -42,7 +42,6 @@ Contents:
     API Reference <api_ref/index>
     Examples <auto_examples/index>
     What's new <news/index>
-    Contributing <contributing/index>
     Literature <literature/index>
 
 
@@ -71,10 +70,6 @@ Contents:
     * - :doc:`news/index`
 
       - Release notes for all versions of Acoular.
-
-    * - :doc:`contributing/index`
-
-      - Information on how to contribute to the development of Acoular.
 
     * - :doc:`literature/index` 
 
