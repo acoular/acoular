@@ -16,7 +16,7 @@ jobs:
     environment:
       name: anaconda
     env:
-      ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+      ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v8.0.1
@@ -27,8 +27,4 @@ jobs:
         run: conda install --yes -n base anaconda-client
       - name: Upload conda package to Anaconda Cloud
         run: |
-          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
-            echo "::error::ANACONDA_TOKEN is not configured for the anaconda environment."
-            exit 1
-          fi
           conda run --no-capture-output -n base anaconda --verbose upload ./conda-pkg/noarch/*.conda
