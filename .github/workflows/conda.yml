@@ -26,5 +26,4 @@ jobs:
       - name: Install anaconda-client
         run: conda install --yes -n base anaconda-client
       - name: Upload conda package to Anaconda Cloud
-        run: |
-          conda run --no-capture-output -n base anaconda --verbose upload ./conda-pkg/noarch/*.conda
+        run: conda run --no-capture-output -n base anaconda --verbose upload ./conda-pkg/noarch/*.conda
