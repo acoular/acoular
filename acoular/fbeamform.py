@@ -1658,7 +1658,7 @@ class BeamformerCMF(BeamformerBase):
             )
             raise ImportError(msg)
 
-    #: Cached index masks (triangular + real/imag selection) for the CMF problem. 
+    #: Cached index masks (triangular + real/imag selection) for the CMF problem.
     msm_indices = Property(depends_on=['freq_data.num_channels', 'steer.digest', 'r_diag'])
 
     @cached_property
@@ -1687,7 +1687,7 @@ class BeamformerCMF(BeamformerBase):
         A = Ac[ind, :]
         A = np.vstack([A.real, A.imag])[ind_reim, :]
         return A
-    
+
     def _vectorize_csm(self, csm):
         """Vectorize one CSM using the same reduction as `_calc_sensing_matrix`."""
         ind, ind_reim = self.msm_indices
@@ -1695,7 +1695,6 @@ class BeamformerCMF(BeamformerBase):
         R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
         R = np.vstack([R.real, R.imag])[ind_reim, :]
         return R
-
 
     def _calc(self, ind):
         """
@@ -1722,7 +1721,7 @@ class BeamformerCMF(BeamformerBase):
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
             A = self._calc_sensing_matrix(f[i])
-            R = self._vectorize_csm(csm) * unit          # scaling applied here now
+            R = self._vectorize_csm(csm) * unit  # scaling applied here now
             # choose method
             if self.method == 'LassoLars':
                 model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)

@@ -53,7 +53,9 @@ def test_calc_sensing_matrix_values():
     mics = ac.MicGeom(pos_total=np.zeros((3, 2)))
     grid = ac.RectGrid(x_min=0, x_max=1, y_min=0, y_max=0, z=0.5, increment=1)
     steer = ac.SteeringVector(grid=grid, mics=mics)
-    freq_data = ac.PowerSpectraImport(csm=np.eye(2, dtype='complex128')[np.newaxis, :, :], frequencies=np.array([1000.0]))
+    freq_data = ac.PowerSpectraImport(
+        csm=np.eye(2, dtype='complex128')[np.newaxis, :, :], frequencies=np.array([1000.0])
+    )
 
     bf_full = ac.BeamformerCMF(freq_data=freq_data, steer=steer, r_diag=False)
     bf_diag = ac.BeamformerCMF(freq_data=freq_data, steer=steer, r_diag=True)
