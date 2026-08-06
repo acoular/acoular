@@ -1685,16 +1685,14 @@ class BeamformerCMF(BeamformerBase):
         Ac = Bc.reshape(nc * nc, num_points)
 
         A = Ac[ind, :]
-        A = np.vstack([A.real, A.imag])[ind_reim, :]
-        return A
+        return np.vstack([A.real, A.imag])[ind_reim, :]
 
     def _vectorize_csm(self, csm):
         """Vectorize one CSM using the same reduction as `_calc_sensing_matrix`."""
         ind, ind_reim = self.msm_indices
         nc = csm.shape[-1]
         R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
-        R = np.vstack([R.real, R.imag])[ind_reim, :]
-        return R
+        return np.vstack([R.real, R.imag])[ind_reim, :]
 
     def _calc(self, ind):
         """
