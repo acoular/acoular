@@ -26,8 +26,8 @@ def test_vectorize_csm_values():
     np.testing.assert_allclose(bf_diag._vectorize_csm(csm).ravel(), [1, -1])
 
 
-def test_calc_sensing_matrix_values():
-    """Verify _calc_sensing_matrix produces exact correct values, for both r_diag settings."""
+def test_build_dictionary_values():
+    """Verify _build_dictionary produces exact correct values, for both r_diag settings."""
     mics = ac.MicGeom(pos_total=np.zeros((3, 2)))
     grid = ac.RectGrid(x_min=0, x_max=2, y_min=0, y_max=0, z=0.5, increment=1)  # 3 grid points, != nc mics
     steer = ac.SteeringVector(grid=grid, mics=mics)
@@ -40,8 +40,8 @@ def test_calc_sensing_matrix_values():
 
     h = np.array([[1 + 1j, 0.5 - 0.5j, 2 + 0j], [0 + 1j, 1 + 0j, 0 - 0j]])  # nc=2, num_points=3
     with patch.object(ac.SteeringVector, 'transfer', return_value=h.T):
-        A_full = bf_full._calc_sensing_matrix(1000.0)
-        A_diag = bf_diag._calc_sensing_matrix(1000.0)
+        dictionary_full = bf_full._build_dictionary(1000.0)
+        dictionary_diag = bf_diag._build_dictionary(1000.0)
 
-    np.testing.assert_allclose(A_full, [[2, 0.5, 4], [1, 0.5, 0], [1, 1, 0], [-1, -0.5, 0]])
-    np.testing.assert_allclose(A_diag, [[1, 0.5, 0], [-1, -0.5, 0]])
+    np.testing.assert_allclose(dictionary_full, [[2, 0.5, 4], [1, 0.5, 0], [1, 1, 0], [-1, -0.5, 0]])
+    np.testing.assert_allclose(dictionary_diag, [[1, 0.5, 0], [-1, -0.5, 0]])
