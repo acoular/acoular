@@ -1681,10 +1681,7 @@ class BeamformerCMF(BeamformerBase):
         nc = self.freq_data.num_channels
         ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
         ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
-        if self.r_diag:
-            ind_reim = np.hstack([ind_im0, ind_im0])
-        else:
-            ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
+        ind_reim = np.hstack([ind_im0, ind_im0]) if self.r_diag else np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
         return ind, ind_reim
 
     def _build_dictionary(self, f):
