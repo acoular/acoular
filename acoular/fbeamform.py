@@ -1673,10 +1673,10 @@ class BeamformerCMF(BeamformerBase):
             raise ImportError(msg)
 
     #: Cached index masks (triangular + real/imag selection) for the CMF problem.
-    msm_indices = Property(depends_on=['freq_data.num_channels', 'steer.digest', 'r_diag'])
+    _csm_indices = Property(depends_on=['freq_data.num_channels', 'r_diag'])
 
     @cached_property
-    def _get_msm_indices(self):
+    def _get__csm_indices(self):
         """Indices for the reduced Kronecker product / vectorized CSM entries."""
         nc = self.freq_data.num_channels
         ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
@@ -1685,12 +1685,11 @@ class BeamformerCMF(BeamformerBase):
             ind_reim = np.hstack([ind_im0, ind_im0])
         else:
             ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
-            ind_reim[0] = True  # why this ?
         return ind, ind_reim
 
-    def _calc_sensing_matrix(self, f):
+    def _build_dictionary(self, f):
         """Build the real-valued CMF sensing matrix (dictionary) for one frequency."""
-        ind, ind_reim = self.msm_indices
+        ind, ind_reim = self._csm_indices
         h = self.steer.transfer(f).T
         nc = h.shape[0]
         num_points = h.shape[1]
@@ -1702,8 +1701,8 @@ class BeamformerCMF(BeamformerBase):
         return np.vstack([A.real, A.imag])[ind_reim, :]
 
     def _vectorize_csm(self, csm):
-        """Vectorize one CSM using the same reduction as `_calc_sensing_matrix`."""
-        ind, ind_reim = self.msm_indices
+        """Vectorize one CSM using the same reduction as `_build_dictionary`."""
+        ind, ind_reim = self._csm_indices
         nc = csm.shape[-1]
         R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
         return np.vstack([R.real, R.imag])[ind_reim, :]
@@ -1732,7 +1731,7 @@ class BeamformerCMF(BeamformerBase):
 
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-            A = self._calc_sensing_matrix(f[i])
+            A = self._build_dictionary(f[i])
             R = self._vectorize_csm(csm) * unit  # scaling applied here now
             # choose method
             if self.method == 'Split_Bregman' and config.have_pylops:
