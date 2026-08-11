@@ -261,6 +261,11 @@ class PowerSpectra(BaseSpectra):
     #: :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
     eve = Property()
 
+    # Eigenvalues and eigenvectors of the CSM as a tuple ``(eva, eve)``, computed in a single
+    # decomposition and cached so that :attr:`eva` and :attr:`eve` share one call to
+    # :meth:`calc_ev`. For internal use only.
+    _ev = Property()
+
     #: A unique identifier for the spectra, based on its properties.  (read-only)
     digest = Property(
         depends_on=['source.digest', 'block_size', 'window', 'overlap', 'precision'],
@@ -338,6 +343,11 @@ class PowerSpectra(BaseSpectra):
     @cached_property
     def _get_basename(self):
         return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
+
+    @property_depends_on(['digest'])
+    def _get__ev(self):
+        # Returns the cached (eva, eve) tuple, recomputing only when the digest changes.
+        return self.calc_ev()
 
     def calc_csm(self):
         """
@@ -455,7 +465,7 @@ class PowerSpectra(BaseSpectra):
         -----
         This method internally calls :meth:`calc_ev` and extracts only the eigenvalues.
         """
-        return self.calc_ev()[0]
+        return self._ev[0]
 
     def calc_eve(self):
         """
@@ -476,7 +486,7 @@ class PowerSpectra(BaseSpectra):
         -----
         This method internally calls :meth:`calc_ev()` and extracts only the eigenvectors.
         """
-        return self.calc_ev()[1]
+        return self._ev[1]
 
     def _get_filecache(self, traitname):
         # Handle caching of results for CSM, eigenvalues, and eigenvectors.
