@@ -18,10 +18,12 @@
 """
 
 from abc import abstractmethod
+from warnings import warn
 
 # acoular imports
 from .base import SamplesGenerator
 from .configuration import config
+from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
@@ -181,6 +183,7 @@ class BaseSpectra(ABCHasStrictTraits):
             pos -= bs
 
 
+@deprecated_alias({'eva': 'eigvals', 'eve': 'eigvecs'}, read_only=True)
 class PowerSpectra(BaseSpectra):
     """
     Provides the cross-spectral matrix of multichannel time-domain data and its eigen-decomposition.
@@ -195,7 +198,7 @@ class PowerSpectra(BaseSpectra):
         - **Caching**: Results can be cached in HDF5 files to avoid redundant calculations for
           identical inputs and parameters.
         - **Lazy Evaluation**: Calculations are triggered only when attributes like :attr:`csm`,
-          :attr:`eva`, or :attr:`eve` are accessed.
+          :attr:`eigvals`, or :attr:`eigvecs` are accessed.
         - **Dynamic Input Handling**: Automatically recomputes results when the input data or
           parameters change.
     """
@@ -252,19 +255,20 @@ class PowerSpectra(BaseSpectra):
     #: :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
     csm = Property()
 
-    #: The eigenvalues of the CSM, stored as an array of shape ``(n,)`` of floats for ``n``
-    #: frequencies. (read-only)
-    eva = Property()
+    #: The eigenvalues of the cross-spectral matrix, stored as an array of shape ``(n, m)`` of
+    #: floats for ``n``frequencies and ``m`` channels as in
+    # :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
+    eigvals = Property()
 
-    #: The eigenvectors of the cross spectral matrix, stored as an array of shape ``(n, m, m)`` of
+    #: The eigenvectors of the cross-spectral matrix, stored as an array of shape ``(n, m, m)`` of
     #: floats for ``n`` frequencies and ``m`` channels as in
     #: :attr:`~acoular.spectra.BaseSpectra.num_channels`. (read-only)
-    eve = Property()
+    eigvecs = Property()
 
-    # Eigenvalues and eigenvectors of the CSM as a tuple ``(eva, eve)``, computed in a single
-    # decomposition and cached so that :attr:`eva` and :attr:`eve` share one call to
-    # :meth:`calc_ev`. For internal use only.
-    _ev = Property()
+    # Eigendecomposition (eigenvectors and eigenvalues) of the CSM as a tuple ``(eigvals, eigvecs)``
+    # computed in a single call and cached so that :attr:`eigvals` and :attr:`eigvecs` share one
+    # call to :meth:`_get__evd`. For internal use only.
+    _evd = Property()
 
     #: A unique identifier for the spectra, based on its properties.  (read-only)
     digest = Property(
@@ -345,9 +349,20 @@ class PowerSpectra(BaseSpectra):
         return find_basename(self.source, alternative_basename=self.source.__class__.__name__ + self.source.digest)
 
     @property_depends_on(['digest'])
-    def _get__ev(self):
-        # Returns the cached (eva, eve) tuple, recomputing only when the digest changes.
-        return self.calc_ev()
+    def _get__evd(self):
+        # Eigendecomposition of the CSM for all frequencies as a tuple ``(eigvals, eigvecs)``.
+        # Cached so that :attr:`eigvals` and :attr:`eigvecs` need only one decomposition.
+        if self.precision == 'complex128':
+            eigvals_dtype = 'float64'
+        elif self.precision == 'complex64':
+            eigvals_dtype = 'float32'
+        #        csm = self.csm #trigger calculation
+        csm_shape = self.csm.shape
+        eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
+        eigvecs = np.empty(csm_shape, dtype=self.precision)
+        for i in range(csm_shape[0]):
+            (eigvals[i], eigvecs[i]) = np.linalg.eigh(self.csm[i])
+        return (eigvals, eigvecs)
 
     def calc_csm(self):
         """
@@ -399,112 +414,71 @@ class PowerSpectra(BaseSpectra):
 
     def calc_ev(self):
         """
-        Calculate eigenvalues and eigenvectors of the CSM for each frequency.
+        Calculate the eigenvalues and eigenvectors of the CSM.
 
-        The eigenvalues represent the spectral power, and the eigenvectors correspond to the
-        principal components of the matrix. This calculation is performed for all frequency slices
-        of the CSM.
-
-        Returns
-        -------
-        :class:`tuple` of :obj:`numpy.ndarray`
-            A tuple containing:
-                - :attr:`eva` (:obj:`numpy.ndarray`): Eigenvalues as a 2D array of shape ``(n, m)``,
-                  where ``n`` is the number of frequencies and ``m`` is the number of channels. The
-                  datatype depends on the precision.
-                - :attr:`eve` (:obj:`numpy.ndarray`): Eigenvectors as a 3D array of shape
-                  ``(n, m, m)``. The datatype is consistent with the precision of the input data.
-
-        Notes
-        -----
-        - The precision of the eigenvalues is determined by
-          :attr:`~acoular.spectra.BaseSpectra.precision` (``'float64'`` for ``complex128`` precision
-          and ``'float32'`` for ``complex64`` precision).
-        - This method assumes the CSM is already computed and accessible via :attr:`csm`.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> from acoular import TimeSamples
-        >>> from acoular.spectra import PowerSpectra
-        >>>
-        >>> data = np.random.rand(1000, 4)
-        >>> ts = TimeSamples(data=data, sample_freq=51200)
-        >>> ps = PowerSpectra(source=ts, block_size=128, window='Hanning')
-        >>> eva, eve = ps.calc_ev()
-        >>> print(eva.shape, eve.shape)
-        (65, 4) (65, 4, 4)
+        .. warning::
+            Deprecated. Use :attr:`eigvals` and :attr:`eigvecs` instead.
         """
-        if self.precision == 'complex128':
-            eva_dtype = 'float64'
-        elif self.precision == 'complex64':
-            eva_dtype = 'float32'
-        #        csm = self.csm #trigger calculation
-        csm_shape = self.csm.shape
-        eva = np.empty(csm_shape[0:2], dtype=eva_dtype)
-        eve = np.empty(csm_shape, dtype=self.precision)
-        for i in range(csm_shape[0]):
-            (eva[i], eve[i]) = np.linalg.eigh(self.csm[i])
-        return (eva, eve)
+        warn(
+            "Deprecated use of 'calc_ev' method. Please use the 'eigvals' and 'eigvecs' traits instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._evd
 
     def calc_eva(self):
         """
-        Calculate eigenvalues of the CSM.
+        Calculate the eigenvalues of the CSM.
 
-        This method computes and returns the eigenvalues of the CSM for all frequency slices.
-
-        Returns
-        -------
-        :obj:`numpy.ndarray`
-            A 2D array of shape ``(n, m)`` containing the eigenvalues for ``n`` frequencies and
-            ``m`` channels. The datatype depends on :attr:`~acoular.spectra.BaseSpectra.precision`
-            (``'float64'`` for ``complex128`` precision and ``'float32'`` for ``complex64``
-            precision).
-
-        Notes
-        -----
-        This method internally calls :meth:`calc_ev` and extracts only the eigenvalues.
+        .. warning::
+            Deprecated. Use :attr:`eigvals` instead.
         """
-        return self._ev[0]
+        warn(
+            "Deprecated use of 'calc_eva' method. Please use the 'eigvals' trait instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.eigvals
 
     def calc_eve(self):
         """
-        Calculate eigenvectors of the Cross Spectral Matrix (CSM).
+        Calculate the eigenvectors of the CSM.
 
-        This method computes and returns the eigenvectors of the CSM for all frequency slices.
-
-        Returns
-        -------
-        :obj:`numpy.ndarray`
-            A 3D array of shape ``(n, m, m)`` containing the eigenvectors for ``n`` frequencies and
-            ``m`` channels. Each slice ``eve[f]`` represents an ``(m, m)`` matrix of eigenvectors
-            for frequency ``f``. The datatype matches the
-            :attr:`~acoular.spectra.BaseSpectra.precision` of the CSM (``complex128`` or
-            ``complex64``).
-
-        Notes
-        -----
-        This method internally calls :meth:`calc_ev()` and extracts only the eigenvectors.
+        .. warning::
+            Deprecated. Use :attr:`eigvecs` instead.
         """
-        return self._ev[1]
+        warn(
+            "Deprecated use of 'calc_eve' method. Please use the 'eigvecs' trait instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.eigvecs
+
+    def _calc_eigvals(self):
+        # Compute-only accessor for the file cache.
+        return self._evd[0]
+
+    def _calc_eigvecs(self):
+        # Compute-only accessor for the file cache.
+        return self._evd[1]
 
     def _get_filecache(self, traitname):
         # Handle caching of results for CSM, eigenvalues, and eigenvectors.
-        # Returns the requested data (``csm``, ``eva``, or ``eve``) as a NumPy array.
+        # Returns the requested data (``csm``, ``eigvals``, or ``eigvecs``) as a NumPy array.
         if traitname == 'csm':
             func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
             shape = (numfreq, self.source.num_channels, self.source.num_channels)
             precision = self.precision
-        elif traitname == 'eva':
-            func = self.calc_eva
+        elif traitname == 'eigvals':
+            func = self._calc_eigvals
             shape = self.csm.shape[0:2]
             if self.precision == 'complex128':
                 precision = 'float64'
             elif self.precision == 'complex64':
                 precision = 'float32'
-        elif traitname == 'eve':
-            func = self.calc_eve
+        elif traitname == 'eigvecs':
+            func = self._calc_eigvecs
             shape = self.csm.shape
             precision = self.precision
 
@@ -537,16 +511,16 @@ class PowerSpectra(BaseSpectra):
         return self._get_filecache('csm')
 
     @property_depends_on(['digest'])
-    def _get_eva(self):
+    def _get_eigvals(self):
         if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self.calc_eva()
-        return self._get_filecache('eva')
+            return self._calc_eigvals()
+        return self._get_filecache('eigvals')
 
     @property_depends_on(['digest'])
-    def _get_eve(self):
+    def _get_eigvecs(self):
         if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self.calc_eve()
-        return self._get_filecache('eve')
+            return self._calc_eigvecs()
+        return self._get_filecache('eigvecs')
 
     def synthetic_ev(self, freq, num=0):
         """
@@ -603,12 +577,12 @@ class PowerSpectra(BaseSpectra):
         f = self.fftfreq()
         if num == 0:
             # single frequency line
-            return self.eva[np.searchsorted(f, freq)]
+            return self.eigvals[np.searchsorted(f, freq)]
         f1 = np.searchsorted(f, freq * 2.0 ** (-0.5 / num))
         f2 = np.searchsorted(f, freq * 2.0 ** (0.5 / num))
         if f1 == f2:
-            return self.eva[f1]
-        return np.sum(self.eva[f1:f2], 0)
+            return self.eigvals[f1]
+        return np.sum(self.eigvals[f1:f2], 0)
 
 
 class PowerSpectraImport(PowerSpectra):
@@ -694,12 +668,12 @@ class PowerSpectraImport(PowerSpectra):
             self._csmsum = np.real(self._csm).sum() + (np.imag(self._csm) ** 2).sum()  # to trigger new digest creation
 
     @property_depends_on(['digest'])
-    def _get_eva(self):
-        return self.calc_eva()
+    def _get_eigvals(self):
+        return self._calc_eigvals()
 
     @property_depends_on(['digest'])
-    def _get_eve(self):
-        return self.calc_eve()
+    def _get_eigvecs(self):
+        return self._calc_eigvecs()
 
     def fftfreq(self):
         """
