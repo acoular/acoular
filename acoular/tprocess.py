@@ -2855,6 +2855,7 @@ class TimeConvolve(TimeOut):
         source_blocks = self.source.result(num)
         signal_blocks = source_blocks
         if M == -1:
+
             def full_blocks():
                 remainder = np.empty((0, N))
                 for block in source_blocks:
