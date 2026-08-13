@@ -57,12 +57,12 @@ def test_csm(freq_data, snapshot, ind):
 
 
 @pytest.mark.parametrize('ind', [16, 32])
-def test_eva(freq_data, snapshot, ind):
+def test_eigvals(freq_data, snapshot, ind):
     """Performs snapshot testing for the eigenvalues.
 
     To overwrite the snapshot, run:
     ```bash
-    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eva
+    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eigvals
     ```
 
     Parameters
@@ -74,16 +74,16 @@ def test_eva(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(freq_data.eva[ind, -5:].astype(np.float32), rtol=5e-5, atol=1e-8)
+    snapshot.check(freq_data.eigvals[ind, -5:].astype(np.float32), rtol=5e-5, atol=1e-8)
 
 
 @pytest.mark.parametrize('ind', [16, 32])
-def test_eve(freq_data, snapshot, ind):
+def test_eigvecs(freq_data, snapshot, ind):
     """Performs snapshot testing for the eigenvectors.
 
     To overwrite the snapshot, run:
     ```bash
-    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eve
+    pytest -v --regtest-reset tests/regression/test_spectra.py::test_eigvecs
     ```
 
     Parameters
@@ -95,4 +95,4 @@ def test_eve(freq_data, snapshot, ind):
     ind : tuple
         frequency indices to test
     """
-    snapshot.check(np.abs(freq_data.eve[ind, :, -5:].astype(np.complex64)), rtol=5e-5, atol=1e-8)
+    snapshot.check(np.abs(freq_data.eigvecs[ind, :, -5:].astype(np.complex64)), rtol=5e-5, atol=1e-8)

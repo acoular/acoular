@@ -36,8 +36,8 @@ g = RectGrid3D(x_min=-0.6, x_max=-0.0, y_min=-0.3, y_max=0.3, \
     z_min=0.48, z_max=0.88, increment=0.1)
 f = EigSpectra(time_data=t, window='Hanning', overlap='50%', block_size=128, ind_low=5, ind_high=15)
 csm = f.csm[:]
-eva = f.eva[:]
-eve = f.eve[:]
+eigvals = f.eigvals[:]
+eigvecs = f.eigvecs[:]
 
 #""" Creating the beamformers
 bb1Rem = BeamformerBase(freq_data=f, grid=g, mpos=m, r_diag=True, c=346.04, steer='classic')

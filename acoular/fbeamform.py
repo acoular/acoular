@@ -758,14 +758,14 @@ class BeamformerFunctional(BeamformerBase):
                 indNegSign = np.sign(beamformerOutput) < 0
                 beamformerOutput[indNegSign] = 0.0
             else:
-                eva = np.array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
-                eve = np.array(self.freq_data.eve[i], dtype='complex128')
+                eigvals = np.array(self.freq_data.eigvals[i], dtype='float64') ** (1.0 / self.gamma)
+                eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
                 beamformerOutput, steerNorm = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
                     1.0,
                     steer_vector(f[i]),
-                    (eva, eve),
+                    (eigvals, eigvecs),
                 )
                 beamformerOutput /= steerNorm  # take normalized steering vec
             self._ac[i] = (
@@ -872,14 +872,14 @@ class BeamformerEig(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
                 self.r_diag,
                 normfactor,
                 steer_vector(f[i]),
-                (eva[na : na + 1], eve[:, na : na + 1]),
+                (eigvals[na : na + 1], eigvecs[:, na : na + 1]),
             )[0]
             if self.r_diag:  # set (unphysical) negative output values to 0
                 indNegSign = np.sign(beamformerOutput) < 0
@@ -932,14 +932,14 @@ class BeamformerMusic(BeamformerEig):
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
                 self.r_diag,
                 normfactor,
                 steer_vector(f[i]),
-                (eva[:n], eve[:, :n]),
+                (eigvals[:n], eigvecs[:, :n]),
             )[0]
             self._ac[i] = 4e-10 * beamformerOutput.min() / beamformerOutput
             self._fr[i] = 1
@@ -1386,17 +1386,17 @@ class BeamformerOrth(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             for n in self.eva_list:
                 beamformerOutput = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
                     normfactor,
                     steer_vector(f[i]),
-                    (np.ones(1), eve[:, n].reshape((-1, 1))),
+                    (np.ones(1), eigvecs[:, n].reshape((-1, 1))),
                 )[0]
-                self._ac[i, beamformerOutput.argmax()] += eva[n] / num_channels
+                self._ac[i, beamformerOutput.argmax()] += eigvals[n] / num_channels
             self._fr[i] = 1
 
 
@@ -2112,19 +2112,19 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             A = hh.T
             # eigenvalues and vectors
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-            eva, eve = spla.eigh(csm)
-            eva = eva[::-1]
-            eve = eve[:, ::-1]
+            eigvals, eigvecs = spla.eigh(csm)
+            eigvals = eigvals[::-1]
+            eigvecs = eigvecs[:, ::-1]
             # set small values zo 0, lowers numerical errors in simulated data
-            eva[eva < max(eva) / 1e12] = 0
+            eigvals[eigvals < max(eigvals) / 1e12] = 0
             # init sources
             qi = np.zeros([n + m, num_points], dtype='complex128')
             # Select the number of coherent modes to be processed referring to the eigenvalue
             # distribution.
             for s in list(range(m, n + m)):
-                if eva[s] > 0:
+                if eigvals[s] > 0:
                     # Generate the corresponding eigenmodes
-                    emode = np.array(np.sqrt(eva[s]) * eve[:, s], dtype='complex128')
+                    emode = np.array(np.sqrt(eigvals[s]) * eigvecs[:, s], dtype='complex128')
                     # choose method for computation
                     if self.method == 'Suzuki':
                         leftpoints = num_points
@@ -2379,8 +2379,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         bmin = np.array(tuple(map(min, self.bounds)))
         bmax = np.array(tuple(map(max, self.bounds)))
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             k = 2 * np.pi * f[i] / env.c
             for j, n in enumerate(eva_list):
                 # print(f[i],n)
@@ -2395,7 +2395,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         self.r_diag,
                         normfactor,
                         (r0, rm, k),
-                        (np.ones(1), eve[:, n : n + 1]),
+                        (np.ones(1), eigvecs[:, n : n + 1]),
                     )[0][0]
 
                 # simplical global homotopy optimizer
@@ -2405,8 +2405,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 # store result for position
                 self._gpos[:, i1] = oR['x']
                 # store result for level
-                self._ac[i, i1] = eva[n] / num_channels
-                # print(oR['x'],eva[n]/num_channels,oR)
+                self._ac[i, i1] = eigvals[n] / num_channels
+                # print(oR['x'],eigvals[n]/num_channels,oR)
             self._fr[i] = 1
 
 
