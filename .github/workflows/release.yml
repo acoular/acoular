@@ -48,6 +48,8 @@ jobs:
     with:
       deploy: true
       package: acoular
+      version: ${{ github.ref_name }}
+      docs_version_match: ${{ github.ref_name }}
       artifact_name: build-docs-stable
       artifact_path: ./docs/_build/html
       html_baseurl: "https://acoular.org/acoular/"
