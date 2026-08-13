@@ -645,6 +645,10 @@ class AngleTracker(MaskedTimeOut):
         # Current version supports only trigger and sources with the same samplefreq.
         # This behaviour may change in future releases.
 
+        if self.source.num_samples == -1:
+            msg = 'AngleTracker requires a finite source'
+            raise ValueError(msg)
+
         # init
         ind = 0
         # trigger data
