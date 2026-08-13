@@ -71,7 +71,7 @@ class SignalGenerator(ABCHasStrictTraits):
     sample_freq = Float(1.0)
 
     #: The number of samples to generate for the signal. Signal generators materialize an array
-    #: and therefore cannot represent an indefinite stream.
+    #: and therefore require a known, non-negative length.
     num_samples = Range(0)
 
     #: A unique checksum identifier based on the object properties. (read-only)
