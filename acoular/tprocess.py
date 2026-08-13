@@ -44,7 +44,7 @@ from os import path
 from warnings import warn as _warn
 
 # acoular imports
-from .base import SamplesGenerator, TimeOut
+from .base import FiniteTimeOut, SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
@@ -1676,7 +1676,7 @@ class TimeCumAverage(TimeOut):
             yield temp
 
 
-class TimeReverse(TimeOut):
+class TimeReverse(FiniteTimeOut):
     """
     Calculates the time-reversed signal of a source.
 
@@ -1874,7 +1874,7 @@ class FiltOctave(Filter):
         return butter(self.order, [om1, om2], 'bandpass', output='sos')
 
 
-class FiltFiltOctave(FiltOctave):
+class FiltFiltOctave(FiniteTimeOut, FiltOctave):
     """
     Octave or third-octave bandpass filter with zero-phase distortion.
 
