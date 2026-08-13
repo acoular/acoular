@@ -2852,9 +2852,29 @@ class TimeConvolve(TimeOut):
         buff = np.zeros([2 * num, N])  # time-domain input buffer
         spec_sum = np.zeros([num + 1, N], dtype='complex128')
 
-        signal_blocks = self.source.result(num)
+        source_blocks = self.source.result(num)
+        signal_blocks = source_blocks
+        if M == -1:
+            def full_blocks():
+                remainder = np.empty((0, N))
+                for block in source_blocks:
+                    remainder = np.concatenate([remainder, block])
+                    while remainder.shape[0] >= num:
+                        yield remainder[:num]
+                        remainder = remainder[num:]
+
+            signal_blocks = full_blocks()
         temp = next(signal_blocks)
         buff[num : num + temp.shape[0]] = temp  # append new time-data
+
+        if M == -1:
+            for temp in signal_blocks:
+                _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+                spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
+                yield irfft(spec_sum, axis=0)[num:]
+                buff = np.concatenate([buff[num:], np.zeros([num, N])], axis=0)
+                buff[num : num + temp.shape[0]] = temp
+            return
 
         # for very short signals, we are already done
         if R == 1:
