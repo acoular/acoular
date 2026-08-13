@@ -1,19 +1,39 @@
 name: "Manual: Seed release docs (run only for versions greater than 26.05)"
-run-name: Seed docs for ${{ inputs.version_tag }} → acoular/${{ inputs.version_tag }}
+run-name: Seed docs for ${{ inputs.version_tag }}
 permissions:
   contents: read
 on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: "Git tag to build and archive (e.g. v26.01)"
+        description: "Git tag to build (e.g. v26.07)"
         required: true
         type: string
+      deploy_as_stable:
+        description: "Deploy to the stable root (/acoular/) instead of the versioned path"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      target_dir: ${{ steps.target.outputs.dir }}
     steps:
+      - name: Choose deployment target
+        id: target
+        run: |
+          tag="${{ inputs.version_tag }}"
+          echo "version_match=${tag#v}" >> "$GITHUB_OUTPUT"
+          if ${{ inputs.deploy_as_stable }}; then
+            echo "baseurl=https://acoular.org/acoular/" >> "$GITHUB_OUTPUT"
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          else
+            echo "baseurl=https://acoular.org/acoular/${{ inputs.version_tag }}/" >> "$GITHUB_OUTPUT"
+            echo "dir=${{ inputs.version_tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check out tag
         uses: actions/checkout@v6
         with:
@@ -64,8 +84,9 @@ jobs:
 
       - name: Build docs
         env:
-          DOCS_BASEURL: "https://acoular.org/acoular/${{ inputs.version_tag }}/"
+          DOCS_BASEURL: ${{ steps.target.outputs.baseurl }}
           DOCS_SWITCHER_JSON_URL: "https://acoular.org/acoular/_static/switcher.json"
+          DOCS_VERSION_MATCH: ${{ steps.target.outputs.version_match }}
         run: uv run ${{ steps.env.outputs.frozen }} ${{ steps.env.outputs.docs-flag }} make -C docs html
 
       - name: Upload artifact
@@ -79,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare payload
-        run: mkdir -p "./payload/acoular/${{ inputs.version_tag }}"
+        run: mkdir -p "./payload/acoular/${{ needs.build.outputs.target_dir }}"
       - name: Generate switcher.json
         uses: acoular/ci/.github/actions/generate-switcher@main
         with:
@@ -90,7 +111,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: build-docs-${{ inputs.version_tag }}
-          path: ./payload/acoular/${{ inputs.version_tag }}
+          path: ./payload/acoular/${{ needs.build.outputs.target_dir }}
       - name: Deploy package documentation to website gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
