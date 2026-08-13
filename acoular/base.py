@@ -83,7 +83,13 @@ class Generator(ABCHasStrictTraits):
         Yields
         ------
         numpy.ndarray
-            Two-dimensional output data block of shape (num, ...)
+            Two-dimensional output data block of shape (num, ...).
+
+        Notes
+        -----
+        Yielded blocks remain stable after the generator advances. Implementations must not modify
+        blocks received from their source. Callers should treat blocks as read-only because some
+        generators return views to avoid copying.
         """
 
 
