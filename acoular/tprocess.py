@@ -2672,7 +2672,8 @@ class WriteH5(TimeOut):
                 data = next(source_gen)
             except StopIteration:
                 break
-            f5h.append_data(ac, data[:anz])
+            data = data[:anz]
+            f5h.append_data(ac, data)
             f5h.flush()
             yield data
             scount += anz
