@@ -43,6 +43,7 @@ from traits.api import (
     Instance,
     Int,
     Property,
+    Range,
     cached_property,
 )
 
@@ -69,8 +70,9 @@ class SignalGenerator(ABCHasStrictTraits):
     #: Sampling frequency of the signal in Hz. Default is ``1.0``.
     sample_freq = Float(1.0)
 
-    #: The number of samples to generate for the signal.
-    num_samples = CInt
+    #: The number of samples to generate for the signal. Signal generators materialize an array
+    #: and therefore cannot represent an indefinite stream.
+    num_samples = Range(0)
 
     #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(depends_on=['sample_freq', 'num_samples'])
