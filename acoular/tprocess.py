@@ -2435,6 +2435,10 @@ class WriteWAV(TimeOut):
         --------
         :meth:`save` : Save the entire source output to a WAV file in one call.
         """
+        if self.source.num_samples == -1 and self.max_val is None:
+            msg = 'WriteWAV requires max_val for an indefinite source'
+            raise ValueError(msg)
+
         nc = len(self.channels)
         if nc == 0:
             msg = 'No channels given for output.'
@@ -2593,6 +2597,10 @@ class WriteH5(TimeOut):
         - If no file is specified, a file name is automatically generated.
         - Metadata defined in the :attr:`metadata` attribute is stored in the file.
         """
+        if self.source.num_samples == -1:
+            msg = 'WriteH5.save requires a finite source; use result with num_samples_write instead'
+            raise ValueError(msg)
+
         f5h = self.get_initialized_file()
         ac = f5h.get_data_by_reference('time_data')
         for data in self.source.result(4096):
