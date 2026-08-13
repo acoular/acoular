@@ -153,6 +153,11 @@ class MaskedTimeOut(TimeOut):
 
     @cached_property
     def _get_num_samples(self):
+        if self.num_samples_total == -1:
+            if self.start < 0 or self.stop is not None:
+                msg = 'indefinite streams only support a non-negative start and no stop'
+                raise ValueError(msg)
+            return -1
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
@@ -184,6 +189,16 @@ class MaskedTimeOut(TimeOut):
             range. This can occur if :attr:`start` is greater than or equal to :attr:`stop` or if
             the :attr:`source` is not containing any valid samples in the given range.
         """
+        if self.num_samples == -1:
+            remaining = self.start
+            for block in self.source.result(num):
+                if remaining >= block.shape[0]:
+                    remaining -= block.shape[0]
+                    continue
+                yield block[remaining:, self.channels]
+                remaining = 0
+            return
+
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         start = sli[0]
         stop = sli[1]
