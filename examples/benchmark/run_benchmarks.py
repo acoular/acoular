@@ -1,6 +1,12 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
+# /// script
+# dependencies = ["acoular", "pyperf"]
+#
+# [tool.uv.sources]
+# acoular = { path = "../..", editable = true }
+# ///
 """Simple speed benchmark tool using pyperf. Reads test* modules, and runs all
 functions starting with 'test'. The results are stored per machine in the
 ./results subdirectory. If result already exists for a particular benchmark,
@@ -50,6 +56,8 @@ for testmodule in testmodules:
         print(f'running {fname}:')
         subprocess.run(
             (
+                sys.executable,
+                '-m',
                 'pyperf',
                 'timeit',
                 '-s',
