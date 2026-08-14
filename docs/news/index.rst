@@ -3,8 +3,11 @@ What's new
 
 Upcoming
 ------------------------
-
-
+    **Internal**
+        * renames :attr:`~acoular.spectra.PowerSpectra.eva` and :attr:`~acoular.spectra.PowerSpectra.eve` to :attr:`~acoular.spectra.PowerSpectra.eigvals` and :attr:`~acoular.spectra.PowerSpectra.eigvecs`, the old names remain available and raise a :class:`DeprecationWarning`
+        * deprecates the ``calc_ev``, ``calc_eva``, and ``calc_eve`` methods of :class:`~acoular.spectra.PowerSpectra`, the eigendecomposition is now computed on access of :attr:`~acoular.spectra.PowerSpectra.eigvals` or :attr:`~acoular.spectra.PowerSpectra.eigvecs`
+        * computes the eigendecomposition of the CSM only once instead of separately for eigenvalues and eigenvectors
+    
 26.07
 ------------------------
     **New features**

@@ -101,8 +101,8 @@ class SetupStationarySourceCase:
             csm=self.freq_data.csm[...],
             frequencies=self.freq_data.fftfreq(),
         )
-        self.freq_data_import.eve  # noqa: B018 : trigger computation
-        self.freq_data_import.eva  # noqa: B018 : trigger computation
+        self.freq_data_import.eigvecs  # noqa: B018 : trigger computation
+        self.freq_data_import.eigvals  # noqa: B018 : trigger computation
 
 
 class SetupMovingSourceCase:
