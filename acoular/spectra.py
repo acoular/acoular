@@ -183,7 +183,7 @@ class BaseSpectra(ABCHasStrictTraits):
             pos -= bs
 
 
-@deprecated_alias({'eva': 'eigvals', 'eve': 'eigvecs'}, read_only=True)
+@deprecated_alias({'eva': 'eigvals', 'eve': 'eigvecs'}, read_only=True, removal_version='27.04')
 class PowerSpectra(BaseSpectra):
     """
     Provides the cross-spectral matrix of multichannel time-domain data and its eigen-decomposition.
@@ -356,7 +356,6 @@ class PowerSpectra(BaseSpectra):
             eigvals_dtype = 'float64'
         elif self.precision == 'complex64':
             eigvals_dtype = 'float32'
-        #        csm = self.csm #trigger calculation
         csm_shape = self.csm.shape
         eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
         eigvecs = np.empty(csm_shape, dtype=self.precision)

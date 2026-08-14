@@ -2406,7 +2406,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 self._gpos[:, i1] = oR['x']
                 # store result for level
                 self._ac[i, i1] = eigvals[n] / num_channels
-                # print(oR['x'],eigvals[n]/num_channels,oR)
             self._fr[i] = 1
 
 
