@@ -6,6 +6,8 @@ import acoular as ac
 
 import numpy as np
 
+np.random.seed(0)
+
 # set_num_threads(1)
 
 # set up test case
