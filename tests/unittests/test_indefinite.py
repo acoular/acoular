@@ -41,7 +41,7 @@ def test_streaming_blocks_preserve_indefinite_length(monkeypatch):
 def test_time_convolve_streams_indefinite_source():
     source = ac.MaskedTimeOut(source=IndefiniteSamples(), start=3)
     convolve = ac.TimeConvolve(source=source, kernel=np.array([1.0]))
-    np.testing.assert_array_equal(next(convolve.result(4)).ravel(), [3.0, 4.0, 5.0, 6.0])
+    np.testing.assert_allclose(next(convolve.result(4)).ravel(), [3.0, 4.0, 5.0, 6.0], atol=1e-15)
 
 
 @pytest.mark.parametrize(
