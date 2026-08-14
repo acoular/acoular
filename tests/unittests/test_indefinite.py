@@ -26,7 +26,7 @@ def test_streaming_blocks_preserve_indefinite_length(monkeypatch):
 
     masked = ac.MaskedTimeOut(source=source, start=3)
     assert masked.num_samples == -1
-    assert next(masked.result(4)).shape == (1, 1)
+    np.testing.assert_array_equal(next(masked.result(4)).ravel(), [3., 4., 5., 6.])
 
     average = ac.Average(source=source, num_per_average=2)
     assert average.num_samples == -1

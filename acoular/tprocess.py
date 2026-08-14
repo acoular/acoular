@@ -189,61 +189,76 @@ class MaskedTimeOut(TimeOut):
             range. This can occur if :attr:`start` is greater than or equal to :attr:`stop` or if
             the :attr:`source` is not containing any valid samples in the given range.
         """
-        if self.num_samples == -1:
-            remaining = self.start
+        indefinite = self.num_samples == -1
+        if indefinite:
+            start = self.start
+        else:
+            sli = slice(self.start, self.stop).indices(self.num_samples_total)
+            start = sli[0]
+            stop = sli[1]
+            if start >= stop:
+                msg = 'no samples available'
+                raise OSError(msg)
+            if start == 0 and stop == self.num_samples_total:
+                for block in self.source.result(num):
+                    yield block[:, self.channels]
+                return
+
+        offset = -start % num
+        if offset == 0:
+            offset = num
+        buf = np.empty((num + offset, self.num_channels), dtype=float)
+        bsize = 0
+
+        if indefinite:
+            remaining = start
             for block in self.source.result(num):
                 if remaining >= block.shape[0]:
                     remaining -= block.shape[0]
                     continue
-                yield block[remaining:, self.channels]
+                data = block[remaining:, self.channels]
                 remaining = 0
+                while data.shape[0]:
+                    size = min(num, data.shape[0])
+                    buf[bsize : bsize + size] = data[:size]
+                    bsize += size
+                    data = data[size:]
+                    if bsize >= num:
+                        yield buf[:num]
+                        buf[: bsize - num] = buf[num:bsize]
+                        bsize -= num
+            if bsize:
+                yield buf[:bsize]
             return
 
-        sli = slice(self.start, self.stop).indices(self.num_samples_total)
-        start = sli[0]
-        stop = sli[1]
-        if start >= stop:
-            msg = 'no samples available'
-            raise OSError(msg)
-
-        if start != 0 or stop != self.num_samples_total:
-            offset = -start % num
-            if offset == 0:
-                offset = num
-            buf = np.empty((num + offset, self.num_channels), dtype=float)
-            bsize = 0
-            i = 0
-            fblock = True
-            for block in self.source.result(num):
-                bs = block.shape[0]
-                i += bs
-                if fblock and i >= start:  # first block in the chosen interval
-                    if i >= stop:  # special case that start and stop are in one block
-                        yield block[bs - (i - start) : bs - (i - stop), self.channels]
-                        break
-                    bsize += i - start
-                    buf[: (i - start), :] = block[bs - (i - start) :, self.channels]
-                    fblock = False
-                elif i >= stop:  # last block
-                    buf[bsize : bsize + bs - (i - stop), :] = block[: bs - (i - stop), self.channels]
-                    bsize += bs - (i - stop)
-                    if bsize > num:
-                        yield buf[:num]
-                        buf[: bsize - num, :] = buf[num:bsize, :]
-                        bsize -= num
-                    yield buf[:bsize, :]
+        i = 0
+        fblock = True
+        for block in self.source.result(num):
+            bs = block.shape[0]
+            i += bs
+            if fblock and i >= start:  # first block in the chosen interval
+                if i >= stop:  # special case that start and stop are in one block
+                    yield block[bs - (i - start) : bs - (i - stop), self.channels]
                     break
-                elif i >= start:
-                    buf[bsize : bsize + bs, :] = block[:, self.channels]
-                    bsize += bs
-                if bsize >= num:
+                bsize += i - start
+                buf[: (i - start), :] = block[bs - (i - start) :, self.channels]
+                fblock = False
+            elif i >= stop:  # last block
+                buf[bsize : bsize + bs - (i - stop), :] = block[: bs - (i - stop), self.channels]
+                bsize += bs - (i - stop)
+                if bsize > num:
                     yield buf[:num]
                     buf[: bsize - num, :] = buf[num:bsize, :]
                     bsize -= num
-
-        else:  # if no start/stop given, don't do the resorting thing
-            for block in self.source.result(num):
-                yield block[:, self.channels]
+                yield buf[:bsize, :]
+                break
+            elif i >= start:
+                buf[bsize : bsize + bs, :] = block[:, self.channels]
+                bsize += bs
+            if bsize >= num:
+                yield buf[:num]
+                buf[: bsize - num, :] = buf[num:bsize, :]
+                bsize -= num
 
 
 class ChannelMixer(TimeOut):
