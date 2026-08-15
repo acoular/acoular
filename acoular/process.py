@@ -143,6 +143,8 @@ class Average(InOut):
     @cached_property
     def _get_num_samples(self):
         if self.source:
+            if self.source.num_samples == -1:
+                return -1
             return self.source.num_samples / self.num_per_average
         return None
 
@@ -361,7 +363,7 @@ class Cache(InOut):
           from the source to update the cache unless the caching mode is ``'readonly'``.
         - The cache node name is based on the source's :attr:`digest` attribute.
         """
-        if config.global_caching == 'none':
+        if self.source.num_samples == -1 or config.global_caching == 'none':
             generator = self._pass_data
         else:
             nodename = 'tc_' + self.digest

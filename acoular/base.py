@@ -21,10 +21,12 @@ be used directly, but to be subclassed by classes that implement the actual sign
     SpectraGenerator
     InOut
     TimeOut
+    FiniteTimeOut
     SpectraOut
 """
 
 from abc import abstractmethod
+from functools import wraps
 
 # acoular imports
 from .internal import digest
@@ -57,7 +59,7 @@ class Generator(ABCHasStrictTraits):
     #: Sampling frequency of the signal, defaults to 1.0
     sample_freq = Float(1.0)
 
-    #: Number of signal samples
+    #: Number of signal samples. ``-1`` denotes an indefinite stream.
     num_samples = CInt
 
     #: Number of channels
@@ -219,6 +221,26 @@ class TimeOut(SamplesGenerator):
         numpy.ndarray
             Two-dimensional output data block of shape (num, num_channels)
         """
+
+
+class FiniteTimeOut(TimeOut):
+    """Time-domain block that requires a source with a known length."""
+
+    def __init_subclass__(cls, **kwargs):
+        """Wrap a subclass result method with the known-length check."""
+        super().__init_subclass__(**kwargs)
+        result = cls.__dict__.get('result')
+        if result is None:
+            return
+
+        @wraps(result)
+        def finite_result(self, *args, **kwargs):
+            if self.source.num_samples == -1:
+                msg = f'{type(self).__name__} requires a finite source'
+                raise ValueError(msg)
+            yield from result(self, *args, **kwargs)
+
+        cls.result = finite_result
 
 
 class SpectraOut(SpectraGenerator):

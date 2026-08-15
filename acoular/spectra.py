@@ -394,6 +394,10 @@ class PowerSpectra(BaseSpectra):
         (65, 4, 4)
         """
         t = self.source
+        if t.num_samples == -1:
+            msg = 'PowerSpectra requires a finite source'
+            raise ValueError(msg)
+
         wind = self.window_(self.block_size)
         weight = np.dot(wind, wind)
         wind = wind[np.newaxis, :].swapaxes(0, 1)
