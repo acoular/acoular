@@ -96,7 +96,7 @@ provides-extras = ["full"]
 [package.metadata.requires-dev]
 dev = [
     { name = "acoular-ruff", git = "https://github.com/acoular/ci.git?rev=ruff-v1.0" },
-    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.3" },
+    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.4" },
     { name = "diff-cover" },
     { name = "h5py" },
     { name = "pylops" },
@@ -111,7 +111,7 @@ dev = [
     { name = "sounddevice" },
     { name = "traitsui" },
 ]
-docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.3" }]
+docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.4" }]
 lint = [{ name = "acoular-ruff", git = "https://github.com/acoular/ci.git?rev=ruff-v1.0" }]
 tests = [
     { name = "diff-cover" },
@@ -130,6 +130,11 @@ tests = [
 ]
 
 [[package]]
+name = "acoular-brand"
+version = "0.1.1"
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-brand&rev=sphinx-v1.4#4c35a8289584a397a1ed1d961405582d5c81a37b" }
+
+[[package]]
 name = "acoular-ruff"
 version = "0.1.0"
 source = { git = "https://github.com/acoular/ci.git?rev=ruff-v1.0#ef0c12875d745c965b7ca2fd3145cce72889a5ef" }
@@ -139,9 +144,10 @@ dependencies = [
 
 [[package]]
 name = "acoular-sphinx"
-version = "0.1.3"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.3#11d1aaaaf8f19cdad403d35b69ebc6a05f6b06b8" }
+version = "0.1.4"
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.4#4c35a8289584a397a1ed1d961405582d5c81a37b" }
 dependencies = [
+    { name = "acoular-brand" },
     { name = "graphviz" },
     { name = "ipython" },
     { name = "matplotlib" },
@@ -1031,11 +1037,11 @@ wheels = [
 
 [[package]]
 name = "idna"
-version = "3.18"
+version = "3.19"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cd/63/9496c57188a2ee585e0f1db071d75089a11e98aa86eb99d9d7618fc1edce/idna-3.18.tar.gz", hash = "sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848", size = 196711, upload-time = "2026-06-02T14:34:07.794Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/f7/abb373e5757eaec4b922b92f97ec8d6d7e057cf06778247604fbc4e7c3f3/idna-3.19.tar.gz", hash = "sha256:5e0811a4383b21dc5838069f801c4fb62113b7447663d2530d2bd6e77b49bf15", size = 215237, upload-time = "2026-08-18T05:14:24.27Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl", hash = "sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2", size = 65455, upload-time = "2026-06-02T14:34:06.319Z" },
+    { url = "https://files.pythonhosted.org/packages/57/b0/0e52c878c53f245edd3a11020f20979b3f490f245af532c7cae3027754b5/idna-3.19-py3-none-any.whl", hash = "sha256:815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4", size = 68550, upload-time = "2026-08-18T05:14:22.343Z" },
 ]
 
 [[package]]
@@ -1513,11 +1519,11 @@ wheels = [
 
 [[package]]
 name = "narwhals"
-version = "2.24.0"
+version = "2.25.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2b/1d/58946e5aab18393e793bd4add6985b95d0e01c3a2d832f38f54468b10dcd/narwhals-2.24.0.tar.gz", hash = "sha256:b5c0f684ccd9d7475b564111e319a4964abcf2baf79d3cf6b1003d06ac9b828d", size = 661143, upload-time = "2026-07-13T10:49:19.086Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/7b/6248dada39781db1ab3ebf08943080df0796098515a87f6f8696d14ec744/narwhals-2.25.0.tar.gz", hash = "sha256:62c036c810662bf7820b7737077176313bc59350eeeefb808510f388c743e4b2", size = 677076, upload-time = "2026-08-20T18:10:15.454Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/85/a5bfaebfd305ac18b57b0854d74e37e586809061a91fda62f0bd50c8518e/narwhals-2.24.0-py3-none-any.whl", hash = "sha256:42fdedf44e5b2ca7505630d45b4ac3058f38d8485cba9fe1652ca23152df7489", size = 461030, upload-time = "2026-07-13T10:49:17.571Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/dc/55481808fd70ef1567cf13540ffd4702af3f74b112e35427564b03f79c2d/narwhals-2.25.0-py3-none-any.whl", hash = "sha256:1f0f403e8c7e4463cde9bfe78b12fdd809e3ae3dda6d9b2f802934fb9c7a6a8f", size = 467373, upload-time = "2026-08-20T18:10:13.834Z" },
 ]
 
 [[package]]
