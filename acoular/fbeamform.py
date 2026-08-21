@@ -53,6 +53,7 @@ from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
 from .microphones import MicGeom
+from .solvers import LeastSquaresProblem
 from .spectra import PowerSpectra
 from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
@@ -1606,6 +1607,9 @@ class BeamformerCMF(BeamformerBase):
     See :cite:`Yardibi2008` for details.
     """
 
+    #: Optional problem/solver abstraction. Currently unused by :meth:`_calc`.
+    problem = Instance(LeastSquaresProblem)
+
     #: Type of fit method to be used ('LassoLars', 'LassoLarsBIC',
     #: 'OMPCV' or 'NNLS', defaults to 'LassoLars').
     #: These methods are implemented in
@@ -1656,6 +1660,7 @@ class BeamformerCMF(BeamformerBase):
             'r_diag',
             'precision',
             'steer.inv_digest',
+            'problem.digest',
         ],
     )
 
