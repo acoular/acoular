@@ -41,7 +41,7 @@ class Caching:
         return bfs, calc, cached
 
     @parametrize('cached', [False, True], ids=['cached-False', 'cached-True'])
-    @parametrize('trait', ['csm', 'eve', 'eva'])
+    @parametrize('trait', ['csm', 'eigvecs', 'eigvals'])
     def case_caching_PowerSpectra(self, create_time_data_source, cached, trait):
         source = create_time_data_source(num_channels=2, num_samples=128)
         pss = []

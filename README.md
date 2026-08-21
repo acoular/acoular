@@ -123,5 +123,5 @@ plt.savefig('three_sources.png', dpi=300, bbox_inches='tight')
 plt.show()
 ```
 
-![result](https://acoular.org/user_guide/three_source_py3_colormap.png)
+![result](https://acoular.org/acoular/_images/three_source_py3_colormap.png)
 

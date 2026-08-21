@@ -44,7 +44,7 @@ from os import path
 from warnings import warn as _warn
 
 # acoular imports
-from .base import SamplesGenerator, TimeOut
+from .base import FiniteTimeOut, SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
@@ -153,6 +153,11 @@ class MaskedTimeOut(TimeOut):
 
     @cached_property
     def _get_num_samples(self):
+        if self.num_samples_total == -1:
+            if self.start < 0 or self.stop is not None:
+                msg = 'indefinite streams only support a non-negative start and no stop'
+                raise ValueError(msg)
+            return -1
         sli = slice(self.start, self.stop).indices(self.num_samples_total)
         return sli[1] - sli[0]
 
@@ -184,51 +189,76 @@ class MaskedTimeOut(TimeOut):
             range. This can occur if :attr:`start` is greater than or equal to :attr:`stop` or if
             the :attr:`source` is not containing any valid samples in the given range.
         """
-        sli = slice(self.start, self.stop).indices(self.num_samples_total)
-        start = sli[0]
-        stop = sli[1]
-        if start >= stop:
-            msg = 'no samples available'
-            raise OSError(msg)
+        indefinite = self.num_samples == -1
+        if indefinite:
+            start = self.start
+        else:
+            sli = slice(self.start, self.stop).indices(self.num_samples_total)
+            start = sli[0]
+            stop = sli[1]
+            if start >= stop:
+                msg = 'no samples available'
+                raise OSError(msg)
+            if start == 0 and stop == self.num_samples_total:
+                for block in self.source.result(num):
+                    yield block[:, self.channels]
+                return
 
-        if start != 0 or stop != self.num_samples_total:
-            offset = -start % num
-            if offset == 0:
-                offset = num
-            buf = np.empty((num + offset, self.num_channels), dtype=float)
-            bsize = 0
-            i = 0
-            fblock = True
+        offset = -start % num
+        if offset == 0:
+            offset = num
+        buf = np.empty((num + offset, self.num_channels), dtype=float)
+        bsize = 0
+
+        if indefinite:
+            remaining = start
             for block in self.source.result(num):
-                bs = block.shape[0]
-                i += bs
-                if fblock and i >= start:  # first block in the chosen interval
-                    if i >= stop:  # special case that start and stop are in one block
-                        yield block[bs - (i - start) : bs - (i - stop), self.channels]
-                        break
-                    bsize += i - start
-                    buf[: (i - start), :] = block[bs - (i - start) :, self.channels]
-                    fblock = False
-                elif i >= stop:  # last block
-                    buf[bsize : bsize + bs - (i - stop), :] = block[: bs - (i - stop), self.channels]
-                    bsize += bs - (i - stop)
-                    if bsize > num:
+                if remaining >= block.shape[0]:
+                    remaining -= block.shape[0]
+                    continue
+                data = block[remaining:, self.channels]
+                remaining = 0
+                while data.shape[0]:
+                    size = min(num, data.shape[0])
+                    buf[bsize : bsize + size] = data[:size]
+                    bsize += size
+                    data = data[size:]
+                    if bsize >= num:
                         yield buf[:num]
-                        buf[: bsize - num, :] = buf[num:bsize, :]
+                        buf[: bsize - num] = buf[num:bsize]
                         bsize -= num
-                    yield buf[:bsize, :]
+            if bsize:
+                yield buf[:bsize]
+            return
+
+        i = 0
+        fblock = True
+        for block in self.source.result(num):
+            bs = block.shape[0]
+            i += bs
+            if fblock and i >= start:  # first block in the chosen interval
+                if i >= stop:  # special case that start and stop are in one block
+                    yield block[bs - (i - start) : bs - (i - stop), self.channels]
                     break
-                elif i >= start:
-                    buf[bsize : bsize + bs, :] = block[:, self.channels]
-                    bsize += bs
-                if bsize >= num:
+                bsize += i - start
+                buf[: (i - start), :] = block[bs - (i - start) :, self.channels]
+                fblock = False
+            elif i >= stop:  # last block
+                buf[bsize : bsize + bs - (i - stop), :] = block[: bs - (i - stop), self.channels]
+                bsize += bs - (i - stop)
+                if bsize > num:
                     yield buf[:num]
                     buf[: bsize - num, :] = buf[num:bsize, :]
                     bsize -= num
-
-        else:  # if no start/stop given, don't do the resorting thing
-            for block in self.source.result(num):
-                yield block[:, self.channels]
+                yield buf[:bsize, :]
+                break
+            elif i >= start:
+                buf[bsize : bsize + bs, :] = block[:, self.channels]
+                bsize += bs
+            if bsize >= num:
+                yield buf[:num]
+                buf[: bsize - num, :] = buf[num:bsize, :]
+                bsize -= num
 
 
 class ChannelMixer(TimeOut):
@@ -644,6 +674,10 @@ class AngleTracker(MaskedTimeOut):
 
         # Current version supports only trigger and sources with the same samplefreq.
         # This behaviour may change in future releases.
+
+        if self.source.num_samples == -1:
+            msg = 'AngleTracker requires a finite source'
+            raise ValueError(msg)
 
         # init
         ind = 0
@@ -1676,7 +1710,7 @@ class TimeCumAverage(TimeOut):
             yield temp
 
 
-class TimeReverse(TimeOut):
+class TimeReverse(FiniteTimeOut):
     """
     Calculates the time-reversed signal of a source.
 
@@ -1874,7 +1908,7 @@ class FiltOctave(Filter):
         return butter(self.order, [om1, om2], 'bandpass', output='sos')
 
 
-class FiltFiltOctave(FiltOctave):
+class FiltFiltOctave(FiniteTimeOut, FiltOctave):
     """
     Octave or third-octave bandpass filter with zero-phase distortion.
 
@@ -2431,6 +2465,10 @@ class WriteWAV(TimeOut):
         --------
         :meth:`save` : Save the entire source output to a WAV file in one call.
         """
+        if self.source.num_samples == -1 and self.max_val is None:
+            msg = 'WriteWAV requires max_val for an indefinite source'
+            raise ValueError(msg)
+
         nc = len(self.channels)
         if nc == 0:
             msg = 'No channels given for output.'
@@ -2589,6 +2627,10 @@ class WriteH5(TimeOut):
         - If no file is specified, a file name is automatically generated.
         - Metadata defined in the :attr:`metadata` attribute is stored in the file.
         """
+        if self.source.num_samples == -1:
+            msg = 'WriteH5.save requires a finite source; use result with num_samples_write instead'
+            raise ValueError(msg)
+
         f5h = self.get_initialized_file()
         ac = f5h.get_data_by_reference('time_data')
         for data in self.source.result(4096):
@@ -2660,7 +2702,8 @@ class WriteH5(TimeOut):
                 data = next(source_gen)
             except StopIteration:
                 break
-            f5h.append_data(ac, data[:anz])
+            data = data[:anz]
+            f5h.append_data(ac, data)
             f5h.flush()
             yield data
             scount += anz
@@ -2824,9 +2867,30 @@ class TimeConvolve(TimeOut):
         buff = np.zeros([2 * num, N])  # time-domain input buffer
         spec_sum = np.zeros([num + 1, N], dtype='complex128')
 
-        signal_blocks = self.source.result(num)
+        source_blocks = self.source.result(num)
+        signal_blocks = source_blocks
+        if M == -1:
+
+            def full_blocks():
+                remainder = np.empty((0, N))
+                for block in source_blocks:
+                    remainder = np.concatenate([remainder, block])
+                    while remainder.shape[0] >= num:
+                        yield remainder[:num]
+                        remainder = remainder[num:]
+
+            signal_blocks = full_blocks()
         temp = next(signal_blocks)
         buff[num : num + temp.shape[0]] = temp  # append new time-data
+
+        if M == -1:
+            for temp in signal_blocks:
+                _append_to_fdl(fdl, idx, numblocks_kernel, rfft(buff, axis=0))
+                spec_sum = _spectral_sum(spec_sum, fdl, self._kernel_blocks)
+                yield irfft(spec_sum, axis=0)[num:]
+                buff = np.concatenate([buff[num:], np.zeros([num, N])], axis=0)
+                buff[num : num + temp.shape[0]] = temp
+            return
 
         # for very short signals, we are already done
         if R == 1:

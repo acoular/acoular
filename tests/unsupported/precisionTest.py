@@ -76,13 +76,13 @@ f = EigSpectra(time_data=t1,
                ind_low=7, ind_high=15, precision='complex128') #to save computational effort, only
                # frequencies with index 1-30 are used
 csm = f.csm[:]
-eva = f.eva[:]
+eigvals = f.eigvals[:]
 
 f32 = EigSpectra(time_data=t1,
                window='Hanning', overlap='50%', block_size=128, #FFT-parameters
                ind_low=7, ind_high=15, precision='complex64') #to save computational effort, only
 csm32 = f32.csm[:]
-eva32 = f32.eva[:]
+eigvals32 = f32.eigvals[:]
 
 psf32 = PointSpreadFunction(grid=g, mpos=m, c=346.04, precision='float32')
 psf32Res = psf32.psf[:]
