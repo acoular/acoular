@@ -155,7 +155,7 @@ suppress_warnings = [
 
 # Custom CSS paths should either relative to html_static_path
 # or fully qualified paths (eg. https://...)
-html_css_files = ['css/sphinx_gallery.css', 'css/custom_pydata_sphinx_theme.css']
+html_css_files = ['css/sphinx_gallery.css', 'css/landing_gallery.css']
 
 # sphinx_gallery.gen_gallery extension configuration
 sphinx_gallery_conf = configure_sphinx_gallery(

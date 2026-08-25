@@ -96,7 +96,7 @@ provides-extras = ["full"]
 [package.metadata.requires-dev]
 dev = [
     { name = "acoular-ruff", git = "https://github.com/acoular/ci.git?rev=ruff-v1.0" },
-    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.5" },
+    { name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.6" },
     { name = "diff-cover" },
     { name = "h5py" },
     { name = "pylops" },
@@ -111,7 +111,7 @@ dev = [
     { name = "sounddevice" },
     { name = "traitsui" },
 ]
-docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.5" }]
+docs = [{ name = "acoular-sphinx", git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.6" }]
 lint = [{ name = "acoular-ruff", git = "https://github.com/acoular/ci.git?rev=ruff-v1.0" }]
 tests = [
     { name = "diff-cover" },
@@ -132,7 +132,7 @@ tests = [
 [[package]]
 name = "acoular-brand"
 version = "0.1.1"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-brand&rev=sphinx-v1.5#0533bc294fa774d3bcfea32e7e7ca839f74e611e" }
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-brand&rev=brand-v1.1#e41ce2d9c2ac87de47b3f575bc0c3475a747b1b4" }
 
 [[package]]
 name = "acoular-ruff"
@@ -145,7 +145,7 @@ dependencies = [
 [[package]]
 name = "acoular-sphinx"
 version = "0.1.5"
-source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.5#0533bc294fa774d3bcfea32e7e7ca839f74e611e" }
+source = { git = "https://github.com/acoular/ci.git?subdirectory=packages%2Facoular-sphinx&rev=sphinx-v1.6#666dfe5bd1efcfb51ca94bfd16f7a0460abbdfd6" }
 dependencies = [
     { name = "acoular-brand" },
     { name = "graphviz" },
