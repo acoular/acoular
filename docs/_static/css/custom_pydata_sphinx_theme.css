@@ -10,3 +10,12 @@ html[data-theme="dark"] div.graphviz>object.graphviz {
   filter: brightness(0.8) invert(0.82) contrast(1.2);
   color-scheme: normal;
 }
+
+.landing-gallery tbody tr:first-child img {
+  border: 1px solid var(--pst-color-border);
+}
+
+.landing-gallery tbody tr:last-child td {
+  font-size: 0.8rem;
+  text-align: center;
+}
