@@ -74,8 +74,13 @@ class TimeSamplesAIAABenchmark(TimeSamples):
         # Set :attr:`num_channels` and :attr:`num_samples` from data.
         if self.data is not None:
             data_shape = self.data.shape
-            self._data_transposed = data_shape[0] < data_shape[1]
-            if self._data_transposed:
+            self._data_transposed = False
+            data_nominal_samples = self._h5f.get_node_attribute(self.data, 'sampleCount')
+
+            if data_shape[0] == data_nominal_samples:
+                self.num_samples, self.num_channels = data_shape
+            elif data_shape[1] == data_nominal_samples:
+                self._data_transposed = True
                 _warn(
                     f'Data is of shape ({data_shape[0]}, {data_shape[1]}) and may be stored as '
                     '(num_channels, num_samples). It will be transposed for further processing.',
@@ -84,7 +89,14 @@ class TimeSamplesAIAABenchmark(TimeSamples):
                 )
                 self.num_channels, self.num_samples = self.data.shape
             else:
-                self.num_samples, self.num_channels = self.data.shape
+                _warn(
+                    f'Data shape ({data_shape[0]}, {data_shape[1]}) does not correspond to the '
+                    f'documented number of samples ({data_nominal_samples}). Number of samples '
+                    f'will assumed to be be {data_shape[0]}.',
+                    Warning,
+                    stacklevel=2,
+                )
+                self.num_samples, self.num_channels = data_shape
 
     def _load_timedata(self):
         """Loads timedata from :attr:`.h5 file<file>`. Only for internal use."""
