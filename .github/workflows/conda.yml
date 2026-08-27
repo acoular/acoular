@@ -6,7 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_deploy:
+  build:
     uses: acoular/ci/.github/workflows/conda.yml@main
-    with:
-      deploy: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: anaconda
+    env:
+      ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: conda-build
+          path: conda-pkg/
+      - name: Install anaconda-client
+        run: conda install --yes -n base anaconda-client
+      - name: Upload conda package to Anaconda Cloud
+        run: conda run --no-capture-output -n base anaconda --verbose upload ./conda-pkg/noarch/*.conda

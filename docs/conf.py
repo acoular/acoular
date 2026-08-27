@@ -9,9 +9,9 @@ from acoular_sphinx import (
     build_github_context,
     build_html_context,
     configure_package_theme_options,
+    configure_sphinx_gallery,
     resolve_docs_build_config,
 )
-from sphinx_gallery.sorting import ExplicitOrder
 
 # %%
 # Project information
@@ -158,27 +158,19 @@ suppress_warnings = [
 html_css_files = ['css/sphinx_gallery.css', 'css/custom_pydata_sphinx_theme.css']
 
 # sphinx_gallery.gen_gallery extension configuration
-sphinx_gallery_conf = {
-    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-    'example_extensions': {'.py'},
-    'filename_pattern': '/example_',
-    'default_thumb_file': str(Path(__file__).parent / '_static' / 'no_image.png'),
-    'thumbnail_size': (250, 250),
-    #'run_stale_examples': True,
-    'reset_modules': (reset_cache_dir, 'matplotlib', 'seaborn'),
-    'examples_dirs': [
-        '../examples',
-    ],  # path to your example scripts
-    'subsection_order': ExplicitOrder(
-        [
-            '../examples/introductory_examples',
-            '../examples/wind_tunnel_examples',
-            '../examples/moving_sources_examples',
-            '../examples/io_and_signal_processing_examples',
-            '../examples/tools',
-        ]
+sphinx_gallery_conf = configure_sphinx_gallery(
+    default_thumb_file=str(Path(__file__).parent / '_static' / 'no_image.png'),
+    thumbnail_size=(250, 250),
+    reset_modules=(reset_cache_dir,),
+    examples_dirs=('../examples',),
+    subsection_order=(
+        '../examples/introductory_examples',
+        '../examples/wind_tunnel_examples',
+        '../examples/moving_sources_examples',
+        '../examples/io_and_signal_processing_examples',
+        '../examples/tools',
     ),
-}
+)
 
 # sphinx_copybutton config
 # ------------------------

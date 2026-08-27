@@ -3,30 +3,37 @@
 Acoular -- Acoustic testing and source mapping software
 =======================================================
 
-Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to  locate sources of interest and to characterize them using their spectra. 
+Acoular is a framework for acoustic beamforming that is written in the Python programming language. It is aimed at applications in acoustic testing. Multichannel data recorded by a microphone array can be processed and analyzed in order to generate mappings of sound source distributions. The maps (acoustic photographs) can then be used to locate sources of interest and to characterize them using their spectra.
 
-.. image:: user_guide/three_source_py3_colormap.png
-    :width: 32%
-    :alt: Three different point sources
-.. image:: _static/Airfoil_selfnoise_3d.png
-    :width: 32%
-    :alt: Airfoil leading edge noise
-.. image:: _static/pantograph_noise_3d.png
-    :width: 32%
-    :alt: Pantograph noise
+.. list-table::
+    :widths: 1 1 1
+    :class: landing-gallery
+
+    * - .. image:: _static/three_source_py3_colormap.png
+          :width: 100%
+          :alt: Three different point sources
+      - .. image:: _static/Airfoil_selfnoise_3d.png
+          :width: 100%
+          :alt: Airfoil leading edge noise
+      - .. image:: _static/pantograph_noise_3d.png
+          :width: 100%
+          :alt: Pantograph noise
+    * - Three point sources
+      - Airfoil leading-edge noise
+      - Pantograph noise
 
 A few highlights of the framework:
 
-    * covers several beamforming algorithms 
-    * different advanced deconvolution algorithms
-    * both time-domain and frequency-domain operation included
-    * 3D mapping possible
-    * application for stationary and for moving targets
-    * supports both scripting and graphical user interface
-    * efficient: intelligent caching, parallel computing with Numba
-    * easily extendible and well documented
+    - covers several beamforming algorithms
+    - different advanced deconvolution algorithms
+    - both time-domain and frequency-domain operation included
+    - 3D mapping possible
+    - application for stationary and for moving targets
+    - supports both scripting and graphical user interface
+    - efficient: intelligent caching, parallel computing with Numba
+    - easily extendible and well documented
 
-If you discover problems with the Acoular software, please report them using the `issue tracker <https://github.com/acoular/acoular/issues>`_ on GitHub. 
+If you discover problems with the Acoular software, please report them using the `issue tracker <https://github.com/acoular/acoular/issues>`_ on GitHub.
 Please use the `Acoular discussions forum <https://github.com/acoular/acoular/discussions>`_ for practical questions, discussions, and demos.
 
 Our `blog <https://acoular.github.io/blog2/>`_ has detailed tutorials about how to set up and run an analysis and how to provide input data.
@@ -35,26 +42,25 @@ Contents:
 
 .. toctree::
     :hidden:
-    
+
     Overview <self>
     Installation <install/index>
     User Guide <user_guide/index>
     API Reference <api_ref/index>
     Examples <auto_examples/index>
     What's new <news/index>
-    Contributing <contributing/index>
     Literature <literature/index>
 
 
 .. list-table::
     :widths: 30 70
-    
-    * - :doc:`install/index` 
 
-      - Description of the different download and installation options to get 
+    * - :doc:`install/index`
+
+      - Description of the different download and installation options to get
         Acoular running on your system.
 
-    * - :doc:`user_guide/index` 
+    * - :doc:`user_guide/index`
 
       - The basics for using Acoular, explained with a simple example, and
         guides to important concepts such as lazy evaluation and caching.
@@ -72,18 +78,14 @@ Contents:
 
       - Release notes for all versions of Acoular.
 
-    * - :doc:`contributing/index`
+    * - :doc:`literature/index`
 
-      - Information on how to contribute to the development of Acoular.
-
-    * - :doc:`literature/index` 
-
-      - In here some of the publications used for this program package are 
+      - In here some of the publications used for this program package are
         listed. Further reading to fully understand how the algorithms work is recommended.
 
-        
+
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
+    - :ref:`genindex`
+    - :ref:`modindex`

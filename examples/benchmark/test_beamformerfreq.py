@@ -37,8 +37,8 @@ csm = np.array(b.freq_data.csm[20], dtype='complex128')
 param_steer_type, steer_vector = b._beamformer_params()
 sln = b.sig_loss_norm()
 svt = steer_vector(8000.0)
-eva = b.freq_data.eva[20]
-eve = b.freq_data.eve[20]
+eigvals = b.freq_data.eigvals[20]
+eigvecs = b.freq_data.eigvecs[20]
 
 
 def test_beamformer_freq():
@@ -46,7 +46,7 @@ def test_beamformer_freq():
 
 
 def test_beamformer_freq_eig():
-    ac.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eva[30:], eve[:, 30:]))
+    ac.fastFuncs.beamformerFreq(param_steer_type, False, sln, svt, (eigvals[30:], eigvecs[:, 30:]))
 
 
 def test_csm():

@@ -143,6 +143,8 @@ class Average(InOut):
     @cached_property
     def _get_num_samples(self):
         if self.source:
+            if self.source.num_samples == -1:
+                return -1
             return self.source.num_samples / self.num_per_average
         return None
 
@@ -159,8 +161,8 @@ class Average(InOut):
         ----------
         num : :class:`int`
             The number of averaged blocks to yield at a time. Each block contains the average over
-            :attr:`num_per_average` time samples or frequency snapshots. The last block may be
-            shorter than the specified size if the remaining data is insufficient.
+            :attr:`num_per_average` time samples or frequency snapshots. The last yielded block
+            may contain fewer than ``num`` averages.
 
         Yields
         ------
@@ -180,14 +182,34 @@ class Average(InOut):
               :attr:`num_per_average` frequency snapshots.
         - The generator will stop yielding when the source data is exhausted.
         - If the source provides fewer than ``num * num_per_average`` samples,
-          the final block may be smaller than the requested ``num`` size.
+          the final yielded block may be smaller than the requested ``num`` size.
+        - If the source provides a final block with fewer than :attr:`num_per_average` samples,
+          these samples are discarded. If the source provides fewer than
+          :attr:`num_per_average` samples in total, nothing is yielded.
         """
         nav = self.num_per_average
-        for temp in self.source.result(num * nav):
+        out = None
+        outnum = 0
+        # fetches data blocks from source, nav must not be too large
+        for temp in self.source.result(nav):
             ns, nc = temp.shape
-            nso = int(ns / nav)
-            if nso > 0:
-                yield temp[: nso * nav].reshape((nso, -1, nc)).mean(axis=1)
+            # is this a complete block of `nav` samples ?
+            if ns != nav:
+                continue
+            # create accumulator if not exists
+            if out is None:
+                out = np.empty((num, nc), dtype=temp.dtype)
+            # add one output sample
+            temp.mean(axis=0, out=out[outnum])
+            outnum += 1
+            # block complete -> yield it and create new one
+            if outnum == num:
+                yield out
+                out = None
+                outnum = 0
+        # last block of data
+        if outnum:
+            yield out[:outnum]
 
 
 class Cache(InOut):
@@ -341,7 +363,7 @@ class Cache(InOut):
           from the source to update the cache unless the caching mode is ``'readonly'``.
         - The cache node name is based on the source's :attr:`digest` attribute.
         """
-        if config.global_caching == 'none':
+        if self.source.num_samples == -1 or config.global_caching == 'none':
             generator = self._pass_data
         else:
             nodename = 'tc_' + self.digest

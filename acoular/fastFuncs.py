@@ -3,6 +3,8 @@
 # ------------------------------------------------------------------------------
 """Contains all computationally expensive operations and accelerates them with NUMBA."""
 
+from .internal import lazyjit
+
 import numba as nb
 import numpy as np
 
@@ -14,14 +16,16 @@ FAST_OPTION = True  # fastmath options
 
 
 # Formerly known as 'faverage'
-@nb.njit(
-    [
-        nb.complex128[:, :, ::1](nb.complex128[:, :, ::1], nb.complex128[:, ::1]),
-        nb.complex64[:, :, ::1](nb.complex64[:, :, ::1], nb.complex64[:, ::1]),
-    ],
-    cache=CACHED_OPTION,
-    parallel=True,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.njit(
+        [
+            nb.complex128[:, :, ::1](nb.complex128[:, :, ::1], nb.complex128[:, ::1]),
+            nb.complex64[:, :, ::1](nb.complex64[:, :, ::1], nb.complex64[:, ::1]),
+        ],
+        cache=CACHED_OPTION,
+        parallel=True,
+        fastmath=FAST_OPTION,
+    ),
 )
 def calcCSM(csm, SpecAllMics):
     """Adds a given spectrum to the Cross-Spectral-Matrix (CSM).
@@ -211,23 +215,25 @@ def beamformerFreq(steerVecType, boolRemovedDiagOfCSM, normFactor, inputTupleSte
 
 
 # fast implementation of full matrix beamformers
-@nb.njit(
-    [
-        (
-            nb.complex128[:, ::1],
-            nb.float64[::1],
-            nb.float64[:, ::1],
-            nb.float64,
-            nb.float64,
-            nb.boolean,
-            nb.int64,
-            nb.float64[::1],
-            nb.float64[::1],
-        ),
-    ],
-    cache=CACHED_OPTION,
-    parallel=True,
-    error_model='numpy',
+@lazyjit(
+    nb.njit(
+        [
+            (
+                nb.complex128[:, ::1],
+                nb.float64[::1],
+                nb.float64[:, ::1],
+                nb.float64,
+                nb.float64,
+                nb.boolean,
+                nb.int64,
+                nb.float64[::1],
+                nb.float64[::1],
+            ),
+        ],
+        cache=CACHED_OPTION,
+        parallel=True,
+        error_model='numpy',
+    ),
 )
 def _freqBeamformer_FullCSM(
     csm,
@@ -305,24 +311,26 @@ def _freqBeamformer_FullCSM(
 
 
 # fast implementation of eigenvalue beamformers
-@nb.njit(
-    [
-        (
-            nb.float64[::1],
-            nb.complex128[:, ::1],
-            nb.float64[::1],
-            nb.float64[:, ::1],
-            nb.float64,
-            nb.float64,
-            nb.boolean,
-            nb.int64,
-            nb.float64[::1],
-            nb.float64[::1],
-        ),
-    ],
-    cache=CACHED_OPTION,
-    parallel=True,
-    error_model='numpy',
+@lazyjit(
+    nb.njit(
+        [
+            (
+                nb.float64[::1],
+                nb.complex128[:, ::1],
+                nb.float64[::1],
+                nb.float64[:, ::1],
+                nb.float64,
+                nb.float64,
+                nb.boolean,
+                nb.int64,
+                nb.float64[::1],
+                nb.float64[::1],
+            ),
+        ],
+        cache=CACHED_OPTION,
+        parallel=True,
+        error_model='numpy',
+    ),
 )
 def _freqBeamformer_EigValues(
     eigVal,
@@ -403,13 +411,15 @@ def _freqBeamformer_EigValues(
             result[gi] = scalarProd / normalizeFactor * signalLossNormalization
 
 
-@nb.guvectorize(
-    [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-    '(m,m),(m),()->(),()',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+        '(m,m),(m),()->(),()',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
@@ -435,13 +445,15 @@ def _freqBeamformer_SpecificSteerVec_FullCSM(csm, steerVec, signalLossNormalizat
     result[0] = scalarProd * signalLossNormalization[0]
 
 
-@nb.guvectorize(
-    [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-    '(m,m),(m),()->(),()',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [(nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+        '(m,m),(m),()->(),()',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNormalization, result, normalizeSteer):
     # see bottom of information header of 'beamformerFreq' for information on which steps are taken,
@@ -464,13 +476,15 @@ def _freqBeamformer_SpecificSteerVec_CsmRemovedDiag(csm, steerVec, signalLossNor
     result[0] = scalarProd * signalLossNormalization[0]
 
 
-@nb.guvectorize(
-    [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-    '(e),(m,e),(m),()->(),()',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+        '(e),(m,e),(m),()->(),()',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     eigVal,
@@ -502,13 +516,15 @@ def _freqBeamformer_EigValProb_SpecificSteerVec_FullCSM(
     result[0] = scalarProdFullCSM * signalLossNormalization[0]
 
 
-@nb.guvectorize(
-    [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
-    '(e),(m,e),(m),()->(),()',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [(nb.float64[:], nb.complex128[:, :], nb.complex128[:], nb.float64[:], nb.float64[:], nb.float64[:])],
+        '(e),(m,e),(m),()->(),()',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _freqBeamformer_EigValProb_SpecificSteerVec_CsmRemovedDiag(
     eigVal,
@@ -625,16 +641,18 @@ def calcPointSpreadFunction(steerVecType, distGridToArrayCenter, distGridToAllMi
     return psfOutput
 
 
-@nb.guvectorize(
-    [
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
-    ],
-    '(),(m),(s),(s,m),()->(s)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
+        ],
+        '(),(m),(s),(s,m),()->(s)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _psf_Formulation1AkaClassic(
     distGridToArrayCenter,  # noqa: ARG001
@@ -659,16 +677,18 @@ def _psf_Formulation1AkaClassic(
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize(
-    [
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
-    ],
-    '(),(m),(s),(s,m),()->(s)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
+        ],
+        '(),(m),(s),(s,m),()->(s)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _psf_Formulation2AkaInverse(
     distGridToArrayCenter,
@@ -697,16 +717,18 @@ def _psf_Formulation2AkaInverse(
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize(
-    [
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
-    ],
-    '(),(m),(s),(s,m),()->(s)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
+        ],
+        '(),(m),(s),(s,m),()->(s)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _psf_Formulation3AkaTrueLevel(
     distGridToArrayCenter,
@@ -737,16 +759,18 @@ def _psf_Formulation3AkaTrueLevel(
         result[cntSources] = scalarProdAbsSquared * (normalizeFactor * normalizeFactor)
 
 
-@nb.guvectorize(
-    [
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
-        (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
-    ],
-    '(),(m),(s),(s,m),()->(s)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float64[:]),
+            (nb.float64[:], nb.float64[:], nb.float64[:], nb.float64[:, :], nb.float64[:], nb.float32[:]),
+        ],
+        '(),(m),(s),(s,m),()->(s)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _psf_Formulation4AkaTrueLocation(
     distGridToArrayCenter,  # noqa: ARG001
@@ -779,17 +803,19 @@ def _psf_Formulation4AkaTrueLocation(
 
 # %% Damas - Gauss Seidel
 # Formerly known as 'gseidel'
-@nb.guvectorize(
-    [  # (nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]),
-        (nb.float64[:, :], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
-        # (nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
-        # (nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])
-    ],
-    '(g,g),(g),(),()->(g)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [  # (nb.float32[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:]),
+            (nb.float64[:, :], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+            # (nb.float32[:,:], nb.float64[:], nb.int64[:], nb.float64[:], nb.float64[:]),
+            # (nb.float64[:,:], nb.float32[:], nb.int64[:], nb.float64[:], nb.float32[:])
+        ],
+        '(g,g),(g),(),()->(g)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def damasSolverGaussSeidel(A, dirtyMap, nIterations, relax, damasSolution):
     """
@@ -854,13 +880,15 @@ def calcTransfer(distGridToArrayCenter, distGridToAllMics, waveNumber):
     return result
 
 
-@nb.guvectorize(
-    [(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])],
-    '(),(m),()->(m)',
-    nopython=True,
-    target=PARALLEL_OPTION,
-    cache=CACHED_OPTION,
-    fastmath=FAST_OPTION,
+@lazyjit(
+    nb.guvectorize(
+        [(nb.float64[:], nb.float64[:], nb.float64[:], nb.complex128[:])],
+        '(),(m),()->(m)',
+        nopython=True,
+        target=PARALLEL_OPTION,
+        cache=CACHED_OPTION,
+        fastmath=FAST_OPTION,
+    ),
 )
 def _transferCoreFunc(distGridToArrayCenter, distGridToAllMics, waveNumber, result):
     nMics = distGridToAllMics.shape[0]

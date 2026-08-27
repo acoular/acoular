@@ -40,7 +40,7 @@ from .base import SamplesGenerator
 # acoular imports
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
-from .internal import digest, ldigest
+from .internal import digest, lazyjit, ldigest
 from .microphones import MicGeom
 from .signals import NoiseGenerator, SignalGenerator
 from .tools.utils import get_file_basename
@@ -74,7 +74,7 @@ from traits.api import (
 )
 
 
-@nb.njit(cache=True, error_model='numpy')  # pragma: no cover
+@lazyjit(nb.njit(cache=True, error_model='numpy'))  # pragma: no cover
 def _fill_mic_signal_block(out, signal, rm, ind, blocksize, num_channels, up, prepadding):
     if prepadding:
         for b in range(blocksize):

@@ -16,8 +16,14 @@ from .internal import digest
 
 from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
 
-if config.have_sounddevice:
+
+def _import_sounddevice():
+    if config.have_sounddevice is False:
+        msg = 'SoundDevice library not found but is required for using the SoundDeviceSamplesGenerator class.'
+        raise ImportError(msg)
     import sounddevice as sd
+
+    return sd
 
 
 class SoundDeviceSamplesGenerator(SamplesGenerator):
@@ -30,9 +36,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if config.have_sounddevice is False:
-            msg = 'SoundDevice library not found but is required for using the SoundDeviceSamplesGenerator class.'
-            raise ImportError(msg)
+        _import_sounddevice()
 
     #: input device index, refers to sounddevice list
     device = Int(0)
@@ -74,10 +78,12 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     # checks that num_channels are not more than device can provide
     @observe('device, num_channels')
     def _get_num_channels(self, event):  # noqa: ARG002
+        sd = _import_sounddevice()
         self.num_channels = min(self.num_channels, sd.query_devices(self.device)['max_input_channels'])
 
     def _get_sample_freq(self):
         if self._sample_freq is None:
+            sd = _import_sounddevice()
             self._sample_freq = sd.query_devices(self.device)['default_samplerate']
         return self._sample_freq
 
@@ -92,6 +98,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         -------
         Dictionary of device properties according to sounddevice
         """
+        sd = _import_sounddevice()
         return sd.query_devices(self.device)
 
     def result(self, num):
@@ -112,6 +119,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             The last block may be shorter than num.
 
         """
+        sd = _import_sounddevice()
         print(self.device_properties(), self.sample_freq)
         self.stream = stream_obj = sd.InputStream(
             device=self.device,

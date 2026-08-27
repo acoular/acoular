@@ -58,12 +58,7 @@ from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 import numpy as np
 import scipy.linalg as spla
-
-# check for sklearn version to account for incompatible behavior
-import sklearn
-from packaging.version import parse
 from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
-from sklearn.linear_model import LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV
 from traits.api import (
     Any,
     Bool,
@@ -84,9 +79,25 @@ from traits.api import (
 )
 from traits.trait_errors import TraitError
 
-sklearn_ndict = {}
-if parse(sklearn.__version__) < parse('1.4'):
-    sklearn_ndict['normalize'] = False  # pragma: no cover
+_SKLEARN_NDICT = None
+
+
+def _get_sklearn_linear_model(*names):
+    from sklearn import linear_model  # noqa: PLC0415
+
+    return tuple(getattr(linear_model, name) for name in names)
+
+
+def _get_sklearn_ndict():
+    global _SKLEARN_NDICT  # noqa: PLW0603
+    if _SKLEARN_NDICT is None:
+        import re  # noqa: PLC0415
+        from importlib.metadata import version  # noqa: PLC0415
+
+        match = re.match(r'(\d+)\.(\d+)', version('scikit-learn'))
+        _SKLEARN_NDICT = {'normalize': False} if match and tuple(map(int, match.groups())) < (1, 4) else {}
+    return _SKLEARN_NDICT
+
 
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
@@ -747,14 +758,14 @@ class BeamformerFunctional(BeamformerBase):
                 indNegSign = np.sign(beamformerOutput) < 0
                 beamformerOutput[indNegSign] = 0.0
             else:
-                eva = np.array(self.freq_data.eva[i], dtype='float64') ** (1.0 / self.gamma)
-                eve = np.array(self.freq_data.eve[i], dtype='complex128')
+                eigvals = np.array(self.freq_data.eigvals[i], dtype='float64') ** (1.0 / self.gamma)
+                eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
                 beamformerOutput, steerNorm = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
                     1.0,
                     steer_vector(f[i]),
-                    (eva, eve),
+                    (eigvals, eigvecs),
                 )
                 beamformerOutput /= steerNorm  # take normalized steering vec
             self._ac[i] = (
@@ -861,14 +872,14 @@ class BeamformerEig(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
                 self.r_diag,
                 normfactor,
                 steer_vector(f[i]),
-                (eva[na : na + 1], eve[:, na : na + 1]),
+                (eigvals[na : na + 1], eigvecs[:, na : na + 1]),
             )[0]
             if self.r_diag:  # set (unphysical) negative output values to 0
                 indNegSign = np.sign(beamformerOutput) < 0
@@ -921,14 +932,14 @@ class BeamformerMusic(BeamformerEig):
         normfactor = self.sig_loss_norm() * nMics**2
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
                 self.r_diag,
                 normfactor,
                 steer_vector(f[i]),
-                (eva[:n], eve[:, :n]),
+                (eigvals[:n], eigvecs[:, :n]),
             )[0]
             self._ac[i] = 4e-10 * beamformerOutput.min() / beamformerOutput
             self._fr[i] = 1
@@ -979,6 +990,9 @@ class PointSpreadFunction(HasStrictTraits):
     #: Frequency to evaluate the PSF for; defaults to 1.0.
     freq = Float(1.0)
 
+    #: Boolean flag, if 'True' (default), the result is cached in h5 files.
+    cached = Bool(True)
+
     # hdf5 cache file
     _h5f = Instance(H5CacheFileBase, transient=True)
 
@@ -1017,7 +1031,7 @@ class PointSpreadFunction(HasStrictTraits):
             self._h5f.create_compressible_array(
                 'gridpts',
                 (gs,),
-                'int8',  #'bool',
+                'int8',
                 group,
             )
         ac = self._h5f.get_data_by_reference('result', '/' + nodename)
@@ -1031,49 +1045,40 @@ class PointSpreadFunction(HasStrictTraits):
         The point spread function is either loaded or calculated.
         """
         gs = self.steer.grid.size
-        if not self.grid_indices.size:
-            self.grid_indices = np.arange(gs)
+        grid_indices = self.grid_indices if self.grid_indices.size else np.arange(gs)
+        cache_active = not (
+            config.global_caching == 'none' or (config.global_caching == 'individual' and not self.cached)
+        )
+        ac, gp = self._get_filecache() if cache_active else (None, None)
+        from_cache = ac is not None and gp is not None
 
-        if config.global_caching != 'none':
-            #            print("get filecache..")
-            (ac, gp) = self._get_filecache()
-            if ac and gp:
-                #                print("cached data existent")
-                if not gp[:][self.grid_indices].all():
-                    #                    print("calculate missing results")
-                    if self.calcmode == 'readonly':
-                        msg = "Cannot calculate missing PSF (points) in 'readonly' mode."
-                        raise ValueError(msg)
-                    if config.global_caching == 'readonly':
-                        (ac, gp) = (ac[:], gp[:])
-                        self.calc_psf(ac, gp)
-                        return ac[:, self.grid_indices]
-                    self.calc_psf(ac, gp)
-                    self._h5f.flush()
-                    return ac[:, self.grid_indices]
-                #                else:
-                #                    print("cached results are complete! return.")
-                return ac[:, self.grid_indices]
-            #           print("no caching, calculate result")
+        if not from_cache:
             ac = np.zeros((gs, gs), dtype=self.precision)
             gp = np.zeros((gs,), dtype='int8')
-            self.calc_psf(ac, gp)
-        else:  # no caching activated
-            #            print("no caching activated, calculate result")
-            ac = np.zeros((gs, gs), dtype=self.precision)
-            gp = np.zeros((gs,), dtype='int8')
-            self.calc_psf(ac, gp)
-        return ac[:, self.grid_indices]
 
-    def calc_psf(self, ac, gp):
+        missing = not gp[:][grid_indices].astype(bool).all()
+        if missing:
+            if from_cache and self.calcmode == 'readonly':
+                msg = "Cannot calculate missing PSF (points) in 'readonly' mode."
+                raise ValueError(msg)
+            if cache_active and config.global_caching == 'readonly':
+                ac, gp = ac[:], gp[:]
+            self.calc_psf(ac, gp, grid_indices)
+            if cache_active and self._h5f and config.global_caching != 'readonly':
+                self._h5f.flush()
+        if grid_indices.size == gs and np.array_equal(grid_indices, np.arange(gs)):
+            return ac[:]
+        result = np.empty((gs, grid_indices.size), dtype=self.precision)
+        for i, ind in enumerate(grid_indices):
+            result[:, i] = ac[:, ind]
+        return result
+
+    def calc_psf(self, ac, gp, grid_indices=None):
         """point-spread function calculation."""
+        if grid_indices is None:
+            grid_indices = self.grid_indices if self.grid_indices.size else np.arange(self.steer.grid.size)
         if self.calcmode != 'full':
-            # calc_ind has the form [True, True, False, True], except
-            # when it has only 1 entry (value True/1 would be ambiguous)
-            calc_ind = [0] if self.grid_indices.size == 1 else np.invert(gp[:][self.grid_indices])
-
-            # get indices which have the value True = not yet calculated
-            g_ind_calc = self.grid_indices[calc_ind]
+            g_ind_calc = grid_indices[~gp[:][grid_indices].astype(bool)]
 
         if self.calcmode == 'single':  # calculate selected psfs one-by-one
             for ind in g_ind_calc:
@@ -1084,10 +1089,9 @@ class PointSpreadFunction(HasStrictTraits):
             ac[:] = self._psf_call(np.arange(self.steer.grid.size))
         else:  # 'block' # calculate selected psfs in one go
             hh = self._psf_call(g_ind_calc)
-            for indh, ind in enumerate(g_ind_calc):
+            for i, ind in enumerate(g_ind_calc):
+                ac[:, ind] = hh[:, i]
                 gp[ind] = 1
-                ac[:, ind] = hh[:, indh]
-                indh += 1
 
     def _psf_call(self, ind):
         """
@@ -1180,7 +1184,9 @@ class BeamformerDamas(BeamformerBase):
         """
         f = self._f
         normfactor = self.sig_loss_norm()
-        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        p = PointSpreadFunction(
+            steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision, cached=self.cached
+        )
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128')
@@ -1262,7 +1268,9 @@ class BeamformerDamasPlus(BeamformerDamas):
         This method only returns values through :attr:`_ac` and :attr:`_fr`
         """
         f = self._f
-        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        p = PointSpreadFunction(
+            steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision, cached=self.cached
+        )
         unit = self.unit_mult
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
@@ -1295,6 +1303,10 @@ class BeamformerDamasPlus(BeamformerDamas):
                 cT = -1 * psf.sum(1)  # turn the minimization into a maximization
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
+                LassoLars, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
+                    'LassoLars',
+                    'OrthogonalMatchingPursuitCV',
+                )
                 if self.method == 'LassoLars':
                     model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                 elif self.method == 'OMPCV':
@@ -1374,17 +1386,17 @@ class BeamformerOrth(BeamformerBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             for n in self.eva_list:
                 beamformerOutput = beamformerFreq(
                     param_steer_type,
                     self.r_diag,
                     normfactor,
                     steer_vector(f[i]),
-                    (np.ones(1), eve[:, n].reshape((-1, 1))),
+                    (np.ones(1), eigvecs[:, n].reshape((-1, 1))),
                 )[0]
-                self._ac[i, beamformerOutput.argmax()] += eva[n] / num_channels
+                self._ac[i, beamformerOutput.argmax()] += eigvals[n] / num_channels
             self._fr[i] = 1
 
 
@@ -1550,7 +1562,9 @@ class BeamformerClean(BeamformerBase):
                 Warning,
                 stacklevel=2,
             )
-        p = PointSpreadFunction(steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision)
+        p = PointSpreadFunction(
+            steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision, cached=self.cached
+        )
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
             p.freq = f[i]
@@ -1658,6 +1672,38 @@ class BeamformerCMF(BeamformerBase):
             )
             raise ImportError(msg)
 
+    #: Cached index masks (triangular + real/imag selection) for the CMF problem.
+    _csm_indices = Property(depends_on=['freq_data.num_channels', 'r_diag'])
+
+    @cached_property
+    def _get__csm_indices(self):
+        """Indices for the reduced Kronecker product / vectorized CSM entries."""
+        nc = self.freq_data.num_channels
+        ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
+        ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
+        ind_reim = np.hstack([ind_im0, ind_im0]) if self.r_diag else np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
+        return ind, ind_reim
+
+    def _build_dictionary(self, f):
+        """Build the real-valued CMF sensing matrix (dictionary) for one frequency."""
+        ind, ind_reim = self._csm_indices
+        h = self.steer.transfer(f).T
+        nc = h.shape[0]
+        num_points = h.shape[1]
+
+        Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
+        Ac = Bc.reshape(nc * nc, num_points)
+
+        A = Ac[ind, :]
+        return np.vstack([A.real, A.imag])[ind_reim, :]
+
+    def _vectorize_csm(self, csm):
+        """Vectorize one CSM using the same reduction as `_build_dictionary`."""
+        ind, ind_reim = self._csm_indices
+        nc = csm.shape[-1]
+        R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
+        return np.vstack([R.real, R.imag])[ind_reim, :]
+
     def _calc(self, ind):
         """
         Calculates the result for the frequencies defined by :attr:`freq_data`.
@@ -1677,50 +1723,14 @@ class BeamformerCMF(BeamformerBase):
         This method only returns values through :attr:`_ac` and :attr:`_fr`
         """
         f = self._f
-
-        # function to repack complex matrices to deal with them in real number space
-        def realify(matrix):
-            return np.vstack([matrix.real, matrix.imag])
-
-        # prepare calculation
-        nc = self.freq_data.num_channels
         num_points = self.steer.grid.size
         unit = self.unit_mult
 
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-
-            h = self.steer.transfer(f[i]).T
-
-            # reduced Kronecker product (only where solution matrix != 0)
-            Bc = (h[:, :, np.newaxis] * h.conjugate().T[np.newaxis, :, :]).transpose(2, 0, 1)
-            Ac = Bc.reshape(nc * nc, num_points)
-
-            # get indices for upper triangular matrices (use np.tril b/c transposed)
-            ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
-
-            ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
-            if self.r_diag:
-                # omit main diagonal for noise reduction
-                ind_reim = np.hstack([ind_im0, ind_im0])
-            else:
-                # take all real parts -- also main diagonal
-                ind_reim = np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
-                ind_reim[0] = True  # why this ?
-
-            A = realify(Ac[ind, :])[ind_reim, :]
-            # use csm.T for column stacking reshape!
-            R = realify(np.reshape(csm.T, (nc * nc, 1))[ind, :])[ind_reim, :] * unit
+            A = self._build_dictionary(f[i])
+            R = self._vectorize_csm(csm) * unit  # scaling applied here now
             # choose method
-            if self.method == 'LassoLars':
-                model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'LassoLarsBIC':
-                model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
-            elif self.method == 'OMPCV':
-                model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
-            elif self.method == 'NNLS':
-                model = LinearRegression(positive=True)
-
             if self.method == 'Split_Bregman' and config.have_pylops:
                 from pylops import Identity, MatrixMult
                 from pylops.optimization.sparsity import splitbregman
@@ -1792,6 +1802,21 @@ class BeamformerCMF(BeamformerBase):
 
                 self._ac[i] /= unit
             else:
+                sklearn_ndict = _get_sklearn_ndict()
+                LassoLars, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
+                    'LassoLars',
+                    'LassoLarsIC',
+                    'LinearRegression',
+                    'OrthogonalMatchingPursuitCV',
+                )
+                if self.method == 'LassoLars':
+                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
+                elif self.method == 'LassoLarsBIC':
+                    model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
+                elif self.method == 'OMPCV':
+                    model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
+                elif self.method == 'NNLS':
+                    model = LinearRegression(positive=True)
                 # from sklearn 1.2, normalize=True does not work the same way anymore and the
                 # pipeline approach with StandardScaler does scale in a different way, thus we
                 # monkeypatch the code and normalize ourselves to make results the same over
@@ -2087,19 +2112,19 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             A = hh.T
             # eigenvalues and vectors
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
-            eva, eve = spla.eigh(csm)
-            eva = eva[::-1]
-            eve = eve[:, ::-1]
+            eigvals, eigvecs = spla.eigh(csm)
+            eigvals = eigvals[::-1]
+            eigvecs = eigvecs[:, ::-1]
             # set small values zo 0, lowers numerical errors in simulated data
-            eva[eva < max(eva) / 1e12] = 0
+            eigvals[eigvals < max(eigvals) / 1e12] = 0
             # init sources
             qi = np.zeros([n + m, num_points], dtype='complex128')
             # Select the number of coherent modes to be processed referring to the eigenvalue
             # distribution.
             for s in list(range(m, n + m)):
-                if eva[s] > 0:
+                if eigvals[s] > 0:
                     # Generate the corresponding eigenmodes
-                    emode = np.array(np.sqrt(eva[s]) * eve[:, s], dtype='complex128')
+                    emode = np.array(np.sqrt(eigvals[s]) * eigvecs[:, s], dtype='complex128')
                     # choose method for computation
                     if self.method == 'Suzuki':
                         leftpoints = num_points
@@ -2163,6 +2188,15 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                         unit = self.unit_mult
                         AB = np.vstack([np.hstack([A.real, -A.imag]), np.hstack([A.imag, A.real])])
                         R = np.hstack([emode.real.T, emode.imag.T]) * unit
+                        LassoLars, LassoLarsCV, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV = (
+                            _get_sklearn_linear_model(
+                                'LassoLars',
+                                'LassoLarsCV',
+                                'LassoLarsIC',
+                                'LinearRegression',
+                                'OrthogonalMatchingPursuitCV',
+                            )
+                        )
                         if self.method == 'LassoLars':
                             model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
                         elif self.method == 'LassoLarsBIC':
@@ -2345,8 +2379,8 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
         bmin = np.array(tuple(map(min, self.bounds)))
         bmax = np.array(tuple(map(max, self.bounds)))
         for i in ind:
-            eva = np.array(self.freq_data.eva[i], dtype='float64')
-            eve = np.array(self.freq_data.eve[i], dtype='complex128')
+            eigvals = np.array(self.freq_data.eigvals[i], dtype='float64')
+            eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             k = 2 * np.pi * f[i] / env.c
             for j, n in enumerate(eva_list):
                 # print(f[i],n)
@@ -2361,7 +2395,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                         self.r_diag,
                         normfactor,
                         (r0, rm, k),
-                        (np.ones(1), eve[:, n : n + 1]),
+                        (np.ones(1), eigvecs[:, n : n + 1]),
                     )[0][0]
 
                 # simplical global homotopy optimizer
@@ -2371,8 +2405,7 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
                 # store result for position
                 self._gpos[:, i1] = oR['x']
                 # store result for level
-                self._ac[i, i1] = eva[n] / num_channels
-                # print(oR['x'],eva[n]/num_channels,oR)
+                self._ac[i, i1] = eigvals[n] / num_channels
             self._fr[i] = 1
 
 
@@ -2393,8 +2426,7 @@ def L_p(x):  # noqa: N802
         The corresponding sound pressure levels in dB.
         If `x<0`, -350.0 dB is returned.
     """
-    # new version to prevent division by zero warning for float32 arguments
-    return 10 * np.log10(np.clip(x / 4e-10, 1e-35, None))
+    return 10 * np.log10(np.maximum(x / 4e-10, np.finfo(x.dtype).eps))
 
 
 #    return where(x>0, 10*np.log10(x/4e-10), -1000.)
