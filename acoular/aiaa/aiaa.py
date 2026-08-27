@@ -77,7 +77,7 @@ class TimeSamplesAIAABenchmark(TimeSamples):
             self._data_transposed = False
             try:
                 data_nominal_samples = self._h5f.get_node_attribute(self.data, 'sampleCount')
-            except AttributeError: # proceed even if loading the attribute is not possible
+            except AttributeError:  # proceed even if loading the attribute is not possible
                 data_nominal_samples = np.max(data_shape)
 
             if data_shape[0] == data_nominal_samples:
