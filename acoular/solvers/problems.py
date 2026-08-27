@@ -79,13 +79,13 @@ class LeastSquaresProblem(BaseProblem):
     _dictionary_scaling = Str('none')
 
     #: Name of the scaling transform applied to dictionary columns.
-    dictionary_scaling = Property(depends_on='_dictionary_scaling')
+    dictionary_scaling = Property(depends_on=['_dictionary_scaling'])
 
     #: Private storage for :attr:`data_scaling`.
     _data_scaling = Str('none')
 
     #: Name of the scaling transform applied to measurement data.
-    data_scaling = Property(depends_on='_data_scaling')
+    data_scaling = Property(depends_on=['_data_scaling'])
 
     #: Unique identifier for this problem configuration. (read-only)
     digest = Property(depends_on=['solver.digest', 'nonnegative', '_dictionary_scaling', '_data_scaling'])
