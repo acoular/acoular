@@ -3,7 +3,12 @@ What's new
 
 Upcoming
 ------------------------
+**New features**
+
+    - Extends functionality of :class:`~acoular.aiaa.TimeSamplesAIAABenchmark` to handle transposed data
+
 **Documentation**
+
     - use new Acoular themeing for the docs and examples
 
 26.08
