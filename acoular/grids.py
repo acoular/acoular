@@ -7,6 +7,7 @@ Implement support for multidimensional grids and integration sectors.
 .. inheritance-diagram::
                 acoular.grids.Grid
                 acoular.grids.RectGrid
+                acoular.grids.PolarGrid
                 acoular.grids.RectGrid3D
                 acoular.grids.ImportGrid
                 acoular.grids.LineGrid
@@ -27,6 +28,7 @@ Implement support for multidimensional grids and integration sectors.
 
     Grid
     RectGrid
+    PolarGrid
     RectGrid3D
     ImportGrid
     LineGrid
@@ -470,6 +472,130 @@ class RectGrid(Grid):
             return self.index(center[0], center[1])
         return np.array(xis), np.array(yis)
         # return np.arange(self.size)[inds]
+
+
+class PolarGrid(Grid):
+    """
+    Provides a 2D polar grid for the beamforming results.
+
+    The grid has circular-sector-like cells with four corners and
+    is on a plane perpendicular to the z-axis.
+    It is defined by lower and upper r- and  phi-limits and the
+    z co-ordinate, and the increments in r and phi direction respectively.
+    """
+
+    #: Inner radius of the grid; defaults to 0.1.
+    r_min = Float(0.1)
+
+    #: Outer radius of the grid; defaults to 1.
+    r_max = Float(1.0)
+
+    #: Minimum/starting angle of the grid; defaults to 0.0.
+    phi_min = Float(0.0)
+
+    #: Maximum angle of the grid; defaults to 360.
+    phi_max = Float(360.0)
+
+    #: Position on z-axis; defaults to 1.0.
+    z = Float(1.0)
+
+    #: Increment in r-direction, defaults to 0.1.
+    dr = Float(0.1)
+
+    #: Increment in phi-direction, defaults to 4.0.
+    dphi = Float(4.0)
+
+    #: Number of grid points along r; is set automatically. (read only)
+    nrsteps = Property()
+
+    #: Number of grid points along phi; is set automatically. (read only)
+    nphisteps = Property()
+
+    #: A unique identifier for the grid, based on its properties. (read-only)
+    digest = Property(depends_on=['r_min', 'r_max', 'phi_min', 'phi_max', 'z', 'dr', 'dphi'])
+
+    @property_depends_on(['nrsteps', 'nphisteps', 'r_min'])
+    def _get_size(self):
+        if self.r_min == 0:
+            return self.nrsteps * self.nphisteps - self.nphisteps + 1
+        return self.nrsteps * self.nphisteps
+
+    @property_depends_on(['nrsteps', 'nphisteps'])
+    def _get_shape(self):
+        # if self.r_min == 0:
+        #     return (???)  # dimensional problem since it is not even with center point...
+        return (self.nrsteps, self.nphisteps)
+
+    @property_depends_on(['r_min', 'r_max', 'dr'])
+    def _get_nrsteps(self):
+        dr_abs = abs(self.dr)
+        if dr_abs != 0:
+            return round((abs(self.r_max - self.r_min) + dr_abs) / dr_abs)
+        return 1
+
+    @property_depends_on(['phi_min', 'phi_max', 'dphi'])
+    def _get_nphisteps(self):
+        diff = self.phi_max - self.phi_min
+        dphi_abs = abs(self.dphi)
+        if diff == 360.0:
+            diff -= dphi_abs
+
+        if dphi_abs != 0:
+            return round((diff + dphi_abs) / dphi_abs)
+        return 1
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+    def __validate_input_radii_and_angles(self):
+        """Validates the user input parameter (radii and angles)."""
+        if self.r_max < self.r_min:
+            msg = 'r_max needs to be greater than or equal to r_min!'
+            raise ValueError(msg)
+        if self.phi_max < self.phi_min:
+            msg = 'phi_max needs to be greater than or equal to phi_min!'
+        bool_list = [param >= 0 for param in (self.r_max, self.r_min, self.dr, self.phi_max, self.phi_min, self.dphi)]
+        if not all(bool_list):
+            msg = 'A negative value was provided!'
+            raise ValueError(msg)
+        if self.phi_max > 360 or self.phi_min > 360:
+            msg = 'Angles must not exceed 360 degrees!'
+            raise ValueError(msg)
+            # all problematic parameter values considered?
+
+    @property_depends_on(['r_min', 'r_max', 'phi_min', 'phi_max', 'dr', 'dphi'])
+    def _get_pos(self):
+        """
+        Calculates cartesian grid coordinates for the PolarGrid.
+
+        Returns
+        -------
+        array of floats of shape (3, [gridsize])
+            The grid point (x, y, z)-coordinates in one array.
+        """
+        # first validate input parameter before calculating grid positions:
+        self.__validate_input_radii_and_angles()
+        # mgrid[{start} : {stop} : {nsteps}j ]
+        bpos = np.mgrid[
+            self.r_min : self.r_max : self.nrsteps * 1j,
+            self.phi_min : self.phi_max : self.nphisteps * 1j,
+            self.z : self.z + 0.1,
+        ]
+        bpos.resize((3, self.nrsteps * self.nphisteps))  # Waring: numpy.ndarray.resize is depracated in numpy 2.5.0
+
+        # all points (r=0,phi,z) map to (0,0,z), therefore keep just one point with r=0
+        if self.r_min == 0:
+            del_columns = list(range(self.nphisteps - 1))
+            bpos = np.delete(bpos, del_columns, 1)
+
+        # transform cylindrical to cartesian coordinates
+        xpos = np.empty((3, self.size))
+        xpos[0, :] = bpos[0, :] * np.cos(bpos[1, :] / 180.0 * np.pi)
+        xpos[1, :] = bpos[0, :] * np.sin(bpos[1, :] / 180.0 * np.pi)
+        xpos[2, :] = bpos[2, :]
+
+        return xpos
 
 
 class RectGrid3D(RectGrid):
