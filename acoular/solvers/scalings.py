@@ -41,7 +41,7 @@ array([1., 2.])
 
 Registered names are stable and cannot be overwritten:
 
->>> register_problem_scaling('doc_half', half_scaling) # doctest: +ELLIPSIS
+>>> register_problem_scaling('doc_half', half_scaling)  # doctest: +ELLIPSIS
 Traceback (most recent call last):
 ...
 ValueError: Problem scaling 'doc_half' is already registered.

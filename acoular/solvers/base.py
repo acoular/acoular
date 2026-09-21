@@ -6,6 +6,7 @@
 .. autosummary::
     :toctree: generated/
 
+    SolverOutput
     SolverBase
 """
 
@@ -13,7 +14,23 @@ from abc import abstractmethod
 
 from acoular.internal import digest
 
-from traits.api import ABCHasStrictTraits, Dict, Property, Str, cached_property
+from traits.api import ABCHasStrictTraits, Any, Dict, Property, Str, cached_property
+
+
+class SolverOutput(ABCHasStrictTraits):
+    """Container for a solver's output.
+
+    Keeps the solved source strengths together with optional backend-specific
+    diagnostics. Deliberately does not carry a frequency index — mapping
+    results to frequency bins is the responsibility of the calling beamformer.
+    """
+
+    #: Solved source strengths.
+    solution = Any()
+
+    #: Optional backend-specific diagnostics (e.g. status, iteration count,
+    #: residual norms). Intentionally has no fixed schema.
+    info = Dict()
 
 
 class SolverBase(ABCHasStrictTraits):
@@ -28,10 +45,10 @@ class SolverBase(ABCHasStrictTraits):
     backend = Str()
 
     #: Additional backend-specific keyword arguments.
-    extra_backend_kwargs = Dict()
+    backend_kwargs = Dict()
 
     #: Unique identifier for this solver configuration. (read-only)
-    digest = Property(depends_on=['backend', 'extra_backend_kwargs'])
+    digest = Property(depends_on=['backend', 'backend_kwargs'])
 
     @cached_property
     def _get_digest(self):
@@ -57,6 +74,7 @@ class SolverBase(ABCHasStrictTraits):
 
         Returns
         -------
-        array-like of shape (n_sources,)
-            Solved source strengths in the scaled problem coordinates.
+        SolverOutput
+            Solved source strengths (in `.solution`) plus optional backend
+            diagnostics (in `.info`), in the scaled problem coordinates.
         """
