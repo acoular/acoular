@@ -53,6 +53,17 @@ from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
 from .microphones import MicGeom
+from .solvers import (
+    FISTALassoSolver,
+    L1RegularizedLeastSquaresProblem,
+    LassoLarsBICSolver,
+    LassoLarsSolver,
+    LBFGSBSolver,
+    LeastSquaresProblem,
+    NNLSSolver,
+    OMPCVSolver,
+    SplitBregmanLassoSolver,
+)
 from .spectra import PowerSpectra
 from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
@@ -1604,7 +1615,32 @@ class BeamformerCMF(BeamformerBase):
 
     This is not really a beamformer, but an inverse method.
     See :cite:`Yardibi2008` for details.
+
+    The preferred way to configure the underlying inverse problem is explicit
+    problem composition: attach a fully configured :class:`~acoular.solvers.LeastSquaresProblem`
+    (or :class:`~acoular.solvers.L1RegularizedLeastSquaresProblem`) instance, which
+    in turn owns its solver, via :attr:`problem`:
+
+    >>> from acoular.solvers import L1RegularizedLeastSquaresProblem
+    >>> bf = BeamformerCMF(
+    ...     problem=L1RegularizedLeastSquaresProblem(
+    ...         alpha=1e-9,
+    ...         nonnegative=True,
+    ...         dictionary_scaling='unit_l2',
+    ...         unit_mult=1e9,
+    ...         solver=some_configured_solver,
+    ...     ),
+    ... )  # doctest: +SKIP
+
+    Concrete solver backends are implemented and used by :meth:`_calc`. If :attr:`problem`
+    is not explicitly set, a default is derived from the built-in :attr:`method` trait
+    (and related traits such as :attr:`alpha`, :attr:`n_iter`, and :attr:`show`) for
+    backward compatibility.
     """
+
+    #: Optional problem/solver abstraction. If not set, :meth:`_calc` derives a default
+    #: from the legacy :attr:`method` configuration.
+    problem = Instance(LeastSquaresProblem)
 
     #: Type of fit method to be used ('LassoLars', 'LassoLarsBIC',
     #: 'OMPCV' or 'NNLS', defaults to 'LassoLars').
@@ -1656,6 +1692,7 @@ class BeamformerCMF(BeamformerBase):
             'r_diag',
             'precision',
             'steer.inv_digest',
+            'problem.digest',
         ],
     )
 
@@ -1704,131 +1741,73 @@ class BeamformerCMF(BeamformerBase):
         R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
         return np.vstack([R.real, R.imag])[ind_reim, :]
 
-    def _calc(self, ind):
+    def _get_problem_for_method(self):
         """
-        Calculates the result for the frequencies defined by :attr:`freq_data`.
+        Build the default problem/solver pair for the current legacy `method` configuration.
 
-        This is an internal helper function that is automatically called when
-        accessing the beamformer's :attr:`result` or calling
-        its :meth:`synthetic` method.
-
-        Parameters
-        ----------
-        ind : array of int
-            This array contains all frequency indices for which (re)calculation is
-            to be performed
-
-        Returns
-        -------
-        This method only returns values through :attr:`_ac` and :attr:`_fr`
+        Used by :meth:`_calc` when :attr:`problem` is not explicitly provided.
         """
-        f = self._f
-        num_points = self.steer.grid.size
         unit = self.unit_mult
+        if self.method == 'Split_Bregman':
+            return L1RegularizedLeastSquaresProblem(
+                solver=SplitBregmanLassoSolver(backend_kwargs={'niter_outer': self.n_iter, 'show': self.show}),
+                alpha=self.alpha,
+                dictionary_scaling='none',
+                unit_mult=unit,
+            )
+        if self.method == 'FISTA':
+            return L1RegularizedLeastSquaresProblem(
+                solver=FISTALassoSolver(backend_kwargs={'niter': self.n_iter, 'show': self.show}),
+                alpha=self.alpha,
+                dictionary_scaling='none',
+                unit_mult=unit,
+            )
+        if self.method == 'fmin_l_bfgs_b':
+            return LeastSquaresProblem(
+                solver=LBFGSBSolver(backend_kwargs={'maxiter': self.n_iter}),
+                nonnegative=True,
+                dictionary_scaling='none',
+                unit_mult=unit,
+            )
+        if self.method == 'NNLS':
+            return LeastSquaresProblem(
+                solver=NNLSSolver(),
+                nonnegative=True,
+                dictionary_scaling='unit_l2',
+                unit_mult=unit,
+            )
+        if self.method == 'LassoLars':
+            return L1RegularizedLeastSquaresProblem(
+                solver=LassoLarsSolver(backend_kwargs={'max_iter': self.n_iter}),
+                alpha=self.alpha,
+                nonnegative=True,
+                dictionary_scaling='unit_l2',
+                unit_mult=unit,
+            )
+        if self.method == 'LassoLarsBIC':
+            return L1RegularizedLeastSquaresProblem(
+                solver=LassoLarsBICSolver(backend_kwargs={'max_iter': self.n_iter}),
+                nonnegative=True,
+                dictionary_scaling='unit_l2',
+                unit_mult=unit,
+            )
+        return LeastSquaresProblem(  # OMPCV
+            solver=OMPCVSolver(),
+            dictionary_scaling='unit_l2',
+            unit_mult=unit,
+        )
 
+    def _calc(self, ind):
+        f = self._f
+        problem = self.problem if self.problem is not None else self._get_problem_for_method()
         for i in ind:
             csm = np.array(self.freq_data.csm[i], dtype='complex128', copy=True)
             A = self._build_dictionary(f[i])
-            R = self._vectorize_csm(csm) * unit  # scaling applied here now
-            # choose method
-            if self.method == 'Split_Bregman' and config.have_pylops:
-                from pylops import Identity, MatrixMult
-                from pylops.optimization.sparsity import splitbregman
+            R = self._vectorize_csm(csm)
 
-                Oop = MatrixMult(A)  # transfer operator
-                Iop = self.alpha * Identity(num_points)  # regularisation
-                self._ac[i], iterations, cost = splitbregman(
-                    Op=Oop,
-                    RegsL1=[Iop],
-                    y=R[:, 0],
-                    niter_outer=self.n_iter,
-                    niter_inner=5,
-                    RegsL2=None,
-                    dataregsL2=None,
-                    mu=1.0,
-                    epsRL1s=[1],
-                    tol=1e-10,
-                    tau=1.0,
-                    show=self.show,
-                )
-                self._ac[i] /= unit
-
-            elif self.method == 'FISTA' and config.have_pylops:
-                from pylops import MatrixMult
-                from pylops.optimization.sparsity import fista
-
-                Oop = MatrixMult(A)  # transfer operator
-                self._ac[i], iterations, cost = fista(
-                    Op=Oop,
-                    y=R[:, 0],
-                    niter=self.n_iter,
-                    eps=self.alpha,
-                    alpha=None,
-                    tol=1e-10,
-                    show=self.show,
-                )
-                self._ac[i] /= unit
-            elif self.method == 'fmin_l_bfgs_b':
-                # function to minimize
-                def function(x):
-                    # function
-                    func = x.T @ A.T @ A @ x - 2 * R.T @ A @ x + R.T @ R
-                    # derivitaive
-                    der = 2 * A.T @ A @ x.T[:, np.newaxis] - 2 * A.T @ R
-                    return func[0].T, der[:, 0]
-
-                # initial guess
-                x0 = np.ones([num_points])
-                # boundaries - set to non negative
-                boundaries = np.tile((0, np.inf), (len(x0), 1))
-
-                # optimize
-                self._ac[i], yval, dicts = fmin_l_bfgs_b(
-                    function,
-                    x0,
-                    fprime=None,
-                    args=(),
-                    approx_grad=0,
-                    bounds=boundaries,
-                    m=10,
-                    factr=10000000.0,
-                    pgtol=1e-05,
-                    epsilon=1e-08,
-                    maxfun=15000,
-                    maxiter=self.n_iter,
-                    callback=None,
-                    maxls=20,
-                )
-
-                self._ac[i] /= unit
-            else:
-                sklearn_ndict = _get_sklearn_ndict()
-                LassoLars, LassoLarsIC, LinearRegression, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
-                    'LassoLars',
-                    'LassoLarsIC',
-                    'LinearRegression',
-                    'OrthogonalMatchingPursuitCV',
-                )
-                if self.method == 'LassoLars':
-                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True, **sklearn_ndict)
-                elif self.method == 'LassoLarsBIC':
-                    model = LassoLarsIC(criterion='bic', max_iter=self.n_iter, positive=True, **sklearn_ndict)
-                elif self.method == 'OMPCV':
-                    model = OrthogonalMatchingPursuitCV(**sklearn_ndict)
-                elif self.method == 'NNLS':
-                    model = LinearRegression(positive=True)
-                # from sklearn 1.2, normalize=True does not work the same way anymore and the
-                # pipeline approach with StandardScaler does scale in a different way, thus we
-                # monkeypatch the code and normalize ourselves to make results the same over
-                # different sklearn versions
-                norms = spla.norm(A, axis=0)
-                # get rid of sklearn warnings that appear for sklearn<1.2 despite any settings
-                with warnings.catch_warnings():
-                    warnings.simplefilter('ignore', category=FutureWarning)
-                    # normalized A
-                    model.fit(A / norms, R[:, 0])
-                # recover normalization in the coef's
-                self._ac[i] = model.coef_[:] / norms / unit
+            # start_value defaults to None; per-frequency warm-starting could be added here later
+            result = problem.solve(A, R[:, 0])
+            self._ac[i] = result.solution
             self._fr[i] = 1
 
 
