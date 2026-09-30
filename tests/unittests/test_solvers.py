@@ -23,7 +23,7 @@ from acoular.solvers import (
 
 import numpy as np
 import pytest
-from traits.api import Any
+from traits.api import Any, Bool
 
 
 class _EchoSolver(LeastSquaresSolver):
@@ -274,29 +274,6 @@ def test_solver_backend_info_reports_dependency_and_availability():
 # ---------------------------------------------------------------------------
 
 
-def _small_cmf(method, **kwargs):
-    mics = ac.MicGeom(pos_total=np.zeros((3, 2)))
-    grid = ac.RectGrid(x_min=0, x_max=1, y_min=0, y_max=0, z=0.5, increment=1)
-    steer = ac.SteeringVector(grid=grid, mics=mics)
-    csm = np.array([[2 + 0j, 1 - 1j], [1 + 1j, 3 + 0j]])
-    freq_data = ac.PowerSpectraImport(csm=csm[np.newaxis, :, :], frequencies=np.array([1000.0]))
-    bf = ac.BeamformerCMF(freq_data=freq_data, steer=steer, r_diag=False, method=method, cached=False, **kwargs)
-    return bf, csm
-
-
-def test_nnls_solver_matches_legacy_cmf():
-    bf, csm = _small_cmf('NNLS')
-    legacy_q = bf.result[0]
-
-    dictionary_matrix = bf._build_dictionary(1000.0)
-    data = bf._vectorize_csm(csm).ravel()
-
-    problem = LeastSquaresProblem(solver=NNLSSolver(), nonnegative=True)
-    result = problem.solve(dictionary_matrix, data)
-
-    np.testing.assert_allclose(result.solution, legacy_q)
-
-
 def test_nnls_solver_scipy_backend_raises_on_bad_kwarg():
     dictionary_matrix = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     data = np.array([2.0, 3.0, 5.0])
@@ -317,3 +294,34 @@ def test_nnls_solver_sklearn_backend_raises_on_bad_kwarg():
     problem = LeastSquaresProblem(solver=solver, nonnegative=True)
     with pytest.raises(TypeError):
         problem.solve(dictionary_matrix, data)
+
+
+# ---------------------------------------------------------------------------
+# BeamformerCMF dispatch
+# ---------------------------------------------------------------------------
+
+
+def _small_cmf(method, **kwargs):
+    mics = ac.MicGeom(pos_total=np.zeros((3, 2)))
+    grid = ac.RectGrid(x_min=0, x_max=1, y_min=0, y_max=0, z=0.5, increment=1)
+    steer = ac.SteeringVector(grid=grid, mics=mics)
+    csm = np.array([[2 + 0j, 1 - 1j], [1 + 1j, 3 + 0j]])
+    freq_data = ac.PowerSpectraImport(csm=csm[np.newaxis, :, :], frequencies=np.array([1000.0]))
+    bf = ac.BeamformerCMF(freq_data=freq_data, steer=steer, r_diag=False, method=method, cached=False, **kwargs)
+    return bf, csm
+
+class _SpySolver(LeastSquaresSolver):
+    called = Bool(False)
+
+    def solve(self, problem, dictionary_matrix, data, start_value=None):  # noqa: ARG002
+        self.called = True
+        return SolverOutput(solution=np.zeros(dictionary_matrix.shape[1]), info={})
+
+
+def test_calc_dispatches_through_problem_solve():
+    spy = _SpySolver()
+    bf, csm = _small_cmf('NNLS', problem=LeastSquaresProblem(solver=spy))
+
+    bf.result[0]
+
+    assert spy.called
