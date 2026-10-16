@@ -340,7 +340,9 @@ class BeamformerTimeTraj(BeamformerTime):
         ma = spla.norm(vvec) / self.steer.env.c  # machnumber
         fdv = (vvec / np.sqrt((vvec * vvec).sum()))[:, np.newaxis]  # unit vecor velocity
         mpos = self.steer.mics.pos[:, np.newaxis, :]
-        rmv = tpos[:, :, np.newaxis] - mpos
+        # vectors from the grid point (source) to the microphones, as in MovingPointSource,
+        # so that the radial Mach number is positive for an approaching source
+        rmv = mpos - tpos[:, :, np.newaxis]
         return (ma * np.sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
 
     def get_r0(self, tpos):
