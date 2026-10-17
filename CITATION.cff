@@ -47,6 +47,8 @@ authors:
   - given-names: "Siavash"
     family-names: "Zaid"
     affiliation: "Department of Engineering Acoustics, TU Berlin"
+  - given-names: "Anton"
+    family-names: "Soloviev"
 identifiers:
   - description: "acoular: all versions"
     type: "doi"
