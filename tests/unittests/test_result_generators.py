@@ -105,7 +105,6 @@ def test_result_block_stability(obj, num):
         ac.OctaveFilterBank: 'Issue #654',
         ac.PointSource: 'Issue #654',
         ac.PointSourceDipole: 'Issue #654',
-        ac.RFFT: 'Issue #654',
         ac.TimeReverse: 'Issue #654',
     }
     if reason := xfails.get(type(obj)):
