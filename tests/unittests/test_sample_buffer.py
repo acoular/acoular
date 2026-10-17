@@ -38,3 +38,26 @@ def test_increase_buffer(create_time_data_source, num_channels):
         # here we increase the num returned by the buffer
         buffer.result_num = 51  # greater than buffer size
     np.testing.assert_array_equal(data, collected_data)
+
+
+@pytest.mark.parametrize('num,source_num', [(3, 8), (8, 3), (7, 8)])
+@pytest.mark.parametrize('dtype', [np.float32, np.float64, np.complex128])
+def test_retained_blocks(num, source_num, dtype):
+    """Refilling must not change previously returned full or partial blocks."""
+    data = np.arange(46, dtype=float).reshape(23, 2).astype(dtype)
+    source = ac.TimeSamples(data=data, sample_freq=64)
+    buffer = ac.process.SamplesBuffer(source=source, length=16, source_num=source_num, dtype=dtype)
+    blocks = list(buffer.result(num))
+    np.testing.assert_array_equal(np.concatenate(blocks), data)
+    assert all(block.dtype == data.dtype for block in blocks)
+    for left, right in zip(blocks, blocks[1:], strict=False):
+        assert not np.shares_memory(left, right)
+
+
+@pytest.mark.parametrize('num', [1, 5, 11])
+def test_retained_irfft(num):
+    """An inverse FFT roundtrip remains correct when output blocks are retained."""
+    data = np.arange(40, dtype=float).reshape(40, 1)
+    source = ac.TimeSamples(data=data, sample_freq=64)
+    inverse = ac.IRFFT(source=ac.RFFT(source=source, block_size=8))
+    np.testing.assert_allclose(np.concatenate(list(inverse.result(num))), data, atol=1e-13)
