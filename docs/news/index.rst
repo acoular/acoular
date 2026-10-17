@@ -13,6 +13,7 @@ Upcoming
 
 **Bugfixes**
 
+    - preserves yielded :class:`~acoular.fprocess.RFFT` spectral blocks when the generator advances, so retained full and partial batches remain valid
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change
 
 26.08
