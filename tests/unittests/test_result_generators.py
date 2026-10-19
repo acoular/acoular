@@ -98,7 +98,6 @@ def _retained_blocks(generator):
 def test_result_block_stability(obj, num):
     """A retained block must not change when its generator advances."""
     xfails = {
-        ac.IRFFT: 'Issue #654',
         ac.IntegratorSectorTime: 'Issue #654',
         ac.MaskedTimeOut: 'Issue #654',
         ac.MovingPointSourceDipole: 'Issue #654',
