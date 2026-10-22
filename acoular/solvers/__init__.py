@@ -21,6 +21,7 @@
     LassoLarsBICSolver
     SolverBase
     LeastSquaresSolver
+    BackendDispatchSolver
     LBFGSBSolver
     FISTALassoSolver
     SplitBregmanLassoSolver
@@ -49,6 +50,7 @@ from .base import SolverBase, SolverOutput
 from .problems import BaseProblem, L1RegularizedLeastSquaresProblem, LeastSquaresProblem
 from .scalings import available_problem_scalings, get_problem_scaling, register_problem_scaling
 from .solver import (
+    BackendDispatchSolver,
     FISTALassoSolver,
     LassoLarsBICSolver,
     LassoLarsSolver,
@@ -60,6 +62,7 @@ from .solver import (
 )
 
 __all__ = [
+    'BackendDispatchSolver',
     'BaseProblem',
     'FISTALassoSolver',
     'L1RegularizedLeastSquaresProblem',

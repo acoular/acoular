@@ -9,3 +9,4 @@ This guide is an overview and explains important features of Acoular.
    get_started
    lazy_evaluation
    caching
+   microphone_array_methods

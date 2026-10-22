@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1200" viewBox="0 0 1000 1200" role="img" aria-label="Flow diagram: BeamformerCMF._calc assembles a dictionary matrix A from the steering vector and a vectorized CSM R from the measured cross-spectral matrix, picks a Problem either from an explicit problem attribute or derived from the legacy method trait, the Problem scales the dictionary and data and delegates to its Solver, the Solver dispatches through the backend registry to a concrete backend function, with a dashed callout showing a user-supplied custom solver plugging into the same slot, and the result is written back into self._ac[i].">
+  <style>
+    text { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; fill: #1b2326; }
+    .mono { font-family: ui-monospace, 'SF Mono', Consolas, 'Liberation Mono', monospace; }
+    .box-title { font-size: 13.5px; font-weight: 600; }
+    .box-line { font-size: 12px; fill: #5b6a70; }
+    .edge-label { font-size: 11px; fill: #5b6a70; }
+    .pill-label { font-size: 12px; font-weight: 600; fill: #ffffff; letter-spacing: 0.02em; }
+  </style>
+
+  <rect x="0" y="0" width="1000" height="1200" fill="#ffffff"></rect>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1b2326"></path>
+    </marker>
+  </defs>
+
+  <!-- ===================== Header ===================== -->
+  <rect x="120" y="24" width="560" height="64" rx="8" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <text x="400" y="52" text-anchor="middle" class="box-title mono">BeamformerCMF._calc(ind)</text>
+  <text x="400" y="72" text-anchor="middle" class="box-line">for each frequency bin i in ind</text>
+
+  <line x1="400" y1="88" x2="400" y2="112" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+  <!-- ===================== Stage: assembly ===================== -->
+  <rect x="170" y="116" width="460" height="32" rx="16" fill="#0d9488"></rect>
+  <text x="400" y="137" text-anchor="middle" class="pill-label">DICTIONARY &amp; CSM ASSEMBLY</text>
+
+  <line x1="400" y1="148" x2="400" y2="174" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="166" class="edge-label">assemble A, R</text>
+
+  <!-- ===================== Row: inputs ===================== -->
+  <rect x="40" y="178" width="330" height="40" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="40" y="178" width="4" height="40" fill="#0d9488"></rect>
+  <text x="60" y="203" class="box-title mono">steer.transfer(f)</text>
+
+  <rect x="430" y="178" width="330" height="40" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="430" y="178" width="4" height="40" fill="#0d9488"></rect>
+  <text x="450" y="203" class="box-title mono">freq_data.csm[i]</text>
+
+  <line x1="205" y1="218" x2="205" y2="258" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="217" y="242" class="edge-label">propagation values</text>
+  <line x1="595" y1="218" x2="595" y2="258" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="607" y="242" class="edge-label">measured CSM</text>
+
+  <!-- ===================== Row: reduction ===================== -->
+  <rect x="40" y="260" width="330" height="40" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="40" y="260" width="4" height="40" fill="#0d9488"></rect>
+  <text x="60" y="285" class="box-title mono">_build_dictionary(f)</text>
+
+  <rect x="430" y="260" width="330" height="40" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="430" y="260" width="4" height="40" fill="#0d9488"></rect>
+  <text x="450" y="285" class="box-title mono">_vectorize_csm(csm)</text>
+
+  <line x1="205" y1="300" x2="205" y2="340" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="217" y="324" class="edge-label">select + reduce</text>
+  <line x1="595" y1="300" x2="595" y2="340" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="607" y="324" class="edge-label">same reduction</text>
+
+  <!-- ===================== Row: outputs A, R ===================== -->
+  <rect x="40" y="342" width="330" height="40" rx="6" fill="#ffffff" stroke="#0d9488" stroke-width="1.6"></rect>
+  <text x="205" y="367" text-anchor="middle" class="box-title mono">A &#8212; dictionary matrix</text>
+
+  <rect x="430" y="342" width="330" height="40" rx="6" fill="#ffffff" stroke="#0d9488" stroke-width="1.6"></rect>
+  <text x="595" y="367" text-anchor="middle" class="box-title mono">R &#8212; vectorized CSM</text>
+
+  <line x1="205" y1="382" x2="400" y2="416" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <line x1="595" y1="382" x2="400" y2="416" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+  <!-- ===================== Stage: routing ===================== -->
+  <rect x="170" y="420" width="460" height="32" rx="16" fill="#e11d48"></rect>
+  <text x="400" y="441" text-anchor="middle" class="pill-label">CHOOSING A PROBLEM</text>
+
+  <line x1="400" y1="452" x2="400" y2="478" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="470" class="edge-label">select problem</text>
+
+  <!-- ===================== Row: explicit vs derived problem ===================== -->
+  <rect x="40" y="482" width="330" height="56" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="40" y="482" width="4" height="56" fill="#e11d48"></rect>
+  <text x="60" y="505" class="box-title mono">self.problem</text>
+  <text x="60" y="522" class="box-line">explicit, user-supplied</text>
+
+  <rect x="430" y="482" width="330" height="56" rx="6" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="430" y="482" width="4" height="56" fill="#e11d48"></rect>
+  <text x="450" y="505" class="box-title mono">_get_problem_for_method()</text>
+  <text x="450" y="522" class="box-line">derived from legacy method</text>
+
+  <line x1="205" y1="538" x2="400" y2="572" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="150" y="558" class="edge-label">if problem is None,</text>
+  <line x1="595" y1="538" x2="400" y2="572" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="530" y="558" class="edge-label">use this instead</text>
+
+  <!-- ===================== Stage: problem & scaling ===================== -->
+  <rect x="170" y="576" width="460" height="32" rx="16" fill="#7c3aed"></rect>
+  <text x="400" y="597" text-anchor="middle" class="pill-label">SCALING &amp; PROBLEM SETUP</text>
+
+  <line x1="400" y1="608" x2="400" y2="634" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="626" class="edge-label">problem.solve(A, R)</text>
+
+  <!-- ===================== Problem box ===================== -->
+  <rect x="120" y="638" width="560" height="170" rx="8" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="120" y="638" width="4" height="170" fill="#7c3aed"></rect>
+  <text x="146" y="666" class="box-title mono">LeastSquaresProblem /</text>
+  <text x="146" y="684" class="box-title mono">L1RegularizedLeastSquaresProblem</text>
+  <text x="146" y="710" class="box-line">1. scale dictionary (dictionary_scaling)</text>
+  <text x="146" y="730" class="box-line">2. scale data &#215; unit_mult</text>
+  <text x="146" y="750" class="box-line">3. delegate to solver.solve(&#8230;)</text>
+  <text x="146" y="770" class="box-line">4. rescale result back</text>
+
+  <line x1="400" y1="808" x2="400" y2="834" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="826" class="edge-label">solver.solve(&#8230;)</text>
+
+  <!-- ===================== Stage: solving ===================== -->
+  <rect x="170" y="838" width="460" height="32" rx="16" fill="#d97706"></rect>
+  <text x="400" y="859" text-anchor="middle" class="pill-label">SOLVING</text>
+
+  <line x1="400" y1="870" x2="400" y2="896" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="888" class="edge-label">dispatch via registry</text>
+
+  <!-- ===================== Solver box + custom solver callout ===================== -->
+  <rect x="120" y="900" width="560" height="90" rx="8" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="120" y="900" width="4" height="90" fill="#d97706"></rect>
+  <text x="146" y="928" class="box-title mono">Solver</text>
+  <text x="146" y="946" class="box-line">NNLSSolver, LassoLarsSolver, FISTALassoSolver, &#8230;</text>
+  <text x="146" y="966" class="box-line mono">get_solver_backend(family, backend)</text>
+
+  <rect x="720" y="908" width="240" height="72" rx="8" fill="#eef6e0" stroke="#4d7c0f" stroke-width="1.6" stroke-dasharray="5,4"></rect>
+  <text x="840" y="933" text-anchor="middle" class="box-title" fill="#4d7c0f">problem= composition</text>
+  <text x="840" y="952" text-anchor="middle" class="box-line mono" fill="#4d7c0f">e.g. LassoLarsSolver(</text>
+  <text x="840" y="968" text-anchor="middle" class="box-line mono" fill="#4d7c0f">  backend='sklearn')</text>
+  <line x1="718" y1="944" x2="686" y2="944" stroke="#4d7c0f" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#arrow)"></line>
+  <text x="700" y="900" text-anchor="middle" class="edge-label" fill="#4d7c0f">plugs into the same slot</text>
+
+  <line x1="400" y1="990" x2="400" y2="1016" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+  <text x="412" y="1008" class="edge-label">backend function</text>
+
+  <!-- ===================== Backend box ===================== -->
+  <rect x="120" y="1020" width="560" height="80" rx="8" fill="#ffffff" stroke="#c7d0d3"></rect>
+  <rect x="120" y="1020" width="4" height="80" fill="#d97706"></rect>
+  <text x="146" y="1048" class="box-title mono">Backend function</text>
+  <text x="146" y="1066" class="box-line">sklearn / scipy / pylops implementation</text>
+  <text x="146" y="1086" class="box-line mono">&#8594; SolverOutput(solution, info)</text>
+
+  <line x1="400" y1="1100" x2="400" y2="1126" stroke="#1b2326" stroke-width="1.4" marker-end="url(#arrow)"></line>
+
+  <!-- ===================== Final ===================== -->
+  <rect x="120" y="1130" width="560" height="50" rx="8" fill="#ffffff" stroke="#c7d0d3" stroke-width="1.6"></rect>
+  <text x="400" y="1160" text-anchor="middle" class="box-title mono">self._ac[i] = result.solution</text>
+</svg>
