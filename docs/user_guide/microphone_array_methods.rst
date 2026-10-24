@@ -63,10 +63,9 @@ beamformer: a sensor geometry, a focus grid, a steering vector, and a source
 of cross-spectral data are set up, then passed in along with the chosen
 method:
 
-.. code-block:: python
-
-   b = ac.BeamformerCMF(freq_data=f, steer=st, alpha=1e-8, method='NNLS')
-   result = b.synthetic(4000, 3)
+.. literalinclude:: ../../examples/wind_tunnel_examples/example_airfoil_in_open_jet_cmf.py
+   :language: python
+   :lines: 38-50
 
 See :doc:`../auto_examples/wind_tunnel_examples/example_airfoil_in_open_jet_cmf`
 for a complete, runnable example comparing several of the built-in methods on
@@ -121,44 +120,27 @@ Custom Solvers
 explicit problem/solver composition, rather than selecting a built-in
 ``method``:
 
-.. code-block:: python
-
-   b = ac.BeamformerCMF(
-       problem=ac.solvers.L1RegularizedLeastSquaresProblem(
-           alpha=1e-8,
-           solver=ac.solvers.LassoLarsSolver(backend='sklearn'),
-           nonnegative=True,
-           dictionary_scaling='unit_l2',
-       ),
-       freq_data=f,
-       steer=st,
-   )
+Setting the ``problem`` attribute to an instance of
+:class:`~acoular.solvers.LeastSquaresProblem` or
+:class:`~acoular.solvers.L1RegularizedLeastSquaresProblem` overrides the
+``method`` trait entirely. The problem instance takes a ``solver`` (any of
+the classes listed in the table above, or a custom one), plus the same
+options available on ``BeamformerCMF`` itself: ``alpha``, ``nonnegative``,
+and ``dictionary_scaling``. Most built-in solvers also accept a ``backend``
+keyword to select which library implementation is used, for example
+``LassoLarsSolver(backend='sklearn')``.
 
 
 Writing a New Solver
 ---------------------
 
 A solver only needs to subclass :class:`~acoular.solvers.LeastSquaresSolver`
-and implement :meth:`~acoular.solvers.SolverBase.solve`, returning a
-:class:`~acoular.solvers.SolverOutput`:
-
-.. code-block:: python
-
-   import numpy as np
-   from acoular.solvers import LeastSquaresSolver, SolverOutput
-
-   class LstsqSolver(LeastSquaresSolver):
-       """Solves via ordinary least squares, ignoring any non-negativity constraint."""
-
-       def solve(self, problem, dictionary_matrix, data, start_value=None):
-           solution, *_ = np.linalg.lstsq(dictionary_matrix, data, rcond=None)
-           return SolverOutput(solution=solution, info={})
-
-   b = ac.BeamformerCMF(
-       problem=ac.solvers.LeastSquaresProblem(solver=LstsqSolver()),
-       freq_data=f,
-       steer=st,
-   )
+and implement :meth:`~acoular.solvers.SolverBase.solve` with the signature
+``solve(self, problem, dictionary_matrix, data, start_value=None)``,
+returning a :class:`~acoular.solvers.SolverOutput`. The resulting solver is
+attached the same way the built-in solvers are, via the ``solver`` argument
+of :class:`~acoular.solvers.LeastSquaresProblem` or
+:class:`~acoular.solvers.L1RegularizedLeastSquaresProblem`.
 
 ``solve`` receives the already-scaled dictionary matrix and data for one
 frequency bin. Scaling is handled by the attached
