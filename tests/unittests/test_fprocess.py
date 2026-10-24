@@ -96,6 +96,20 @@ class TestRFFT(TestInOutBase):
         data = next(fft.result(1))
         assert data.dtype == PRECISION_MAPPING[(precision, 'complex')]
 
+    @pytest.mark.parametrize('num', [1, 2, 4])
+    @pytest.mark.parametrize('precision', ['complex64', 'complex128'])
+    def test_retained_spectra(self, num, precision):
+        """Retaining spectra must preserve full and partial output blocks."""
+        data = np.arange(80, dtype=float).reshape(40, 2)
+        source = ac.TimeSamples(data=data, sample_freq=64)
+        fft = ac.RFFT(source=source, block_size=8, precision=precision)
+        blocks = list(fft.result(num))
+        expected = np.fft.rfft(data.reshape(5, 8, 2), axis=1).reshape(5, -1)
+        np.testing.assert_allclose(np.concatenate(blocks), expected, rtol=1e-6, atol=1e-6)
+        assert all(block.dtype == precision for block in blocks)
+        for left, right in zip(blocks, blocks[1:], strict=False):
+            assert not np.shares_memory(left, right)
+
 
 class TestIRFFT(TestInOutBase):
     def create_source(self, num_samples, sample_freq=64, block_size=64, window='Rectangular', precision='64'):
