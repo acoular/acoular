@@ -14,6 +14,7 @@ Upcoming
 **Bugfixes**
 
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change
+    - fixes ``weights='power'`` in the time-domain beamformers in :mod:`~acoular.tbeamform`: :func:`~acoular.tbeamform.const_power_weight` returned weights of wrong shape with numpy >= 2.0, and the samples in the overlap between blocks were weighted more than once; results with ``weights='power'`` change
 
 26.08
 ------------------------
