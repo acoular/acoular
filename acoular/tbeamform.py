@@ -156,7 +156,7 @@ class BeamformerTime(TimeOut):
             dtype=fdtype,
         )
         for p_res in buffer.result(num):
-            p_res *= weights
+            p_res = p_res * weights
             if p_res.shape[0] < buffer.result_num:  # last block shorter
                 num = p_res.shape[0] - max_sample_delay
                 # exit loop if there is not enough data left to be processed
@@ -405,7 +405,7 @@ class BeamformerTimeTraj(BeamformerTime):
         blockr0 = np.empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
-        weights = self._get_weights()
+        weights = np.asarray(self._get_weights(), dtype=fdtype)  # keep the working precision
 
         # preliminary implementation of different steering vectors
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
@@ -433,7 +433,6 @@ class BeamformerTimeTraj(BeamformerTime):
 
             try:
                 time_block = next(buffered_result)
-                time_block *= weights
             except StopIteration:
                 break
             if time_block.shape[0] < buffer.result_num:  # last block shorter
@@ -441,7 +440,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
-            p_res = time_block.copy()
+            p_res = time_block * weights
             phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
