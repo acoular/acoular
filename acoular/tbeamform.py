@@ -66,7 +66,7 @@ def const_power_weight(bf):
     bins *= bins
     weights = np.sqrt((bins[1:] - bins[:-1]) / count)
     weights /= weights.mean()
-    return weights[ind]
+    return weights[ind].ravel()
 
 
 # possible choices for spatial weights
