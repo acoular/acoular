@@ -310,6 +310,7 @@ def _small_cmf(method, **kwargs):
     bf = ac.BeamformerCMF(freq_data=freq_data, steer=steer, r_diag=False, method=method, cached=False, **kwargs)
     return bf, csm
 
+
 class _SpySolver(LeastSquaresSolver):
     called = Bool(False)
 
