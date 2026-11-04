@@ -25,6 +25,7 @@ The following modules are part of Acoular:
     process
     sdinput
     signals
+    solvers
     sources
     spectra
     tbeamform
