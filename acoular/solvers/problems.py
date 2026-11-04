@@ -16,7 +16,7 @@ from acoular.internal import digest
 from .base import SolverBase
 from .scalings import get_problem_scaling
 
-from traits.api import ABCHasStrictTraits, Bool, Instance, Property, Range, Str, cached_property
+from traits.api import ABCHasStrictTraits, Bool, Float, Instance, Property, Range, Str, cached_property
 
 
 class BaseProblem(ABCHasStrictTraits):
@@ -50,8 +50,8 @@ class BaseProblem(ABCHasStrictTraits):
 
         Returns
         -------
-        array-like
-            Solved source strengths.
+        SolverOutput
+            Solver output produced by the attached solver.
 
         Raises
         ------
@@ -75,20 +75,24 @@ class LeastSquaresProblem(BaseProblem):
     #: If True, constrain the source strengths to be non-negative.
     nonnegative = Bool(False)
 
+    #: Working-unit multiplier applied to scaled data before solving, preserving
+    #: historical Acoular behavior. Not a registered scaling transform.
+    unit_mult = Float(1e9)
+
     #: Private storage for :attr:`dictionary_scaling`.
     _dictionary_scaling = Str('none')
 
     #: Name of the scaling transform applied to dictionary columns.
-    dictionary_scaling = Property(depends_on='_dictionary_scaling')
+    dictionary_scaling = Property(depends_on=['_dictionary_scaling'])
 
     #: Private storage for :attr:`data_scaling`.
     _data_scaling = Str('none')
 
     #: Name of the scaling transform applied to measurement data.
-    data_scaling = Property(depends_on='_data_scaling')
+    data_scaling = Property(depends_on=['_data_scaling'])
 
     #: Unique identifier for this problem configuration. (read-only)
-    digest = Property(depends_on=['solver.digest', 'nonnegative', '_dictionary_scaling', '_data_scaling'])
+    digest = Property(depends_on=['solver.digest', 'nonnegative', '_dictionary_scaling', '_data_scaling', 'unit_mult'])
 
     @cached_property
     def _get_digest(self):
@@ -161,6 +165,8 @@ class LeastSquaresProblem(BaseProblem):
     def solve(self, dictionary_matrix, data, start_value=None):
         """Scale dictionary/data, solve via the attached solver, then rescale the result.
 
+        Also applies the working-unit multiplier (:attr:`unit_mult`) to the scaled
+        data before solving, and divides it back out of the result afterward.
         The optional *start_value* is forwarded to the attached solver. It does
         not define a warm-start policy in the problem itself.
 
@@ -175,8 +181,8 @@ class LeastSquaresProblem(BaseProblem):
 
         Returns
         -------
-        array-like of shape (n_sources,)
-            Source strengths recovered in the unscaled problem coordinates.
+        SolverOutput
+            Solver output with `.solution` rescaled to the unscaled problem coordinates.
 
         Raises
         ------
@@ -187,8 +193,12 @@ class LeastSquaresProblem(BaseProblem):
         self._validate_inputs(dictionary_matrix, data)
         dictionary_matrix_scaled, dictionary_scale = self.scale_dictionary(dictionary_matrix)
         data_scaled, data_scale = self.scale_data(data)
-        result = super().solve(dictionary_matrix_scaled, data_scaled, start_value=start_value)
-        return result / dictionary_scale * data_scale
+
+        data_work = data_scaled * self.unit_mult
+
+        solver_output = super().solve(dictionary_matrix_scaled, data_work, start_value=start_value)
+        solver_output.solution = solver_output.solution / dictionary_scale * data_scale / self.unit_mult
+        return solver_output
 
 
 class L1RegularizedLeastSquaresProblem(LeastSquaresProblem):
@@ -198,7 +208,9 @@ class L1RegularizedLeastSquaresProblem(LeastSquaresProblem):
     alpha = Range(low=0.0, high=1.0, value=0)
 
     #: Unique identifier for this problem configuration. (read-only)
-    digest = Property(depends_on=['solver.digest', 'nonnegative', '_dictionary_scaling', '_data_scaling', 'alpha'])
+    digest = Property(
+        depends_on=['solver.digest', 'nonnegative', '_dictionary_scaling', '_data_scaling', 'alpha', 'unit_mult']
+    )
 
     @cached_property
     def _get_digest(self):
