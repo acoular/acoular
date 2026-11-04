@@ -46,8 +46,8 @@ class LeastSquaresProblem(BaseProblem):
 
     def solve(self, A, y, x=None, index=None):
         """Normalize dictionary/data, solve via the attached solver, then rescale the result."""
-        a_normal, dict_norm = normalize_dictionary(self,A)
-        y_normal, data_norm = normalize_data(self,y)
+        a_normal, dict_norm = self.normalize_dictionary(A)
+        y_normal, data_norm = self.normalize_data(y)
         result = super().solve(a_normal, y_normal, x, index)  
         return result/dict_norm /data_norm
 
