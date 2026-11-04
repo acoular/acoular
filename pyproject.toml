@@ -182,7 +182,6 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 ]
 "tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
-"tests/unittests/test_fbeamform.py" = ["N806"]
 "examples/*" = [
   "A001",
   "B007",
