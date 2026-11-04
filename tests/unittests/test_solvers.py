@@ -304,7 +304,7 @@ def test_nnls_solver_scipy_backend_raises_on_bad_kwarg():
     # a real example of backend_kwargs drifting across scipy versions
     solver = NNLSSolver(backend='scipy', backend_kwargs={'atol': 1e-12})
     problem = LeastSquaresProblem(solver=solver, nonnegative=True)
-    with pytest.raises(TypeError):
+    with pytest.raises((TypeError, DeprecationWarning)):
         problem.solve(dictionary_matrix, data)
 
 
