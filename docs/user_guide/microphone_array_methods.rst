@@ -3,8 +3,22 @@
 Microphone Array Methods
 =========================
 
-Covariance Matrix Fitting (CMF) is an inverse method for estimating
-acoustic source strengths from microphone array measurements
+Acoular supports both time-domain and frequency-domain methods for sound
+source characterization and mapping. Frequency-domain methods include
+beamforming (e.g. :class:`~acoular.fbeamform.BeamformerFunctional`),
+deconvolution (e.g. :class:`~acoular.fbeamform.BeamformerCleansc` and
+:class:`~acoular.fbeamform.BeamformerDamas`), and inverse methods
+(e.g. :class:`~acoular.fbeamform.BeamformerCMF` and
+:class:`~acoular.fbeamform.BeamformerSODIX`).
+
+Inverse Methods
+---------------
+
+Example: Covariance Matrix Fitting (CMF)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Covariance Matrix Fitting (CMF) is an inverse frequency-domain method for
+estimating acoustic source strengths from microphone array measurements
 :cite:`Yardibi2008`. Unlike conventional delay-and-sum beamforming,
 which evaluates each focus point independently by steering and
 summing microphone signals, CMF fits a modeled cross-spectral
@@ -20,7 +34,7 @@ users to add custom solvers.
 
 
 Model
------
+^^^^^
 
 At a given frequency, each microphone measures a mix of contributions from
 every candidate source location on the focus grid, with each contribution
@@ -56,7 +70,7 @@ measured data have consistent shapes.
    composition plugs into.
 
 Example
--------
+^^^^^^^
 
 :class:`~acoular.fbeamform.BeamformerCMF` is used like any other frequency-domain
 beamformer: a sensor geometry, a focus grid, a steering vector, and a source
@@ -73,7 +87,7 @@ measured array data.
 
 
 Built-in Methods
------------------
+^^^^^^^^^^^^^^^^
 
 .. list-table::
    :header-rows: 1
@@ -114,7 +128,7 @@ Built-in Methods
 
 
 Custom Solvers
---------------
+^^^^^^^^^^^^^^
 
 :class:`~acoular.fbeamform.BeamformerCMF` can also be configured with an
 explicit problem/solver composition, rather than selecting a built-in
@@ -132,7 +146,7 @@ keyword to select which library implementation is used, for example
 
 
 Writing a New Solver
----------------------
+^^^^^^^^^^^^^^^^^^^^
 
 A solver only needs to subclass :class:`~acoular.solvers.LeastSquaresSolver`
 and implement :meth:`~acoular.solvers.SolverBase.solve` with the signature
