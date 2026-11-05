@@ -69,7 +69,7 @@ from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
 
 import numpy as np
 import scipy.linalg as spla
-from scipy.optimize import fmin_l_bfgs_b, linprog, nnls, shgo
+from scipy.optimize import fmin_l_bfgs_b, linprog, shgo
 from traits.api import (
     Any,
     Bool,
@@ -1283,6 +1283,18 @@ class BeamformerDamasPlus(BeamformerDamas):
             steer=self.steer, calcmode=self.calcmode, precision=self.psf_precision, cached=self.cached
         )
         unit = self.unit_mult
+        if self.method == 'NNLS':
+            problem = LeastSquaresProblem(solver=NNLSSolver(backend='scipy'), nonnegative=True, unit_mult=unit)
+        elif self.method == 'LassoLars':
+            problem = L1RegularizedLeastSquaresProblem(
+                solver=LassoLarsSolver(backend_kwargs={'max_iter': self.n_iter}),
+                alpha=self.alpha,
+                nonnegative=True,
+                dictionary_scaling='unit_l2',
+                unit_mult=unit,
+            )
+        elif self.method == 'OMPCV':
+            problem = LeastSquaresProblem(solver=OMPCVSolver(), dictionary_scaling='unit_l2', unit_mult=unit)
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
@@ -1297,13 +1309,11 @@ class BeamformerDamasPlus(BeamformerDamas):
             if self.r_diag:  # set (unphysical) negative output values to 0
                 indNegSign = np.sign(y) < 0
                 y[indNegSign] = 0.0
-            y *= unit
             p.freq = f[i]
             psf = p.psf[:]
 
-            if self.method == 'NNLS':
-                self._ac[i] = nnls(psf, y)[0] / unit
-            elif self.method == 'LP':  # linear programming (Dougherty)
+            if self.method == 'LP':  # linear programming (Dougherty)
+                y *= unit
                 if self.r_diag:
                     _warn(
                         'Linear programming solver may fail when CSM main '
@@ -1314,31 +1324,7 @@ class BeamformerDamasPlus(BeamformerDamas):
                 cT = -1 * psf.sum(1)  # turn the minimization into a maximization
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
-                LassoLars, OrthogonalMatchingPursuitCV = _get_sklearn_linear_model(
-                    'LassoLars',
-                    'OrthogonalMatchingPursuitCV',
-                )
-                if self.method == 'LassoLars':
-                    model = LassoLars(alpha=self.alpha * unit, max_iter=self.n_iter, positive=True)
-                elif self.method == 'OMPCV':
-                    model = OrthogonalMatchingPursuitCV()
-                else:
-                    msg = f'Method {self.method} not implemented.'
-                    raise NotImplementedError(msg)
-                model.normalize = False
-                # from sklearn 1.2, normalize=True does not work the same way anymore and the
-                # pipeline approach with StandardScaler does scale in a different way, thus we
-                # monkeypatch the code and normalize ourselves to make results the same over
-                # different sklearn versions
-                norms = spla.norm(psf, axis=0)
-                # get rid of annoying sklearn warnings that appear
-                # for sklearn<1.2 despite any settings
-                with warnings.catch_warnings():
-                    warnings.simplefilter('ignore', category=FutureWarning)
-                    # normalized psf
-                    model.fit(psf / norms, y)
-                # recover normalization in the coef's
-                self._ac[i] = model.coef_[:] / norms / unit
+                self._ac[i] = problem.solve(psf, y).solution
             self._fr[i] = 1
 
 
