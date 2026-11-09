@@ -827,7 +827,7 @@ class BeamformerEig(BeamformerBase):
     #: A uniquernal identifier for the beamformer, based on its properties. (read-only)
     digest = Property(fget=AcoularBase._get_digest, depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
 
-    @property_depends_on(['steer.mics', 'n'])
+    @property_depends_on(['steer.mics.num_mics', 'n'])
     def _get_na(self):
         na = self.n
         nm = self.steer.mics.num_mics

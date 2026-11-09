@@ -75,7 +75,7 @@ def test_trait_dependencies(acoular_cls):
     """Assert that any property that is being depended on itself depends on something."""
 
     def check_or_unpack(obj, tname, toptrait, toplevel=True):
-        assert len(objtname := tname.split('.')) < 3, 'Trait dependency too deep.'
+        objtname = tname.split('.', 1)
         # recurse if trait depends on a trait of another object
         if len(objtname) == 2:
             # instantiate the trait
