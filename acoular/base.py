@@ -1,11 +1,11 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements base classes for signal processing blocks in Acoular.
+"""Implements common object and signal processing base classes in Acoular.
 
-The classes in this module are abstract base classes that provide a common interface for all classes
-that generate an output via the ``result`` generator in block-wise manner. They are not intended to
-be used directly, but to be subclassed by classes that implement the actual signal processing.
+The signal processing classes provide a common interface for classes that generate output via the
+``result`` generator in block-wise manner. They are abstract base classes, not intended to be used
+directly, but to be subclassed by classes that implement the actual signal processing.
 
 .. inheritance-diagram::
                 acoular.base
@@ -16,6 +16,7 @@ be used directly, but to be subclassed by classes that implement the actual sign
 .. autosummary::
     :toctree: generated/
 
+    AcoularBase
     Generator
     SamplesGenerator
     SpectraGenerator
@@ -41,6 +42,19 @@ from traits.api import (
     Property,
     cached_property,
 )
+
+
+class AcoularBase(ABCHasStrictTraits):
+    """Common base class for Acoular objects with dependency-based digests.
+
+    Subclasses declare their digest dependencies with a Traits :class:`~traits.traits.Property`
+    and explicitly select ``AcoularBase._get_digest`` as its ``fget``. Traits does not use an
+    inherited getter when a subclass redeclares a property.
+    """
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
 
 
 class Generator(ABCHasStrictTraits):
