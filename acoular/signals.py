@@ -302,7 +302,8 @@ class PNoiseGenerator(NoiseGenerator):
         -----
         - The "depth" parameter controls the number of octaves included in the pink noise
           simulation. If the specified depth exceeds the maximum possible value based on
-          the number of samples, it is automatically adjusted, and a warning is printed.
+          the number of samples, it is automatically adjusted, and a :class:`UserWarning`
+          is emitted.
         - The output signal is scaled to have the same overall level as white noise by dividing
           the result by ``np.sqrt(depth + 1.5)``.
         """
@@ -312,8 +313,12 @@ class PNoiseGenerator(NoiseGenerator):
         max_depth = int(np.log(nums) / np.log(2))
 
         if depth > max_depth:
+            _warn(
+                f'Pink-noise depth reduced (requested_depth={depth}, depth={max_depth}, samples={nums})',
+                UserWarning,
+                stacklevel=2,
+            )
             depth = max_depth
-            print(f'Pink noise filter depth set to maximum possible value of {max_depth:d}.')
 
         rnd_gen = np.random.RandomState(self.seed)
         s = rnd_gen.standard_normal(nums)

@@ -15,6 +15,7 @@ from acoular import logger as al
 
 from tests.utils import create_instance, get_all_classes
 
+import numpy as np
 import pytest
 from traits.trait_errors import TraitError
 
@@ -471,3 +472,20 @@ def test_operation_failures_are_not_logged(caplog):
         raise RuntimeError(msg)
     assert caplog.messages == []
     assert al._display is None
+
+
+def test_pink_depth_warning_preserves_signal(caplog):
+    requested = ac.PNoiseGenerator(num_samples=64, depth=16, seed=7)
+    supported = ac.PNoiseGenerator(num_samples=64, depth=6, seed=7)
+    with pytest.warns(UserWarning, match='requested_depth=16, depth=6, samples=64') as emitted:
+        actual = requested.signal()
+    assert len(emitted) == 1
+    np.testing.assert_array_equal(actual, supported.signal())
+    assert requested.depth == 16
+    assert not caplog.records
+
+
+def test_invalid_band_width_raises_without_logging(caplog):
+    with pytest.raises(ValueError, match='num must be 1 .* or 3 .* got 2'):
+        ac.tools.barspectrum(np.ones(3), np.arange(3), num=2)
+    assert not caplog.records

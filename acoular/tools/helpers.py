@@ -189,10 +189,15 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
     fc : array of floats
         Evaluated band center frequencies.
 
+    Raises
+    ------
+    ValueError
+        If ``num`` is neither 1 (octave) nor 3 (third-octave).
+
     """
     if num not in [1, 3]:
-        print('Only octave and third-octave bands supported at this moment.')
-        return (0, 0, 0)
+        msg = f'num must be 1 (octave) or 3 (third-octave); got {num!r}'
+        raise ValueError(msg)
 
     # preferred center freqs after din en iso 266 for third-octave bands
     fcbase = np.array([31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250])
