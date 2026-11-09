@@ -489,3 +489,68 @@ def test_invalid_band_width_raises_without_logging(caplog):
     with pytest.raises(ValueError, match='num must be 1 .* or 3 .* got 2'):
         ac.tools.barspectrum(np.ones(3), np.arange(3), num=2)
     assert not caplog.records
+
+
+@pytest.fixture
+def calculation_setup(monkeypatch):
+    monkeypatch.setattr(ac.config, 'global_caching', 'none')
+    source = ac.TimeSamples(data=np.random.default_rng(7).normal(size=(512, 2)), sample_freq=8000)
+    mics = ac.MicGeom(pos_total=np.array([[-0.1, 0.1], [0, 0], [0, 0]]))
+    grid = ac.RectGrid(x_min=-0.1, x_max=0.1, y_min=0, y_max=0, z=1, increment=0.2)
+    steer = ac.SteeringVector(mics=mics, grid=grid)
+    spectra = ac.PowerSpectra(source=source, block_size=128, cached=False)
+    return spectra, ac.BeamformerBase(freq_data=spectra, steer=steer, cached=False)
+
+
+def test_spectrum_cache_hit_has_no_info(calculation_setup, caplog, monkeypatch, tmp_path):
+    spectra, _ = calculation_setup
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    caplog.set_level(logging.DEBUG, logger='acoular')
+    expected = spectra.csm[:]
+    caplog.clear()
+    other = ac.PowerSpectra(source=spectra.source, block_size=128)
+
+    def unexpected_calculation(_self):
+        pytest.fail('A warm cache must not calculate spectra again')
+
+    monkeypatch.setattr(ac.PowerSpectra, 'calc_csm', unexpected_calculation)
+    np.testing.assert_array_equal(other.csm, expected)
+    assert not any(record.levelno == logging.INFO for record in caplog.records)
+    assert any(message.startswith('Reused cache file') for message in caplog.messages)
+
+
+def test_data_file_download_and_local_resolution(tmp_path, monkeypatch, mocker, caplog):
+    from acoular.tools.helpers import get_data_file
+
+    monkeypatch.chdir(tmp_path)
+    caplog.set_level(logging.DEBUG, logger='acoular')
+    connection = mocker.patch('http.client.HTTPSConnection').return_value
+    response = connection.getresponse.return_value
+    response.status = 200
+    response.read.return_value = b'data'
+    filename = get_data_file('logging_test.bin')
+    assert filename.read_bytes() == b'data'
+    infos = [record.getMessage() for record in caplog.records if record.levelno == logging.INFO]
+    assert len(infos) == 1 and infos[0].startswith('Downloaded data file')
+    assert 'bytes=4' in infos[0]
+    connection.close.assert_called_once()
+    caplog.clear()
+    assert get_data_file('logging_test.bin') == filename
+    assert all(record.levelno == logging.DEBUG for record in caplog.records)
+    assert caplog.messages[0].startswith('Resolved data file')
+    assert connection.request.call_count == 1
+
+
+def test_download_failure_has_no_duplicate_log(tmp_path, monkeypatch, mocker, caplog):
+    from acoular.tools.helpers import get_data_file
+
+    monkeypatch.chdir(tmp_path)
+    caplog.set_level(logging.INFO, logger='acoular')
+    connection = mocker.patch('http.client.HTTPSConnection').return_value
+    connection.getresponse.return_value.status = 404
+    with pytest.raises(OSError, match='HTTP 404'):
+        get_data_file('logging_missing.bin')
+    connection.close.assert_called_once()
+    assert not caplog.records
+    assert not (tmp_path / 'logging_missing.bin').exists()
