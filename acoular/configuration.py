@@ -55,11 +55,14 @@ else:
     # numpy is not loaded, make sure that OpenBLAS runs single threaded
     environ['OPENBLAS_NUM_THREADS'] = '1'
 
+from .base import AcoularBase
+from .logger import _configure
+
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, File, Property, cached_property  # noqa: I001
+from traits.api import Bool, Enum, File, Property, cached_property
 
 
-class Config(HasStrictTraits):
+class Config(AcoularBase):
     """Implements the global configuration of the Acoular package.
 
     An instance of this class can be accessed for adjustment of the following
@@ -79,8 +82,23 @@ class Config(HasStrictTraits):
     """
 
     def __init__(self):
-        HasStrictTraits.__init__(self)
+        super().__init__()
         self._assert_h5library()
+
+    #: Logging threshold: INFO standalone, or application levels in 'auto' mode.
+    #: An explicit standard level overrides the automatic Acoular threshold.
+    log_level = Enum('auto', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'NOTSET')
+
+    #: Color policy for Acoular-owned output. Application handlers are untouched.
+    log_color = Enum('auto', 'on', 'off')
+
+    #: Progress policy: automatic interactive display, explicitly on, or off.
+    #: Automatic progress steps aside when application logging is present.
+    log_progress = Enum('auto', 'on', 'off')
+
+    def _log_level_changed(self):
+        if self is globals().get('config'):
+            _configure()
 
     #: Flag that globally defines caching behaviour of Acoular classes
     #: defaults to 'individual'.

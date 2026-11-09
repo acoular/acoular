@@ -8,13 +8,14 @@ import gc
 from pathlib import Path
 from weakref import WeakValueDictionary
 
+from .base import AcoularBase
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
 
-from traits.api import Bool, Delegate, Dict, HasStrictTraits, Instance
+from traits.api import Bool, Delegate, Dict, Instance
 
 
-class HDF5Cache(HasStrictTraits):
+class HDF5Cache(AcoularBase):
     """Cache class that handles opening and closing 'tables.File' objects."""
 
     config = Instance(Config)

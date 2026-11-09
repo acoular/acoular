@@ -31,6 +31,7 @@ from functools import wraps
 
 # acoular imports
 from .internal import digest
+from .logger import _LoggingMixin
 
 from traits.api import (
     ABCHasStrictTraits,
@@ -44,7 +45,7 @@ from traits.api import (
 )
 
 
-class AcoularBase(ABCHasStrictTraits):
+class AcoularBase(_LoggingMixin, ABCHasStrictTraits):
     """Common base class for Acoular objects with dependency-based digests.
 
     Subclasses declare their digest dependencies with a Traits :class:`~traits.traits.Property`
