@@ -9,6 +9,7 @@ import pickle
 import subprocess
 import sys
 import warnings
+import wave
 from concurrent.futures import ThreadPoolExecutor
 
 import acoular as ac
@@ -615,6 +616,112 @@ def test_csm_failure_has_no_success_or_error_log(calculation_setup, caplog, monk
         _ = calculation_setup[0].csm
     assert not caplog.records
     assert al._display is None
+
+
+@pytest.mark.parametrize('partial', [False, True])
+@pytest.mark.parametrize('kind', ['h5', 'wav'])
+def test_export_summaries_and_closed_files(kind, partial, tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    source = ac.TimeSamples(data=np.full((10, 1), 0.1), sample_freq=8000)
+    filename = tmp_path / f'output.{kind}'
+    writer = (
+        ac.WriteH5(source=source, file=filename)
+        if kind == 'h5'
+        else ac.WriteWAV(source=source, file=filename, channels=[0], max_val=1)
+    )
+    iterator = writer.result(4)
+    if partial:
+        next(iterator)
+        iterator.close()
+    else:
+        list(iterator)
+    samples = 4 if partial else 10
+    assert len(caplog.records) == 1
+    assert caplog.messages[0].startswith('Stopped' if partial else 'Wrote')
+    assert f'samples={samples}' in caplog.messages[0]
+    assert ('reason=consumer_closed' in caplog.messages[0]) is partial
+    if kind == 'wav':
+        with wave.open(str(filename), 'rb') as file:
+            assert file.getnframes() == samples
+    else:
+        import tables as tb
+
+        with tb.open_file(filename) as file:
+            assert file.root.time_data.shape == (samples, 1)
+
+
+@pytest.mark.parametrize('kind', ['h5', 'wav'])
+def test_export_failure_closes_file_without_logging(kind, tmp_path, caplog, monkeypatch):
+    caplog.set_level(logging.INFO, logger='acoular')
+    ac.config.log_progress = 'on'
+    source = ac.TimeSamples(data=np.full((10, 1), 0.1), sample_freq=8000)
+    filename = tmp_path / f'failed.{kind}'
+
+    def fail(self, num):
+        yield self.data[:num]
+        msg = 'source failed'
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(ac.TimeSamples, 'result', fail)
+    writer = (
+        ac.WriteH5(source=source, file=filename)
+        if kind == 'h5'
+        else ac.WriteWAV(source=source, file=filename, channels=[0], max_val=1)
+    )
+    with pytest.raises(RuntimeError, match='source failed'):
+        list(writer.result(4))
+    assert not caplog.records
+    assert al._display is None
+    if kind == 'wav':
+        with wave.open(str(filename), 'rb') as file:
+            assert file.getnframes() == 4
+    else:
+        import tables as tb
+
+        with tb.open_file(filename) as file:
+            assert file.root.time_data.shape == (4, 1)
+
+
+def test_h5_save_summary(tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    source = ac.TimeSamples(data=np.ones((10, 1)), sample_freq=8000)
+    ac.WriteH5(source=source, file=tmp_path / 'saved.h5').save()
+    assert len(caplog.records) == 1
+    assert caplog.messages[0].startswith('Wrote HDF5 file')
+    assert 'samples=10' in caplog.messages[0]
+
+
+@pytest.mark.parametrize('kind', ['h5', 'wav'])
+def test_export_accepts_plain_iterators(kind, tmp_path, caplog, monkeypatch):
+    caplog.set_level(logging.INFO, logger='acoular')
+    source = ac.TimeSamples(data=np.full((10, 1), 0.1), sample_freq=8000)
+
+    def blocks(self, num):
+        return iter([self.data[start : start + num] for start in range(0, len(self.data), num)])
+
+    monkeypatch.setattr(ac.TimeSamples, 'result', blocks)
+    filename = tmp_path / f'iterator.{kind}'
+    writer = (
+        ac.WriteH5(source=source, file=filename)
+        if kind == 'h5'
+        else ac.WriteWAV(source=source, file=filename, channels=[0], max_val=1)
+    )
+    writer.save()
+    assert len(caplog.records) == 1
+    assert 'samples=10' in caplog.messages[0]
+
+
+def test_h5_requested_stop_summary(tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    source = ac.TimeSamples(data=np.ones((10, 1)), sample_freq=8000)
+    writer = ac.WriteH5(source=source, file=tmp_path / 'stopped.h5')
+    iterator = writer.result(4)
+    next(iterator)
+    writer.write_flag = False
+    assert list(iterator) == []
+    assert caplog.messages[0].startswith('Stopped HDF5 export')
+    assert 'samples=4' in caplog.messages[0]
+    assert 'reason=requested_stop' in caplog.messages[0]
 
 
 @pytest.mark.usefixtures('setup_sounddevice_mocks')

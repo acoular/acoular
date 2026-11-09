@@ -39,6 +39,7 @@ Implement blockwise processing in the time domain.
 # imports from other packages
 import wave
 from abc import abstractmethod
+from contextlib import closing
 from datetime import UTC, datetime
 from os import path
 from warnings import warn as _warn
@@ -49,6 +50,7 @@ from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
 from .internal import lazyjit, ldigest
+from .logger import _closing_iterator, _operation
 from .microphones import MicGeom
 from .process import Cache
 from .tools.utils import find_basename
@@ -2439,7 +2441,18 @@ class WriteWAV(TimeOut):
         else:
             name = self.file
 
-        with wave.open(name, 'w') as wf:
+        with (
+            _operation(
+                self.logger,
+                'Writing WAV file',
+                'Wrote WAV file',
+                total=self.source.num_samples if self.source.num_samples >= 0 else None,
+                count='samples',
+                stopped='Stopped WAV export',
+                fields={'file': name, 'channels': nc, 'sample_freq': fs},
+            ) as task,
+            wave.open(name, 'w') as wf,
+        ):
             wf.setnchannels(nc)
             wf.setsampwidth(sw)
             wf.setframerate(fs)
@@ -2452,22 +2465,26 @@ class WriteWAV(TimeOut):
                 # distinguish cases to use full dynamic range of dtype
                 if dtype == np.dtype('uint8'):
                     mx = 0
-                    for data in self.source.result(num):
-                        mx = max(np.abs(data).max(), mx)
+                    with _closing_iterator(self.source.result(num)) as blocks:
+                        for data in blocks:
+                            mx = max(np.abs(data).max(), mx)
                 elif dtype in (np.dtype('int16'), np.dtype('int32')):
                     # for signed integers, we need special treatment because of asymmetry
                     negmax, posmax = 0, 0
-                    for data in self.source.result(num):
-                        negmax, posmax = max(abs(data.min()), negmax), max(data.max(), posmax)
+                    with _closing_iterator(self.source.result(num)) as blocks:
+                        for data in blocks:
+                            negmax, posmax = max(abs(data.min()), negmax), max(data.max(), posmax)
                     mx = negmax if negmax > posmax else posmax + 1 / dmax  # correction for asymmetry
             else:
                 mx = self.max_val
 
             # write scaled data to file
-            for data in self.source.result(num):
-                frames = self._encode(data[:, ind] / mx)
-                wf.writeframes(frames)
-                yield data
+            with _closing_iterator(self.source.result(num)) as blocks:
+                for data in blocks:
+                    frames = self._encode(data[:, ind] / mx)
+                    wf.writeframes(frames)
+                    task.advance(data.shape[0])
+                    yield data
 
     def save(self):
         """
@@ -2576,11 +2593,24 @@ class WriteH5(TimeOut):
             msg = 'WriteH5.save requires a finite source; use result with num_samples_write instead'
             raise ValueError(msg)
 
-        f5h = self.get_initialized_file()
-        ac = f5h.get_data_by_reference('time_data')
-        for data in self.source.result(4096):
-            f5h.append_data(ac, data)
-        f5h.close()
+        fields = {'file': self.file or None}
+        with (
+            _operation(
+                self.logger,
+                'Writing HDF5 file',
+                'Wrote HDF5 file',
+                total=self.source.num_samples,
+                count='samples',
+                fields=fields,
+            ) as task,
+            closing(self.get_initialized_file()) as f5h,
+        ):
+            fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
+            ac = f5h.get_data_by_reference('time_data')
+            with _closing_iterator(self.source.result(4096)) as blocks:
+                for data in blocks:
+                    f5h.append_data(ac, data)
+                    task.advance(data.shape[0])
 
     def add_metadata(self, f5h):
         """
@@ -2630,29 +2660,44 @@ class WriteH5(TimeOut):
         - The data is echoed as it is yielded, after being written to the file.
         """
         self.write_flag = True
-        f5h = self.get_initialized_file()
-        ac = f5h.get_data_by_reference('time_data')
         scount = 0
         stotal = self.num_samples_write
-        source_gen = self.source.result(num)
-        while self.write_flag:
-            sleft = stotal - scount
-            if stotal != -1 and sleft > 0:
-                anz = min(num, sleft)
-            elif stotal == -1:
-                anz = num
-            else:
-                break
-            try:
-                data = next(source_gen)
-            except StopIteration:
-                break
-            data = data[:anz]
-            f5h.append_data(ac, data)
-            f5h.flush()
-            yield data
-            scount += anz
-        f5h.close()
+        fields = {'file': self.file or None}
+        with (
+            _operation(
+                self.logger,
+                'Writing HDF5 file',
+                'Wrote HDF5 file',
+                total=stotal if stotal >= 0 else None,
+                count='samples',
+                stopped='Stopped HDF5 export',
+                fields=fields,
+            ) as task,
+            closing(self.get_initialized_file()) as f5h,
+            _closing_iterator(self.source.result(num)) as source_gen,
+        ):
+            fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
+            ac = f5h.get_data_by_reference('time_data')
+            while self.write_flag:
+                sleft = stotal - scount
+                if stotal != -1 and sleft > 0:
+                    anz = min(num, sleft)
+                elif stotal == -1:
+                    anz = num
+                else:
+                    break
+                try:
+                    data = next(source_gen)
+                except StopIteration:
+                    break
+                data = data[:anz]
+                f5h.append_data(ac, data)
+                f5h.flush()
+                task.advance(data.shape[0])
+                yield data
+                scount += anz
+            if not self.write_flag:
+                fields['reason'] = 'requested_stop'
 
 
 class TimeConvolve(TimeOut):
