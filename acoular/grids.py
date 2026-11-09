@@ -48,6 +48,7 @@ from abc import abstractmethod
 from pathlib import Path
 
 # acoular imports
+from .base import AcoularBase
 from .internal import digest, ldigest
 from .tools.utils import Polygon
 
@@ -128,7 +129,7 @@ def in_hull(p, hull, border=True, tol=0):
     return hull.find_simplex(p, tol=tol) > 0
 
 
-class Grid(ABCHasStrictTraits):
+class Grid(AcoularBase):
     """
     Abstract base class for grid geometries.
 
@@ -160,11 +161,7 @@ class Grid(ABCHasStrictTraits):
     pos = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
-    digest = Property
-
-    @abstractmethod
-    def _get_digest(self):
-        """Generate a unique digest for the grid."""
+    digest = Property(fget=AcoularBase._get_digest, depends_on=[])
 
     # 'digest' is a placeholder for other properties in derived classes, necessary to trigger the
     # depends on mechanism

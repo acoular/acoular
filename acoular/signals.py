@@ -28,13 +28,12 @@ from abc import abstractmethod
 from warnings import warn as _warn
 
 # acoular imports
-from .base import SamplesGenerator
+from .base import AcoularBase, SamplesGenerator
 from .internal import digest
 
 import numpy as np
 from scipy.signal import resample, sosfilt, tf2sos
 from traits.api import (
-    ABCHasStrictTraits,
     Bool,
     CArray,
     CInt,
@@ -48,14 +47,14 @@ from traits.api import (
 )
 
 
-class SignalGenerator(ABCHasStrictTraits):
+class SignalGenerator(AcoularBase):
     """
     ABC for a simple one-channel signal generator.
 
     This ABC defines the common interface and attributes for all signal generator implementations.
     It provides a template for generating one-channel signals with specified amplitude,
-    sampling frequency, and duration. Subclasses should implement the core functionality,
-    including signal generation and computation of the internal identifier.
+    sampling frequency, and duration. Subclasses implement signal generation and declare any
+    additional digest dependencies.
 
     See Also
     --------
@@ -75,11 +74,7 @@ class SignalGenerator(ABCHasStrictTraits):
     num_samples = Range(0)
 
     #: A unique checksum identifier based on the object properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples'])
-
-    @abstractmethod
-    def _get_digest(self):
-        """Return the internal identifier."""
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['sample_freq', 'num_samples'])
 
     @abstractmethod
     def signal(self):
@@ -152,11 +147,9 @@ class PeriodicSignalGenerator(SignalGenerator):
     amplitude = Float(1.0)
 
     #: Internal identifier based on generator properties. (read-only)
-    digest = Property(depends_on=['amplitude', 'num_samples', 'sample_freq', 'freq', 'phase'])
-
-    @abstractmethod
-    def _get_digest(self):
-        """Return the internal identifier."""
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['amplitude', 'num_samples', 'sample_freq', 'freq', 'phase']
+    )
 
     @abstractmethod
     def signal(self):
@@ -190,11 +183,7 @@ class NoiseGenerator(SignalGenerator):
     seed = Int(0)
 
     #: Internal identifier based on generator properties. (read-only)
-    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
-
-    @abstractmethod
-    def _get_digest(self):
-        """Return the internal identifier."""
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
 
     @abstractmethod
     def signal(self):

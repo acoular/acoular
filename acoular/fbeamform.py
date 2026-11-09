@@ -45,6 +45,7 @@ import warnings
 from warnings import warn as _warn
 
 # acoular imports
+from .base import AcoularBase
 from .configuration import config
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
@@ -66,7 +67,6 @@ from traits.api import (
     Dict,
     Enum,
     Float,
-    HasStrictTraits,
     Instance,
     Int,
     List,
@@ -102,7 +102,7 @@ def _get_sklearn_ndict():
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
 
-class SteeringVector(HasStrictTraits):
+class SteeringVector(AcoularBase):
     """
     Basic class for implementing steering vectors with monopole source transfer models.
 
@@ -286,7 +286,7 @@ class LazyBfResult:
         return self.bf._ac.__getitem__(key)
 
 
-class BeamformerBase(HasStrictTraits):
+class BeamformerBase(AcoularBase):
     """Beamforming using the basic delay-and-sum algorithm in the frequency domain."""
 
     #: Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
@@ -945,7 +945,7 @@ class BeamformerMusic(BeamformerEig):
             self._fr[i] = 1
 
 
-class PointSpreadFunction(HasStrictTraits):
+class PointSpreadFunction(AcoularBase):
     """
     The point spread function.
 

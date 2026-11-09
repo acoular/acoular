@@ -57,7 +57,7 @@ class AcoularBase(ABCHasStrictTraits):
         return digest(self)
 
 
-class Generator(ABCHasStrictTraits):
+class Generator(AcoularBase):
     """Interface for any generating signal processing block.
 
     It provides a common interface for all classes, which generate an output via the generator

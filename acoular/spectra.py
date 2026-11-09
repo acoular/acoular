@@ -17,11 +17,10 @@
     PowerSpectraImport
 """
 
-from abc import abstractmethod
 from warnings import warn
 
 # acoular imports
-from .base import SamplesGenerator
+from .base import AcoularBase, SamplesGenerator
 from .configuration import config
 from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
@@ -33,7 +32,6 @@ from .tools.utils import find_basename
 import numpy as np
 from scipy import fft
 from traits.api import (
-    ABCHasStrictTraits,
     Bool,
     CArray,
     Delegate,
@@ -49,7 +47,7 @@ from traits.api import (
 )
 
 
-class BaseSpectra(ABCHasStrictTraits):
+class BaseSpectra(AcoularBase):
     """
     Base class for handling spectral data in Acoular.
 
@@ -119,11 +117,7 @@ class BaseSpectra(ABCHasStrictTraits):
     precision = Enum('complex128', 'complex64')
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
-    digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
-
-    @abstractmethod
-    def _get_digest(self):
-        """Return internal identifier."""
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['precision', 'block_size', 'window', 'overlap'])
 
     def fftfreq(self):
         """

@@ -37,6 +37,7 @@ Implements acoustic environments with and without flow.
 from abc import abstractmethod
 from warnings import warn as _warn
 
+from .base import AcoularBase
 from .internal import digest, lazyjit
 
 import numba as nb
@@ -46,11 +47,9 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
 from traits.api import (
-    ABCHasStrictTraits,
     CArray,
     Dict,
     Float,
-    HasStrictTraits,
     Instance,
     Int,
     Property,
@@ -169,7 +168,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
     return np.array([x[1] * np.sin(x[0]), x[1] * np.cos(x[0]), x[2]])
 
 
-class Environment(HasStrictTraits):
+class Environment(AcoularBase):
     """
     A simple acoustic environment without flow.
 
@@ -332,15 +331,11 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(ABCHasStrictTraits):
+class FlowField(AcoularBase):
     """An abstract base class for a spatial flow field."""
 
     #: A unique identifier based on the field properties. (read-only)
-    digest = Property
-
-    @abstractmethod
-    def _get_digest(self):
-        pass
+    digest = Property(fget=AcoularBase._get_digest, depends_on=[])
 
     @abstractmethod
     def v(self, xx):

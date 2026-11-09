@@ -11,14 +11,15 @@
 
 # imports from other packages
 # acoular imports
+from .base import AcoularBase
 from .internal import digest
 
 import numpy as np
 from scipy.interpolate import splev, splprep
-from traits.api import Dict, Float, HasStrictTraits, Property, Tuple, cached_property, property_depends_on
+from traits.api import Dict, Float, Property, Tuple, cached_property, property_depends_on
 
 
-class Trajectory(HasStrictTraits):
+class Trajectory(AcoularBase):
     """
     Represents a trajectory as a continuous curve derived from sampled points.
 

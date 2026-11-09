@@ -15,6 +15,7 @@ import xml.dom.minidom
 from pathlib import Path
 
 # acoular imports
+from .base import AcoularBase
 from .internal import digest
 
 import numpy as np
@@ -22,7 +23,6 @@ from scipy.spatial.distance import cdist
 from traits.api import (
     CArray,
     File,
-    HasStrictTraits,
     List,
     Property,
     Union,
@@ -31,7 +31,7 @@ from traits.api import (
 )
 
 
-class MicGeom(HasStrictTraits):
+class MicGeom(AcoularBase):
     """
     Provide the geometric arrangement of microphones in an array.
 
