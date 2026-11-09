@@ -149,7 +149,6 @@ extend-ignore = [
   "PERF4",  # list performance improvements
   "PTH",  # migrate to Pathlib
   "SLF001",  # private attr access
-  "T20",  # deactivate when logging is implemented
   "FBT003",  # boolean-positional
   "PLR2004",  # magic-value-comparison
   "PLR091",  # too-many-arguments/statements
@@ -166,13 +165,14 @@ extend-ignore = [
 banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 
 [tool.ruff.lint.per-file-ignores]
-"!acoular/*" = ["D"]
+"!acoular/*" = ["D", "T20"]
 "acoular/__init__.py" = ["F401"]
-"acoular/demo/__init__.py" = ["F401"]
+"acoular/demo/__init__.py" = ["F401", "T201"] # ASCII result output
 "acoular/tools/__init__.py" = ["F401"]
 "acoular/aiaa/__init__.py" = ["F401"]
 "acoular/environments.py" = ["N806"]
 "acoular/fastFuncs.py" = ["N802", "N803", "N806", "N999"] # allow different naming convention
+"acoular/tfastfuncs.py" = ["T201"] # Explicit developer diagnostics
 "acoular/fbeamform.py" = ["N806", "B023"]
 "acoular/sources.py" = ["N806"]
 "acoular/tools/helpers.py" = ["D205"]
