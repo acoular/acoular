@@ -279,12 +279,9 @@ class UniformFlowEnvironment(Environment):
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['c', 'ma', 'fdv'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """Compute the apparent distances between two sets of points.
@@ -389,12 +386,9 @@ class SlotJet(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'flow', 'plane', 'B', 'l'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -503,12 +497,9 @@ class OpenJet(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'D', 'l'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -612,6 +603,7 @@ class RotatingFlow(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'rps'],
     )
 
@@ -624,10 +616,6 @@ class RotatingFlow(FlowField):
     @cached_property
     def _get_omega(self):
         return 2 * np.pi * self.rps
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -809,16 +797,13 @@ class GeneralFlowEnvironment(Environment):
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['c', 'ff.digest', 'N', 'Om'],
     )
 
     #: A dictionary for storing precomputed interpolators to optimize repeated calculations.
     #: (internal use)
     idict = Dict
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """

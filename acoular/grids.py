@@ -49,7 +49,7 @@ from pathlib import Path
 
 # acoular imports
 from .base import AcoularBase
-from .internal import digest, ldigest
+from .internal import ldigest
 from .tools.utils import Polygon
 
 import numpy as np
@@ -70,7 +70,6 @@ from traits.api import (
     Str,
     Tuple,
     Union,
-    cached_property,
     observe,
     property_depends_on,
 )
@@ -315,6 +314,7 @@ class RectGrid(Grid):
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z', 'increment'],
     )
 
@@ -339,10 +339,6 @@ class RectGrid(Grid):
         if i != 0:
             return round((abs(self.y_max - self.y_min) + i) / i)
         return 1
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @property_depends_on(['x_min', 'x_max', 'y_min', 'y_max', 'increment'])
     def _get_pos(self):
@@ -514,6 +510,7 @@ class RectGrid3D(RectGrid):
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['x_min', 'x_max', 'y_min', 'y_max', 'z_min', 'z_max', '_increment'],
     )
 
@@ -555,10 +552,6 @@ class RectGrid3D(RectGrid):
         ]
         bpos.resize((3, self.size))
         return bpos
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def index(self, x, y, z):
         """
@@ -679,11 +672,7 @@ class ImportGrid(Grid):
     subgrids = CArray()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
-    digest = Property(depends_on=['_gpos'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['_gpos'])
 
     @property_depends_on(['_gpos'])
     def _get_size(self):
@@ -882,12 +871,9 @@ class LineGrid(Grid):
 
     #: A unique identifier for the grid, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['loc', 'direction', 'length', 'num_points', 'size'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @property_depends_on(['num_points'])
     def _get_size(self):
@@ -952,11 +938,7 @@ class MergeGrid(Grid):
     subgrids = Property()
 
     #: A unique identifier for the grid, based on its properties. (read-only)
-    digest = Property(depends_on=['grids', 'grid_digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['grids', 'grid_digest'])
 
     @observe('grids.items.digest')
     def _set_sourcesdigest(self, event):  # noqa: ARG002

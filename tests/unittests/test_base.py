@@ -103,6 +103,20 @@ def test_inherited_digest_includes_subclass_identity():
 
 
 @pytest.mark.parametrize(
+    'block_cls',
+    [
+        cls
+        for cls in get_all_classes(hastraits_only=True)
+        if issubclass(cls, ac.TimeOut) and cls.class_traits()['digest'].cached
+    ],
+)
+def test_timeout_classes_use_shared_cached_getter(block_cls):
+    assert issubclass(block_cls, ac.AcoularBase)
+    assert block_cls.class_traits()['digest'].property_fields[0] is ac.AcoularBase._get_digest
+    assert '_get_digest' not in block_cls.__dict__
+
+
+@pytest.mark.parametrize(
     'block_cls', [ac.Generator, ac.SamplesGenerator, ac.SpectraGenerator, ac.BeamformerTime, ac.Environment]
 )
 def test_uncached_digest_getters_are_preserved(block_cls):
@@ -147,6 +161,19 @@ def test_timeout_subclass_can_override_getter():
 )
 def test_all_digest_classes_derive_from_shared_base(obj_cls):
     assert issubclass(obj_cls, ac.AcoularBase)
+
+
+@pytest.mark.parametrize(
+    'obj_cls',
+    [
+        cls
+        for cls in get_all_classes(hastraits_only=True)
+        if 'digest' in cls.class_traits() and cls.class_traits()['digest'].cached
+    ],
+)
+def test_all_cached_digest_classes_use_shared_getter(obj_cls):
+    assert obj_cls.class_traits()['digest'].property_fields[0] is ac.AcoularBase._get_digest
+    assert '_get_digest' not in obj_cls.__dict__
 
 
 def test_base_spectra_is_concrete_with_shared_digest():

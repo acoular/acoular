@@ -19,11 +19,10 @@ from inspect import currentframe
 from warnings import warn as _warn
 
 # acoular imports
-from .base import Generator, InOut
+from .base import AcoularBase, Generator, InOut
 from .configuration import config
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
-from .internal import digest
 from .tools.utils import find_basename
 
 import numpy as np
@@ -128,11 +127,7 @@ class Average(InOut):
     num_samples = Property(depends_on=['source.num_samples', 'num_per_average'])
 
     #: A unique identifier based on the class properties.
-    digest = Property(depends_on=['source.digest', 'num_per_average'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'num_per_average'])
 
     @cached_property
     def _get_sample_freq(self):
@@ -270,11 +265,7 @@ class Cache(InOut):
     _h5f = Instance(H5CacheFileBase, transient=True)
 
     #: A unique identifier based on the cache properties.
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @cached_property
     def _get_basename(self):

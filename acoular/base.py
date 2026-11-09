@@ -212,11 +212,7 @@ class TimeOut(SamplesGenerator):
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num):
@@ -288,11 +284,7 @@ class SpectraOut(SpectraGenerator):
     block_size = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num=1):
@@ -346,11 +338,7 @@ class InOut(SamplesGenerator, SpectraGenerator):
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num):

@@ -29,7 +29,6 @@ from warnings import warn as _warn
 
 # acoular imports
 from .base import AcoularBase, SamplesGenerator
-from .internal import digest
 
 import numpy as np
 from scipy.signal import resample, sosfilt, tf2sos
@@ -43,7 +42,6 @@ from traits.api import (
     Int,
     Property,
     Range,
-    cached_property,
 )
 
 
@@ -235,11 +233,7 @@ class WNoiseGenerator(NoiseGenerator):
     """
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['rms', 'seed', 'sample_freq', 'num_samples'])
 
     def signal(self):
         """
@@ -288,11 +282,7 @@ class PNoiseGenerator(NoiseGenerator):
     depth = Int(16)
 
     #: A unique checksum identifier based on the object properties. (read-only)
-    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'depth'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'depth'])
 
     def signal(self):
         """
@@ -400,11 +390,9 @@ class FiltWNoiseGenerator(WNoiseGenerator):
     ma = CArray(value=np.array([]), dtype=float)
 
     #: A unique checksum identifier based on the object properties. (read-only)
-    digest = Property(depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['rms', 'seed', 'sample_freq', 'num_samples', 'ar', 'ma']
+    )
 
     def handle_empty_coefficients(self, coefficients):
         """
@@ -519,11 +507,9 @@ class SineGenerator(PeriodicSignalGenerator):
     """
 
     #: A unique checksum identifier based on the object properties. (read-only)
-    digest = Property(depends_on=['num_samples', 'sample_freq', 'amplitude', 'freq', 'phase'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['num_samples', 'sample_freq', 'amplitude', 'freq', 'phase']
+    )
 
     def signal(self):
         r"""
@@ -612,12 +598,9 @@ class GenericSignalGenerator(SignalGenerator):
 
     #: A unique checksum identifier based on the object properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['source.digest', 'loop_signal', 'num_samples', 'amplitude'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def signal(self):
         """

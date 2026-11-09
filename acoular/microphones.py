@@ -16,7 +16,6 @@ from pathlib import Path
 
 # acoular imports
 from .base import AcoularBase
-from .internal import digest
 
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -165,11 +164,7 @@ class MicGeom(AcoularBase):
     aperture = Property(depends_on=['pos'])
 
     #: A unique identifier for the geometry, based on its properties. (read-only)
-    digest = Property(depends_on=['pos'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['pos'])
 
     @cached_property
     def _get_pos(self):

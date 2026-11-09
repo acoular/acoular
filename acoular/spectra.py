@@ -26,7 +26,6 @@ from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
-from .internal import digest
 from .tools.utils import find_basename
 
 import numpy as np
@@ -266,6 +265,7 @@ class PowerSpectra(BaseSpectra):
 
     #: A unique identifier for the spectra, based on its properties.  (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['source.digest', 'block_size', 'window', 'overlap', 'precision'],
     )
 
@@ -333,10 +333,6 @@ class PowerSpectra(BaseSpectra):
             except IndexError:
                 return range(0)
         return None
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_basename(self):
@@ -632,7 +628,7 @@ class PowerSpectraImport(PowerSpectra):
     _ind_high = Union(None, Int)
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
-    digest = Property(depends_on=['_csmsum'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['_csmsum'])
 
     #: Name of the cache file without extension. (read-only)
     basename = Property(depends_on=['digest'])
@@ -644,10 +640,6 @@ class PowerSpectraImport(PowerSpectra):
 
     def _get_basename(self):
         return 'csm_import_' + self.digest
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _get_num_channels(self):
         return self.csm.shape[1]
