@@ -17,9 +17,12 @@ by default. Logging and progress belong in Python, not in compiled Numba kernels
 import logging
 import sys
 from contextlib import contextmanager, suppress
+from copy import copy
 from importlib.util import find_spec
 from os import environ
+from pathlib import Path
 from threading import RLock
+from time import perf_counter
 
 from rich.console import Console
 from rich.highlighter import NullHighlighter
@@ -80,6 +83,15 @@ def _fallback_filter(record):
     return True
 
 
+class _ConsoleFormatter(logging.Formatter):
+    """Shorten console labels without mutating records seen by other handlers."""
+
+    def format(self, record):
+        record = copy(record)
+        record.name = record.name.rsplit('.', 1)[-1]
+        return super().format(record)
+
+
 def _configure(logger=None):
     """Refresh default ownership and levels at logger access or task entry."""
     global _handler, _managed_level  # noqa: PLW0603
@@ -91,7 +103,7 @@ def _configure(logger=None):
             _handler = RichHandler(
                 console=_get_console(), show_time=False, show_path=False, markup=False, highlighter=NullHighlighter()
             )
-            _handler.setFormatter(logging.Formatter('%(name)s: %(message)s'))
+            _handler.setFormatter(_ConsoleFormatter('%(name)s: %(message)s'))
             _handler.addFilter(_fallback_filter)
         if _handler not in _namespace.handlers:
             _namespace.addHandler(_handler)
@@ -109,6 +121,35 @@ def _configure(logger=None):
         _managed_level = level
 
 
+def _get_logger(name):
+    """Obtain a standard logger and refresh Acoular's output ownership."""
+    logger = logging.getLogger(name)
+    _configure(logger)
+    return logger
+
+
+def _event(logger, level, message, **fields):
+    """Emit scalar context in the common human-readable message format."""
+    if not logger.isEnabledFor(level):
+        return
+    context = []
+    for key, value in fields.items():
+        if value is None:
+            continue
+        if key in ('elapsed', 'sample_freq', 'default_sample_freq', 'frequency'):
+            unit = 's' if key == 'elapsed' else 'Hz'
+            value = format(value, '.3g' if key == 'elapsed' else 'g') + f' {unit}'
+        elif isinstance(value, (str, Path)):
+            value = str(value)
+            if any(not char.isprintable() or char.isspace() or char in ',()' for char in value):
+                value = repr(value)
+        context.append(f'{key}={value}')
+    if context:
+        logger.log(level, '%s (%s)', message, ', '.join(context), stacklevel=2)
+    else:
+        logger.log(level, '%s', message, stacklevel=2)
+
+
 class _LoggingMixin:
     """Provide class-level logging without adding Traits or instance state."""
 
@@ -124,12 +165,12 @@ class _LoggingMixin:
         name = f'{cls.__module__}.{cls.__qualname__}'
         if not name.startswith('acoular.'):
             name = f'acoular.{name}'
-        logger = logging.getLogger(name)
-        _configure(logger)
-        return logger
+        return _get_logger(name)
 
 
-def _progress_enabled(console):
+def _progress_enabled(console, logger=None):
+    if logger is None:
+        logger = _namespace
     setting = _settings().log_progress
     if setting == 'off':
         return False
@@ -137,7 +178,7 @@ def _progress_enabled(console):
         return False
     if setting == 'on':
         return True
-    if _has_application_handler(_namespace) or environ.get('CI'):
+    if _has_application_handler(logger) or environ.get('CI'):
         return False
     if console.is_jupyter:
         return True
@@ -156,10 +197,15 @@ class _ProgressTask:
     def __init__(self, display=None, task_id=None):
         self._display = display
         self._task_id = task_id
+        self.completed = 0
+        self._closed = False
 
     def advance(self, amount=1):
         """Advance by completed work, not by work merely scheduled."""
         with _lock:
+            if self._closed:
+                return
+            self.completed += amount
             if self._display is not None:
                 self._display.advance(self._task_id, amount)
                 if self._display.console.is_jupyter:
@@ -169,6 +215,10 @@ class _ProgressTask:
         """Set completed work or a newly discovered total."""
         _check_total(total)
         with _lock:
+            if self._closed:
+                return
+            if completed is not None:
+                self.completed = completed
             if self._display is not None:
                 self._display.update(self._task_id, completed=completed, total=total, refresh=True)
 
@@ -199,13 +249,20 @@ def progress(description, total=None):
     Existing tasks keep their display policy until exit. stdout/stderr are never
     redirected. This helper must not be called from compiled Numba functions.
     """
+    with _progress(description, total, _namespace) as task:
+        yield task
+
+
+@contextmanager
+def _progress(description, total, logger):
+    """Share rendering while respecting the initiating logger's handler route."""
     global _display  # noqa: PLW0603
 
     _check_total(total)
-    _configure()
+    _configure(logger)
     with _lock:
         console = _get_console()
-        if _progress_enabled(console):
+        if _progress_enabled(console, logger):
             if _display is None:
                 display = Progress(
                     SpinnerColumn(),
@@ -230,6 +287,7 @@ def progress(description, total=None):
         with _lock:
             display = task._display
             task._display = None
+            task._closed = True
             if display is not None:
                 display.remove_task(task._task_id)
                 if not display.tasks:
@@ -237,6 +295,48 @@ def progress(description, total=None):
                         display.stop()
                     finally:
                         _display = None
+
+
+@contextmanager
+def _closing_iterator(iterator):
+    """Close upstream generators without requiring close() on ordinary iterators."""
+    try:
+        yield iterator
+    finally:
+        close = getattr(iterator, 'close', None)
+        if close is not None:
+            close()
+
+
+@contextmanager
+def _operation(logger, description, completed, *, total=None, count=None, stopped=None, fields=None):
+    """Time selected work; report success or intentional closure, never exceptions.
+
+    Fields may be populated as work discovers metadata. A reason field indicates
+    an intentional stop. Counts track actual work even with display disabled.
+    """
+    fields = {} if fields is None else fields
+    start = perf_counter()
+    _event(logger, logging.DEBUG, description, **fields)
+    with _progress(description, total, logger) as task:
+
+        def summarize(message, reason=None):
+            context = fields.copy()
+            if count is not None:
+                context[count] = task.completed
+            if reason is not None:
+                context['reason'] = reason
+            context['elapsed'] = perf_counter() - start
+            _event(logger, logging.INFO, message, **context)
+
+        try:
+            yield task
+        except GeneratorExit:
+            if stopped is not None:
+                summarize(stopped, reason='consumer_closed')
+            raise
+        else:
+            summarize(stopped if stopped is not None and fields.get('reason') else completed)
 
 
 def track(iterable, description='Processing', total=None):
