@@ -9,9 +9,13 @@
     SoundDeviceSamplesGenerator
 """
 
+import logging
+from warnings import warn as _warn
+
 # acoular imports
 from .base import AcoularBase, SamplesGenerator
 from .configuration import config
+from .logger import _event, _operation
 
 from traits.api import Any, Bool, Enum, Float, Int, Property, observe
 
@@ -58,7 +62,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     #: Datatype (resolution) of the signal, used as `dtype` in a sd `Stream` object
     precision = Enum('float32', 'float16', 'int32', 'int16', 'int8', 'uint8')
 
-    #: Indicates that the sounddevice buffer has overflown
+    #: Indicates whether the last sounddevice read reported an input overflow.
     overflow = Bool(False)
 
     #: Indicates that the stream is collecting samples
@@ -113,9 +117,26 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
+        Warns
+        -----
+        UserWarning
+            On the first input overflow per recording. The final INFO summary counts
+            flagged reads, not lost samples. Normal Python warning filters apply.
+
         """
         sd = _import_sounddevice()
-        print(self.device_properties(), self.sample_freq)
+        logger = self.logger
+        if logger.isEnabledFor(logging.DEBUG):
+            properties = self.device_properties()
+            _event(
+                logger,
+                logging.DEBUG,
+                'Selected input device',
+                device=self.device,
+                name=properties.get('name'),
+                max_channels=properties.get('max_input_channels'),
+                default_sample_freq=properties.get('default_samplerate'),
+            )
         self.stream = stream_obj = sd.InputStream(
             device=self.device,
             channels=self.num_channels,
@@ -123,19 +144,42 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             samplerate=self.sample_freq,
             dtype=self.precision,
         )
-
-        with stream_obj as stream:
-            self.running = True
-            if self.num_samples == -1:
-                while self.collect_samples:  # yield data as long as collect_samples is True
-                    data, self.overflow = stream.read(num)
-                    yield data[:num]
-
-            elif self.num_samples > 0:  # amount of samples to collect is specified by user
-                samples_count = 0  # num_samples counter
-                while samples_count < self.num_samples:
-                    anz = min(num, self.num_samples - samples_count)
-                    data, self.overflow = stream.read(num)
-                    yield data[:anz]
-                    samples_count += anz
-        self.running = False
+        fields = {
+            'device': self.device,
+            'channels': self.num_channels,
+            'sample_freq': self.sample_freq,
+            'overflow_reads': 0,
+        }
+        total = self.num_samples if self.num_samples >= 0 else None
+        with _operation(
+            logger,
+            'Recording samples',
+            'Stopped recording',
+            total=total,
+            count='samples',
+            stopped='Stopped recording',
+            fields=fields,
+        ) as task:
+            try:
+                with stream_obj as stream:
+                    self.running = True
+                    _event(logger, logging.INFO, 'Started recording', **fields)
+                    samples_count = 0
+                    while (self.num_samples == -1 and self.collect_samples) or samples_count < self.num_samples:
+                        anz = num if self.num_samples == -1 else min(num, self.num_samples - samples_count)
+                        data, self.overflow = stream.read(num)
+                        if self.overflow:
+                            fields['overflow_reads'] += 1
+                            if fields['overflow_reads'] == 1:
+                                _warn(
+                                    f'Input overflow detected; recorded samples may be missing (device={self.device})',
+                                    UserWarning,
+                                    stacklevel=2,
+                                )
+                        data = data[:anz]
+                        task.advance(data.shape[0])
+                        samples_count += anz
+                        yield data
+            finally:
+                self.running = False
+            fields['reason'] = 'requested_stop' if self.num_samples == -1 else 'sample_limit'

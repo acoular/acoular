@@ -8,6 +8,7 @@ import logging
 import pickle
 import subprocess
 import sys
+import warnings
 from concurrent.futures import ThreadPoolExecutor
 
 import acoular as ac
@@ -613,6 +614,73 @@ def test_csm_failure_has_no_success_or_error_log(calculation_setup, caplog, monk
     with pytest.raises(RuntimeError, match='source failed'):
         _ = calculation_setup[0].csm
     assert not caplog.records
+    assert al._display is None
+
+
+@pytest.mark.usefixtures('setup_sounddevice_mocks')
+def test_recording_does_not_query_properties_for_info(caplog, mocker):
+    caplog.set_level(logging.INFO, logger='acoular')
+    properties = mocker.patch.object(ac.SoundDeviceSamplesGenerator, 'device_properties')
+    source = ac.SoundDeviceSamplesGenerator(num_samples=4, sample_freq=8000)
+    list(source.result(4))
+    properties.assert_not_called()
+
+
+@pytest.mark.usefixtures('setup_sounddevice_mocks')
+def test_recording_device_debug_fields(caplog):
+    caplog.set_level(logging.DEBUG, logger='acoular')
+    source = ac.SoundDeviceSamplesGenerator(num_samples=4, sample_freq=8000)
+    list(source.result(4))
+    selected = next(message for message in caplog.messages if message.startswith('Selected input device'))
+    assert 'default_sample_freq=44100 Hz' in selected
+    assert 'max_channels=2' in selected
+    assert 'sample_freq=8000 Hz' in caplog.messages[-1]
+
+
+@pytest.mark.usefixtures('setup_sounddevice_mocks')
+def test_recording_overflow_warning_and_summary(caplog):
+    import sounddevice as sd
+
+    caplog.set_level(logging.INFO, logger='acoular')
+    stream = sd.InputStream.return_value.__enter__.return_value
+    stream.read.side_effect = [(np.ones((4, 1)), overflow) for overflow in [True, False, True]]
+    source = ac.SoundDeviceSamplesGenerator(num_samples=10)
+    with pytest.warns(UserWarning, match='Input overflow detected') as emitted:
+        blocks = list(source.result(4))
+    assert len(emitted) == 1
+    assert [len(block) for block in blocks] == [4, 4, 2]
+    assert not source.running
+    assert len(caplog.records) == 2
+    assert caplog.messages[0].startswith('Started recording')
+    assert caplog.messages[-1].startswith('Stopped recording')
+    assert 'overflow_reads=2' in caplog.messages[-1]
+    assert 'samples=10' in caplog.messages[-1]
+    stream.read.assert_called_with(4)
+
+
+@pytest.mark.parametrize('warning_error', [False, True])
+@pytest.mark.usefixtures('setup_sounddevice_mocks')
+def test_recording_close_and_warning_error_cleanup(caplog, warning_error):
+    import sounddevice as sd
+
+    caplog.set_level(logging.INFO, logger='acoular')
+    stream = sd.InputStream.return_value.__enter__.return_value
+    stream.read.return_value = (np.ones((4, 1)), warning_error)
+    source = ac.SoundDeviceSamplesGenerator(num_samples=10)
+    iterator = source.result(4)
+    if warning_error:
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', UserWarning)
+            with pytest.raises(UserWarning, match='Input overflow'):
+                next(iterator)
+        assert len(caplog.records) == 1  # Start only; propagated failures aren't logged.
+    else:
+        next(iterator)
+        iterator.close()
+        assert 'samples=4' in caplog.messages[-1]
+        assert 'reason=consumer_closed' in caplog.messages[-1]
+    assert not source.running
+    sd.InputStream.return_value.__exit__.assert_called_once()
     assert al._display is None
 
 
