@@ -41,6 +41,7 @@ Implements beamformers in the frequency domain.
 
 # imports from other packages
 
+import logging
 import warnings
 from warnings import warn as _warn
 
@@ -53,6 +54,7 @@ from .grids import Grid, Sector
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
 from .internal import digest
+from .logger import _event, _operation
 from .microphones import MicGeom
 from .spectra import PowerSpectra
 from .tfastfuncs import _steer_I, _steer_II, _steer_III, _steer_IV
@@ -277,9 +279,17 @@ class LazyBfResult:
         missingind = np.arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
         # calc if needed
         if missingind.size:
-            self.bf._calc(missingind)
-            if self.bf._h5f:
-                self.bf._h5f.flush()
+            with _operation(
+                self.bf.logger,
+                'Computing beamforming maps',
+                'Computed beamforming maps',
+                fields={'frequencies': missingind.size},
+            ):
+                self.bf._calc(missingind)
+                if self.bf._h5f:
+                    self.bf._h5f.flush()
+        else:
+            _event(self.bf.logger, logging.DEBUG, 'Reused beamforming maps')
 
         return self.bf._ac.__getitem__(key)
 
@@ -1046,8 +1056,11 @@ class PointSpreadFunction(AcoularBase):
             if cache_active and config.global_caching == 'readonly':
                 ac, gp = ac[:], gp[:]
             self.calc_psf(ac, gp, grid_indices)
+            _event(self.logger, logging.DEBUG, 'Computed point spread functions', frequency=self.freq)
             if cache_active and self._h5f and config.global_caching != 'readonly':
                 self._h5f.flush()
+        if not missing:
+            _event(self.logger, logging.DEBUG, 'Reused point spread functions', frequency=self.freq)
         if grid_indices.size == gs and np.array_equal(grid_indices, np.arange(gs)):
             return ac[:]
         result = np.empty((gs, grid_indices.size), dtype=self.precision)

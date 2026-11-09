@@ -17,6 +17,7 @@
     PowerSpectraImport
 """
 
+import logging
 from warnings import warn
 
 # acoular imports
@@ -26,6 +27,7 @@ from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
+from .logger import _event, _operation
 from .tools.utils import find_basename
 
 import numpy as np
@@ -346,12 +348,19 @@ class PowerSpectra(BaseSpectra):
             eigvals_dtype = 'float64'
         elif self.precision == 'complex64':
             eigvals_dtype = 'float32'
-        csm_shape = self.csm.shape
-        eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
-        eigvecs = np.empty(csm_shape, dtype=self.precision)
-        for i in range(csm_shape[0]):
-            (eigvals[i], eigvecs[i]) = np.linalg.eigh(self.csm[i])
-        return (eigvals, eigvecs)
+        fields = {}
+        with _operation(
+            self.logger, 'Computing eigendecompositions', 'Computed eigendecompositions', fields=fields
+        ) as task:
+            csm_shape = self.csm.shape
+            fields.update(frequencies=csm_shape[0], channels=csm_shape[1])
+            task.update(total=csm_shape[0])
+            eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
+            eigvecs = np.empty(csm_shape, dtype=self.precision)
+            for i in range(csm_shape[0]):
+                (eigvals[i], eigvecs[i]) = np.linalg.eigh(self.csm[i])
+                task.advance()
+            return (eigvals, eigvecs)
 
     def calc_csm(self):
         """
@@ -388,22 +397,33 @@ class PowerSpectra(BaseSpectra):
             msg = 'PowerSpectra requires a finite source'
             raise ValueError(msg)
 
-        wind = self.window_(self.block_size)
-        weight = np.dot(wind, wind)
-        wind = wind[np.newaxis, :].swapaxes(0, 1)
-        numfreq = int(self.block_size / 2 + 1)
-        csm_shape = (numfreq, t.num_channels, t.num_channels)
-        csm_upper = np.zeros(csm_shape, dtype=self.precision)
-        # get time data blockwise
-        for data in self._get_source_data():
-            ft = fft.rfft(data * wind, None, 0).astype(self.precision)
-            calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-        # create the full csm matrix via transposing and complex conj.
-        csm_lower = csm_upper.conj().transpose(0, 2, 1)
-        [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
-        csm = csm_lower + csm_upper
-        # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-        return csm * (2.0 / self.block_size / weight / self.num_blocks)
+        fields = {}
+        with _operation(
+            self.logger,
+            'Computing cross-spectral matrices',
+            'Computed cross-spectral matrices',
+            count='fft_blocks',
+            fields=fields,
+        ) as task:
+            wind = self.window_(self.block_size)
+            weight = np.dot(wind, wind)
+            wind = wind[np.newaxis, :].swapaxes(0, 1)
+            numfreq = int(self.block_size / 2 + 1)
+            csm_shape = (numfreq, t.num_channels, t.num_channels)
+            fields.update(frequencies=numfreq, channels=csm_shape[1])
+            task.update(total=max(0, int(self.num_blocks)))
+            csm_upper = np.zeros(csm_shape, dtype=self.precision)
+            # get time data blockwise
+            for data in self._get_source_data():
+                ft = fft.rfft(data * wind, None, 0).astype(self.precision)
+                calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated
+                task.advance()
+            # create the full csm matrix via transposing and complex conj.
+            csm_lower = csm_upper.conj().transpose(0, 2, 1)
+            [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+            csm = csm_lower + csm_upper
+            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
+            return csm * (2.0 / self.block_size / weight / self.num_blocks)
 
     def calc_ev(self):
         """
@@ -493,9 +513,10 @@ class PowerSpectra(BaseSpectra):
 
         ac = self._h5f.get_data_by_reference(nodename)
         if ac[:].sum() == 0:  # only initialized
-            #            print("write {} to:".format(traitname),nodename)
             ac[:] = func()
             self._h5f.flush()
+        else:
+            _event(self.logger, logging.DEBUG, 'Reused cached spectra', result=traitname, node=nodename)
         return ac
 
     @property_depends_on(['digest'])

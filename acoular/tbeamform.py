@@ -24,15 +24,44 @@ Implements beamformers in the time domain.
     IntegratorSectorTime
 """
 
+from contextlib import closing
+from functools import wraps
+
 from .base import AcoularBase, SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
+from .logger import _operation
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
 
 import numpy as np
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
+
+
+def _log_result(method):
+    """Summarize the two implementing generators, not their forwarding overrides."""
+
+    @wraps(method)
+    def wrapped(self, num=2048):
+        fields = {}
+        with (
+            _operation(
+                self.logger,
+                'Computing time-domain beamforming',
+                'Computed time-domain beamforming',
+                count='samples',
+                stopped='Stopped time-domain beamforming',
+                fields=fields,
+            ) as task,
+            closing(method(self, num)) as blocks,
+        ):
+            for block in blocks:
+                fields['grid_points'] = block.shape[1]
+                task.advance(block.shape[0])
+                yield block
+
+    return wrapped
 
 
 def const_power_weight(bf):
@@ -103,6 +132,7 @@ class BeamformerTime(TimeOut):
     def _get_weights(self):
         return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
 
+    @_log_result
     def result(self, num=2048):
         """
         Python generator that yields the time-domain beamformer output.
@@ -348,6 +378,7 @@ class BeamformerTimeTraj(BeamformerTime):
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.steer.env.apparent_r(tpos)
 
+    @_log_result
     def result(self, num=2048):
         """
         Python generator that yields the time-domain beamformer output.

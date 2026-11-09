@@ -502,6 +502,37 @@ def calculation_setup(monkeypatch):
     return spectra, ac.BeamformerBase(freq_data=spectra, steer=steer, cached=False)
 
 
+def test_csm_and_eigen_summaries_once(calculation_setup, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    spectra, _ = calculation_setup
+    csm = spectra.csm
+    values, vectors = spectra.eigvals, spectra.eigvecs
+    assert csm.shape == (65, 2, 2)
+    np.testing.assert_allclose(values, np.linalg.eigvalsh(csm))
+    np.testing.assert_allclose(csm @ vectors, vectors * values[:, None, :], atol=1e-12)
+    assert sum(message.startswith('Computed cross-spectral matrices') for message in caplog.messages) == 1
+    assert sum(message.startswith('Computed eigendecompositions') for message in caplog.messages) == 1
+    assert len(caplog.records) == 2
+    assert all(record.name == 'acoular.spectra.PowerSpectra' for record in caplog.records)
+
+
+def test_nested_calculation_progress_cleanup(calculation_setup, caplog, mocker):
+    caplog.set_level(logging.INFO, logger='acoular')
+    ac.config.log_progress = 'on'
+    counts = []
+    original = al.Progress.add_task
+
+    def add_task(display, *args, **kwargs):
+        task_id = original(display, *args, **kwargs)
+        counts.append(len(display.tasks))
+        return task_id
+
+    mocker.patch.object(al.Progress, 'add_task', add_task)
+    _ = calculation_setup[0].eigvals
+    assert max(counts) == 2
+    assert al._display is None
+
+
 def test_spectrum_cache_hit_has_no_info(calculation_setup, caplog, monkeypatch, tmp_path):
     spectra, _ = calculation_setup
     monkeypatch.setattr(ac.config, 'global_caching', 'all')
@@ -517,7 +548,72 @@ def test_spectrum_cache_hit_has_no_info(calculation_setup, caplog, monkeypatch, 
     monkeypatch.setattr(ac.PowerSpectra, 'calc_csm', unexpected_calculation)
     np.testing.assert_array_equal(other.csm, expected)
     assert not any(record.levelno == logging.INFO for record in caplog.records)
-    assert any(message.startswith('Reused cache file') for message in caplog.messages)
+    assert any(message.startswith('Reused cached spectra') for message in caplog.messages)
+
+
+def test_beamforming_summarizes_original_batch(calculation_setup, caplog, monkeypatch):
+    caplog.set_level(logging.INFO, logger='acoular')
+    _, beamformer = calculation_setup
+    original = ac.BeamformerBase._calc
+    calls = []
+
+    def calculate(self, indices):
+        calls.append(indices.copy())
+        return original(self, indices)
+
+    monkeypatch.setattr(ac.BeamformerBase, '_calc', calculate)
+    result = beamformer.result[1:4].copy()
+    assert len(calls) == 1
+    np.testing.assert_array_equal(calls[0], [1, 2, 3])
+    summaries = [message for message in caplog.messages if message.startswith('Computed beamforming maps')]
+    assert len(summaries) == 1 and 'frequencies=3' in summaries[0]
+    caplog.clear()
+    np.testing.assert_array_equal(beamformer.result[1:4], result)
+    assert len(calls) == 1
+    assert not caplog.records
+
+
+@pytest.mark.parametrize('cls', [ac.BeamformerTime, ac.BeamformerTimeSq, ac.BeamformerCleant, ac.BeamformerCleantSq])
+def test_time_beamforming_has_one_summary(cls, calculation_setup, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    spectra, frequency_beamformer = calculation_setup
+    kwargs = {'n_iter': 1} if issubclass(cls, ac.BeamformerCleant) else {}
+    beamformer = cls(source=spectra.source, steer=frequency_beamformer.steer, **kwargs)
+    blocks = list(beamformer.result(64))
+    assert blocks
+    assert len(caplog.records) == 1
+    message = caplog.messages[0]
+    assert message.startswith('Computed time-domain beamforming')
+    assert f'samples={sum(block.shape[0] for block in blocks)}' in message
+    assert 'grid_points=2' in message
+
+
+def test_time_beamforming_partial_summary(calculation_setup, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    spectra, frequency_beamformer = calculation_setup
+    beamformer = ac.BeamformerTimeSq(source=spectra.source, steer=frequency_beamformer.steer)
+    iterator = beamformer.result(64)
+    block = next(iterator)
+    iterator.close()
+    assert len(caplog.records) == 1
+    assert caplog.messages[0].startswith('Stopped time-domain beamforming')
+    assert f'samples={len(block)}' in caplog.messages[0]
+    assert 'reason=consumer_closed' in caplog.messages[0]
+
+
+def test_csm_failure_has_no_success_or_error_log(calculation_setup, caplog, monkeypatch):
+    caplog.set_level(logging.INFO, logger='acoular')
+    ac.config.log_progress = 'on'
+
+    def fail(_self, _num):
+        msg = 'source failed'
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(ac.TimeSamples, 'result', fail)
+    with pytest.raises(RuntimeError, match='source failed'):
+        _ = calculation_setup[0].csm
+    assert not caplog.records
+    assert al._display is None
 
 
 def test_data_file_download_and_local_resolution(tmp_path, monkeypatch, mocker, caplog):
