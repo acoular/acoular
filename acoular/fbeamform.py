@@ -2030,14 +2030,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
         ],
     )
 
-    @property_depends_on('n')
-    def _get_na(self):
-        na = self.n
-        nm = self.steer.mics.num_mics
-        if na < 0:
-            na = max(nm + na, 0)
-        return min(nm - 1, na)
-
     def _calc(self, ind):
         """
         Calculates the result for the frequencies defined by :attr:`freq_data`.

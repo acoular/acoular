@@ -70,3 +70,9 @@ def test_eigenvalue_index_updates_when_channels_are_restored(beamformer_cls):
     assert obj.na == 2
     obj.steer.mics.invalid_channels.clear()
     assert obj.na == 3
+
+
+def test_gib_uses_parent_eigenvalue_index_getter():
+    assert '_get_na' not in ac.BeamformerGIB.__dict__
+    getter = ac.BeamformerEig.class_traits()['na'].property_fields[0]
+    assert ac.BeamformerGIB.class_traits()['na'].property_fields[0] is getter
