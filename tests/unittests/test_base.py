@@ -97,3 +97,12 @@ def test_inherited_digest_includes_subclass_identity():
     assert inherited.digest == digest(inherited)
     assert inherited.digest != obj.digest
     assert DigestObject(value=obj.value).digest == obj.digest
+
+
+def test_grid_position_getter_remains_abstract():
+    assert '_get_pos' in ac.Grid.__abstractmethods__
+
+
+def test_existing_adaptive_grid_instantiation_is_preserved():
+    obj = ac.BeamformerAdaptiveGrid()
+    assert obj.digest == digest(obj)

@@ -179,8 +179,8 @@ class Grid(ABCHasStrictTraits):
     def _get_shape(self):
         """Return the shape of the grid as a Tuple."""
 
-    @property_depends_on(['digest'])
     @abstractmethod
+    @property_depends_on(['digest'])
     def _get_pos(self):
         """Return the grid positions as array of floats, shape (3, :attr:`size`)."""
 
