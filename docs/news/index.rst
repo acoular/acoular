@@ -11,8 +11,19 @@ Upcoming
 
     - use new Acoular themeing for the docs and examples
 
+**Internal**
+
+    - adds :class:`~acoular.base.AcoularBase` and removes duplicate cached digest getters
+    - caches digests in the generator base classes, :class:`~acoular.tbeamform.BeamformerTime`,
+      and :class:`~acoular.environments.Environment` without changing digest values
+    - centralizes the disk-cache policy for :class:`~acoular.spectra.PowerSpectra`;
+      imported spectra continue to bypass disk caching
+
 **Bugfixes**
 
+    - updates the cached eigenvalue index in :class:`~acoular.fbeamform.BeamformerEig`,
+      :class:`~acoular.fbeamform.BeamformerMusic`, and :class:`~acoular.fbeamform.BeamformerGIB`
+      when the microphone count changes, including channel exclusion or restoration
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change
 
 26.08
