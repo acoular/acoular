@@ -17,6 +17,7 @@ V = np.array([-50.0, 0.0, 0.0])  # source velocity, the source moves in -x direc
 P0 = np.array([4.0, 0.0, 3.0])  # source position at t = 0; it passes over the microphones at t = 0.08 s
 UP = 16  # default up-sampling factor of the source
 MICS = np.array([[0.0, 0.0, 0.0], [1.5, 2.0, 0.0], [-2.0, -1.0, 0.0]])  # one position per row
+FAR_MIC = (12.0, 0.0, 0.0)  # microphone far from the others, for the test of channel independence
 
 
 def get_trajectory(shift=(0.0, 0.0, 0.0)):
@@ -130,6 +131,24 @@ def test_conv_amp_factor(direction):
     assert (mach < -0.01).any()
 
 
+@pytest.mark.parametrize('conv_amp', [False, True])
+@pytest.mark.parametrize('other_mic', [MICS[0], FAR_MIC], ids=['origin', 'far'])
+def test_channel_independence(other_mic, conv_amp):
+    """The channel of a microphone does not depend on the other microphones of the array.
+
+    The microphone ``MICS[1]`` is computed alone and as the second microphone of an array whose
+    first microphone is ``other_mic``. Both channels must be equal. Before the fix, the source
+    position at the emission time of the first microphone was used for the directivity and the
+    pole distances of all channels, so the channel depended on the first microphone, the more the
+    farther it is from ``MICS[1]`` (``far``).
+    """
+    alone = get_output(get_source([MICS[1]], conv_amp=conv_amp))[:, 0]
+    pair = get_output(get_source([other_mic, MICS[1]], conv_amp=conv_amp))[:, 1]  # second channel
+    # rounding only: the emission time, the distances and the signal index of a microphone do not
+    # depend on the other microphones
+    np.testing.assert_allclose(pair, alone, rtol=0, atol=1e-9 * np.abs(alone).max())
+
+
 @pytest.mark.parametrize(('time', 'sign'), [(0.0, 1.0), (0.15, -1.0)], ids=['approaching', 'receding'])
 def test_emission_time_mach_sign_and_translation(time, sign):
     """``get_emission_time`` returns the radial Mach number of :class:`MovingPointSource`.
@@ -151,6 +170,39 @@ def test_emission_time_mach_sign_and_translation(time, sign):
     np.testing.assert_allclose(rm_s, rm, rtol=1e-9)
     np.testing.assert_allclose(mach_s, mach, rtol=1e-9)
     np.testing.assert_allclose(xs_s, xs + shift[:, np.newaxis], rtol=0, atol=1e-9)
+
+
+@pytest.mark.parametrize('conv_amp', [False, True])
+@pytest.mark.parametrize('direction', [(0.0, 0.0, 1.0), (1.0, 0.0, 0.0), (0.0, 0.5, 0.5)])
+def test_consistency_with_moving_point_source(direction, conv_amp):
+    """Dipole / monopole equals the directivity ``cos(theta)`` per microphone and sample.
+
+    The dipole is compared with a :class:`~acoular.sources.MovingPointSource` with the same signal,
+    microphones, trajectory and ``conv_amp``. ``theta`` is the angle between the dipole axis and
+    the vector from the source position at the exact emission time to the microphone. The test
+    fails if ``conv_amp`` is not applied in the same way as for the monopole (factor and radial
+    Mach number) or if the directivity and the pole distances refer to the source position at the
+    emission time of another microphone. The axis (0, 0.5, 0.5) also checks that the output does
+    not depend on the length of ``direction``.
+
+    The monopole is evaluated with block size 1, so that its Newton-Raphson iteration stops at the
+    same step as the one of the dipole and both read the signal at the same index of the
+    up-sampled signal.
+
+    Tolerance: the iteration stops when the time correction is below ``0.1 / (up * fs)``, a tenth
+    of the up-sampled sampling interval. The distances used for the amplitude are evaluated before
+    (``rm``) and after (pole distances) the last correction, which changes the amplitude by at
+    most ``2 * |v| * 0.1 / (up * fs) / r_min`` (1.6e-5 here). The two-pole difference adds
+    rounding errors of about 1e-9 (``atol``).
+    """
+    dipole = get_output(get_source(MICS, direction=direction, conv_amp=conv_amp))
+    monopole = get_output(get_source(MICS, cls=ac.MovingPointSource, conv_amp=conv_amp), num=1)
+    _, _, unit, _ = exact_emission(MICS)
+    axis = np.array(direction) / np.linalg.norm(direction)
+    cos_theta = np.einsum('i,inm->nm', axis, unit)  # directivity per sample n and microphone m
+    r_min = np.abs(MICS[:, 2] - P0[2]).min()  # smallest distance, source height above the mics
+    rtol = 2 * np.linalg.norm(V) * 0.1 / (UP * FS) / r_min
+    np.testing.assert_allclose(dipole, monopole * cos_theta, rtol=rtol, atol=1e-8 * np.abs(monopole).max())
 
 
 @pytest.mark.parametrize(
@@ -197,8 +249,9 @@ def test_single_microphone_at_origin_unchanged(direction, expected):
 
     For a microphone at the origin, the fix of the radial Mach number does not change the output:
     the unit vector from the origin to the source used before is the negative unit vector from the
-    source to the microphone, so the Newton-Raphson iteration is the same. With ``conv_amp=False``,
-    the convective amplification is not applied.
+    source to the microphone, so the Newton-Raphson iteration is the same. With a single
+    microphone, the emission time of the first microphone is the one of this microphone. With
+    ``conv_amp=False``, the convective amplification is not applied.
     """
     out = get_output(get_source([MICS[0]], direction=direction))  # shape (NUM, 1)
     indices = [*range(0, NUM, 250), NUM - 1]  # samples 0, 250, ..., 1750 and the last sample 1999

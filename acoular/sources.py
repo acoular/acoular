@@ -1422,10 +1422,15 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         Notes
         -----
+        - For each microphone, the positions of the two monopoles are taken at the emission time of
+          that microphone, so that the directivity and the distances refer to the position of the
+          source when the received sound was emitted.
         - If :attr:`~MovingPointSource.conv_amp` is enabled, the output at each microphone is
           multiplied by :math:`(1 - M_r)^{-2}` (convective amplification), with the radial Mach
           number :math:`M_r` from :meth:`get_emission_time` (positive for an approaching source),
           as in :class:`MovingPointSource`.
+        - If :attr:`rvec` is not ``(0, 0, 0)``, the rotated dipole orientation is computed from the
+          velocity at the emission time of the first microphone and used for all microphones.
         """
         # If signal samples are needed for te < t_start, then samples are taken
         # from the end of the calculated signal.
@@ -1455,14 +1460,17 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             n -= 1
             te, rm, Mr, locs = self.get_emission_time(t, 0)
             t += 1.0 / self.sample_freq
-            # location of the center
-            loc = np.array(self.trajectory.location(te), dtype=float)[:, 0][:, np.newaxis]
+            # location of the center at the emission time of each microphone, shape (3, num_mics)
+            loc = np.array(self.trajectory.location(te), dtype=float)
             # distance of the dipoles from the center
             diff = self.get_moving_direction(dir2, te)
 
-            # distance of sources
-            rm1 = self.env.apparent_r(loc + diff, mpos)
-            rm2 = self.env.apparent_r(loc - diff, mpos)
+            # distance of sources: pole positions at the emission time of microphone m to
+            # microphone m, i.e. the diagonal of the (num_mics, num_mics) matrix from apparent_r
+            # (reshaped because apparent_r returns shape (1,) for a single microphone; copied
+            # because np.diagonal returns a read-only view)
+            rm1 = np.diagonal(np.reshape(self.env.apparent_r(loc + diff, mpos), (m.num_mics, m.num_mics))).copy()
+            rm2 = np.diagonal(np.reshape(self.env.apparent_r(loc - diff, mpos), (m.num_mics, m.num_mics))).copy()
 
             ind = (te - self.start_t + self.start) * self.sample_freq
             if self.conv_amp:
