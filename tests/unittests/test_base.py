@@ -125,8 +125,47 @@ def test_timeout_classes_use_shared_cached_getter(block_cls):
     assert '_get_digest' not in block_cls.__dict__
 
 
-def test_environment_digest_remains_uncached():
-    assert not ac.Environment.class_traits()['digest'].cached
+def test_environment_digest_caches_and_invalidates(mocker):
+    getter = mocker.spy(ac.base, 'digest')
+    obj = ac.Environment()
+    before = obj.digest
+    assert obj.digest == before
+    assert before == digest(obj)
+    assert getter.call_count == 1
+
+    obj.c = 340.0
+    assert obj.digest != before
+    assert obj.digest == digest(obj)
+    assert getter.call_count == 2
+
+    obj.roi = np.ones((3, 2))
+    assert obj.digest == digest(obj)
+    assert getter.call_count == 2
+
+
+def test_environment_digest_invalidates_steering():
+    env = ac.Environment()
+    steer = ac.SteeringVector(env=env)
+    before = steer.digest
+    env.c = 340.0
+    assert steer.digest != before
+    assert steer.digest == digest(steer)
+
+    before = steer.digest
+    steer.env = ac.Environment(c=330.0)
+    assert steer.digest != before
+    assert steer.digest == digest(steer)
+
+
+def test_environment_subclass_can_override_digest_getter():
+    class CustomEnvironment(ac.Environment):
+        def _get_digest(self):
+            return f'custom_{self.c}'
+
+    obj = CustomEnvironment()
+    assert obj.digest == 'custom_343.0'
+    obj.c = 340.0
+    assert obj.digest == 'custom_340.0'
 
 
 def test_generator_digest_caches_and_tracks_dependencies(generator_cls, mocker):

@@ -38,7 +38,7 @@ from abc import abstractmethod
 from warnings import warn as _warn
 
 from .base import AcoularBase
-from .internal import digest, lazyjit
+from .internal import lazyjit
 
 import numba as nb
 import numpy as np
@@ -185,7 +185,7 @@ class Environment(AcoularBase):
     """
 
     #: A unique identifier based on the environment properties. (read-only)
-    digest = Property(depends_on=['c'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['c'])
 
     #: The speed of sound in the environment. Default is ``343.0``, which corresponds to the
     #: approximate speed of sound at 20°C in dry air at sea level, if the unit is m/s.
@@ -194,9 +194,6 @@ class Environment(AcoularBase):
     #: The region of interest (ROI) for calculations. (Not needed for most types of environment.)
     #: Default is :obj:`None`.
     roi = Union(None, CArray)
-
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """Compute the distances between two sets of points.
