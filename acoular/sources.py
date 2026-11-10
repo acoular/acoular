@@ -1360,9 +1360,15 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             - rm : :class:`numpy.ndarray`
                 Distances from the source to each microphone.
             - Mr : :class:`numpy.ndarray`
-                Radial Mach numbers for the source's motion.
+                Radial Mach numbers of the source with respect to each microphone, i.e. the
+                projection of the source velocity onto the unit vector pointing from the source to
+                the microphone, divided by the speed of sound. ``Mr`` is positive for an
+                approaching source (same convention as in :class:`MovingPointSource`).
             - xs : :class:`numpy.ndarray`
                 Source coordinates at the calculated emission times.
+
+            ``rm``, ``Mr`` and ``xs`` are evaluated in the last iteration step, i.e. before the
+            last update of ``te``.
 
         Warnings
         --------
@@ -1373,7 +1379,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
         -----
         The emission times are computed iteratively using the Newton-Raphson method. The iteration
         terminates when the time discrepancy (``eps``) is below a threshold (``epslim``)
-        or after 100 iterations.
+        or after 100 iterations. The distances and the radial Mach number are computed for each
+        microphone with respect to the source position at the emission time of that microphone.
         """
         eps = np.ones(self.mics.num_mics)
         epslim = 0.1 / self.up / self.sample_freq
@@ -1384,12 +1391,12 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             xs = np.array(self.trajectory.location(te))
             loc = xs.copy()
             loc += direction
-            rm = loc - self.mics.pos  # distance vectors to microphones
-            rm = np.sqrt((rm * rm).sum(0))  # absolute distance
-            loc /= np.sqrt((loc * loc).sum(0))  # distance unit vector
+            dv = self.mics.pos - loc  # distance vectors from source to microphones
+            rm = np.sqrt((dv * dv).sum(0))  # absolute distance
+            dv /= rm  # unit vectors from source to microphones
             der = np.array(self.trajectory.location(te, der=1))
-            Mr = (der * loc).sum(0) / self.env.c  # radial Mach number
-            eps = (te + rm / self.env.c - t) / (1 + Mr)  # discrepancy in time
+            Mr = (der * dv).sum(0) / self.env.c  # radial Mach number, positive for an approaching source
+            eps = (te + rm / self.env.c - t) / (1 - Mr)  # discrepancy in time
             te -= eps
             j += 1  # iteration count
         return te, rm, Mr, xs
