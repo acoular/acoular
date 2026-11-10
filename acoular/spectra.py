@@ -17,23 +17,20 @@
     PowerSpectraImport
 """
 
-from abc import abstractmethod
 from warnings import warn
 
 # acoular imports
-from .base import SamplesGenerator
+from .base import AcoularBase, SamplesGenerator
 from .configuration import config
 from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
-from .internal import digest
 from .tools.utils import find_basename
 
 import numpy as np
 from scipy import fft
 from traits.api import (
-    ABCHasStrictTraits,
     Bool,
     CArray,
     Delegate,
@@ -49,7 +46,7 @@ from traits.api import (
 )
 
 
-class BaseSpectra(ABCHasStrictTraits):
+class BaseSpectra(AcoularBase):
     """
     Base class for handling spectral data in Acoular.
 
@@ -119,11 +116,7 @@ class BaseSpectra(ABCHasStrictTraits):
     precision = Enum('complex128', 'complex64')
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
-    digest = Property(depends_on=['precision', 'block_size', 'window', 'overlap'])
-
-    @abstractmethod
-    def _get_digest(self):
-        """Return internal identifier."""
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['precision', 'block_size', 'window', 'overlap'])
 
     def fftfreq(self):
         """
@@ -272,6 +265,7 @@ class PowerSpectra(BaseSpectra):
 
     #: A unique identifier for the spectra, based on its properties.  (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['source.digest', 'block_size', 'window', 'overlap', 'precision'],
     )
 
@@ -339,10 +333,6 @@ class PowerSpectra(BaseSpectra):
             except IndexError:
                 return range(0)
         return None
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_basename(self):
@@ -468,20 +458,21 @@ class PowerSpectra(BaseSpectra):
     def _get_filecache(self, traitname):
         # Handle caching of results for CSM, eigenvalues, and eigenvectors.
         # Returns the requested data (``csm``, ``eigvals``, or ``eigvecs``) as a NumPy array.
+        func = {'csm': self.calc_csm, 'eigvals': self._calc_eigvals, 'eigvecs': self._calc_eigvecs}[traitname]
+        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
+            return func()
+
         if traitname == 'csm':
-            func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
             shape = (numfreq, self.source.num_channels, self.source.num_channels)
             precision = self.precision
         elif traitname == 'eigvals':
-            func = self._calc_eigvals
             shape = self.csm.shape[0:2]
             if self.precision == 'complex128':
                 precision = 'float64'
             elif self.precision == 'complex64':
                 precision = 'float32'
         elif traitname == 'eigvecs':
-            func = self._calc_eigvecs
             shape = self.csm.shape
             precision = self.precision
 
@@ -509,20 +500,14 @@ class PowerSpectra(BaseSpectra):
 
     @property_depends_on(['digest'])
     def _get_csm(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self.calc_csm()
         return self._get_filecache('csm')
 
     @property_depends_on(['digest'])
     def _get_eigvals(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self._calc_eigvals()
         return self._get_filecache('eigvals')
 
     @property_depends_on(['digest'])
     def _get_eigvecs(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self._calc_eigvecs()
         return self._get_filecache('eigvecs')
 
     def synthetic_ev(self, freq, num=0):
@@ -638,7 +623,7 @@ class PowerSpectraImport(PowerSpectra):
     _ind_high = Union(None, Int)
 
     #: A unique identifier for the spectra, based on its properties. (read-only)
-    digest = Property(depends_on=['_csmsum'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['_csmsum'])
 
     #: Name of the cache file without extension. (read-only)
     basename = Property(depends_on=['digest'])
@@ -650,10 +635,6 @@ class PowerSpectraImport(PowerSpectra):
 
     def _get_basename(self):
         return 'csm_import_' + self.digest
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _get_num_channels(self):
         return self.csm.shape[1]

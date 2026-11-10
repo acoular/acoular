@@ -18,8 +18,7 @@
 # imports from other packages
 import xml.dom.minidom
 
-from .base import InOut, SamplesGenerator, SpectraGenerator
-from .internal import digest
+from .base import AcoularBase, InOut, SamplesGenerator, SpectraGenerator
 
 import numpy as np
 from traits.api import CArray, CInt, File, List, Property, Union, cached_property, observe
@@ -97,7 +96,7 @@ class Calib(InOut):
     channels = Property(depends_on=['invalid_channels', 'num_mics'])
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'data'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'data'])
 
     @observe('data')
     def _update_num_mics(self, event):  # noqa: ARG002
@@ -110,10 +109,6 @@ class Calib(InOut):
             return slice(0, None, None)
         allr = [i for i in range(self.num_mics) if i not in self.invalid_channels]
         return np.array(allr)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @observe('file')
     def _import_data(self, event):  # noqa: ARG002

@@ -28,8 +28,8 @@ Examples
 import contextlib
 from warnings import warn as _warn
 
+from acoular.base import AcoularBase
 from acoular.h5files import H5FileBase, _get_h5file_class
-from acoular.internal import digest
 from acoular.microphones import MicGeom
 from acoular.sources import TimeSamples
 from acoular.spectra import PowerSpectraImport
@@ -205,11 +205,7 @@ class CsmAIAABenchmark(PowerSpectraImport):
     _h5f = Instance(H5FileBase, transient=True)
 
     #: A unique identifier for the CSM importer, based on its properties. (read-only)
-    digest = Property(depends_on=['basename', '_csmsum'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['basename', '_csmsum'])
 
     @cached_property
     def _get_basename(self):

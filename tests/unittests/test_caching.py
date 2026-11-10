@@ -129,6 +129,83 @@ def test_filecache_created(case, file_cache_options):
         np.testing.assert_allclose(result, result_uncache)
 
 
+@pytest.mark.parametrize(
+    ('trait', 'method'), [('csm', 'calc_csm'), ('eigvals', '_calc_eigvals'), ('eigvecs', '_calc_eigvecs')]
+)
+@pytest.mark.parametrize(('mode', 'cached'), [('none', False), ('none', True), ('individual', False)])
+def test_spectra_disabled_cache_skips_file_preparation(monkeypatch, mocker, trait, method, mode, cached):
+    monkeypatch.setattr(ac.config, 'global_caching', mode)
+    obj = ac.PowerSpectra(cached=cached)
+    expected = np.ones((1, 1, 1))
+    compute = mocker.patch.object(ac.PowerSpectra, method, return_value=expected)
+    filecache = mocker.patch('acoular.h5cache.HDF5Cache.get_cache_file')
+
+    assert obj._get_filecache(trait) is expected
+    compute.assert_called_once_with()
+    filecache.assert_not_called()
+
+
+@pytest.mark.parametrize('trait', ['csm', 'eigvals', 'eigvecs'])
+@pytest.mark.parametrize('mode', ['none', 'individual', 'all', 'readonly', 'overwrite'])
+def test_spectra_getters_delegate_cache_policy(monkeypatch, mocker, trait, mode):
+    monkeypatch.setattr(ac.config, 'global_caching', mode)
+    obj = ac.PowerSpectra(cached=False)
+    expected = np.ones((1, 1, 1))
+    handler = mocker.patch.object(ac.PowerSpectra, '_get_filecache', return_value=expected)
+
+    assert getattr(obj, trait) is expected
+    handler.assert_called_once_with(trait)
+
+
+@pytest.fixture(params=['pytables', 'h5py'])
+def cached_spectra(request, tmp_path, monkeypatch):
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'h5library', request.param)
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    source = ac.TimeSamples(data=np.random.default_rng(1).normal(size=(256, 2)), sample_freq=48000)
+    return ac.PowerSpectra(source=source, block_size=128, cached=False)
+
+
+@pytest.mark.parametrize('trait', ['csm', 'eigvals', 'eigvecs'])
+def test_spectra_readonly_reuses_cached_result(cached_spectra, monkeypatch, mocker, trait):
+    expected = getattr(cached_spectra, trait)[:].copy()
+    monkeypatch.setattr(ac.config, 'global_caching', 'readonly')
+    for method in ('calc_csm', '_calc_eigvals', '_calc_eigvecs'):
+        mocker.patch.object(ac.PowerSpectra, method, side_effect=AssertionError('unexpected computation on cache hit'))
+    obj = ac.PowerSpectra(source=cached_spectra.source, block_size=128, cached=False)
+
+    np.testing.assert_array_equal(getattr(obj, trait)[:], expected)
+
+
+@pytest.mark.parametrize('trait', ['eigvals', 'eigvecs'])
+def test_spectra_readonly_does_not_store_missing_result(cached_spectra, monkeypatch, trait):
+    csm = cached_spectra.csm[:].copy()
+    expected = np.linalg.eigh(csm)[0 if trait == 'eigvals' else 1]
+    nodename = trait + '_' + cached_spectra.digest
+    assert not cached_spectra._h5f.is_cached(nodename)
+    monkeypatch.setattr(ac.config, 'global_caching', 'readonly')
+    obj = ac.PowerSpectra(source=cached_spectra.source, block_size=128, cached=False)
+
+    np.testing.assert_allclose(getattr(obj, trait), expected)
+    assert not obj._h5f.is_cached(nodename)
+
+
+@pytest.mark.parametrize('mode', ['none', 'individual', 'all', 'readonly', 'overwrite'])
+def test_imported_spectra_bypasses_file_cache(monkeypatch, mocker, mode):
+    monkeypatch.setattr(ac.config, 'global_caching', mode)
+    csm = np.array([[[2.0, 0.0], [0.0, 1.0]]], dtype=complex)
+    obj = ac.PowerSpectraImport(csm=csm)
+    handler = mocker.patch.object(
+        ac.PowerSpectra, '_get_filecache', side_effect=AssertionError('unexpected disk caching')
+    )
+    eigvals, eigvecs = np.linalg.eigh(csm)
+
+    np.testing.assert_array_equal(obj.csm, csm)
+    np.testing.assert_allclose(obj.eigvals, eigvals)
+    np.testing.assert_allclose(obj.eigvecs, eigvecs)
+    handler.assert_not_called()
+
+
 def test_timesamples_file_change(tmp_path):
     """Test that changing the file attribute of a TimeSamples object works correctly.
 

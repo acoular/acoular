@@ -15,14 +15,13 @@ import xml.dom.minidom
 from pathlib import Path
 
 # acoular imports
-from .internal import digest
+from .base import AcoularBase
 
 import numpy as np
 from scipy.spatial.distance import cdist
 from traits.api import (
     CArray,
     File,
-    HasStrictTraits,
     List,
     Property,
     Union,
@@ -31,7 +30,7 @@ from traits.api import (
 )
 
 
-class MicGeom(HasStrictTraits):
+class MicGeom(AcoularBase):
     """
     Provide the geometric arrangement of microphones in an array.
 
@@ -165,11 +164,7 @@ class MicGeom(HasStrictTraits):
     aperture = Property(depends_on=['pos'])
 
     #: A unique identifier for the geometry, based on its properties. (read-only)
-    digest = Property(depends_on=['pos'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['pos'])
 
     @cached_property
     def _get_pos(self):

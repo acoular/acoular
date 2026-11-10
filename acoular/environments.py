@@ -37,7 +37,8 @@ Implements acoustic environments with and without flow.
 from abc import abstractmethod
 from warnings import warn as _warn
 
-from .internal import digest, lazyjit
+from .base import AcoularBase
+from .internal import lazyjit
 
 import numba as nb
 import numpy as np
@@ -46,11 +47,9 @@ from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import ConvexHull
 from traits.api import (
-    ABCHasStrictTraits,
     CArray,
     Dict,
     Float,
-    HasStrictTraits,
     Instance,
     Int,
     Property,
@@ -169,7 +168,7 @@ def cylToCart(x, Q=None):  # noqa: N802, N803
     return np.array([x[1] * np.sin(x[0]), x[1] * np.cos(x[0]), x[2]])
 
 
-class Environment(HasStrictTraits):
+class Environment(AcoularBase):
     """
     A simple acoustic environment without flow.
 
@@ -186,7 +185,7 @@ class Environment(HasStrictTraits):
     """
 
     #: A unique identifier based on the environment properties. (read-only)
-    digest = Property(depends_on=['c'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['c'])
 
     #: The speed of sound in the environment. Default is ``343.0``, which corresponds to the
     #: approximate speed of sound at 20°C in dry air at sea level, if the unit is m/s.
@@ -195,9 +194,6 @@ class Environment(HasStrictTraits):
     #: The region of interest (ROI) for calculations. (Not needed for most types of environment.)
     #: Default is :obj:`None`.
     roi = Union(None, CArray)
-
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """Compute the distances between two sets of points.
@@ -280,12 +276,9 @@ class UniformFlowEnvironment(Environment):
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['c', 'ma', 'fdv'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """Compute the apparent distances between two sets of points.
@@ -332,15 +325,11 @@ class UniformFlowEnvironment(Environment):
         return rm
 
 
-class FlowField(ABCHasStrictTraits):
+class FlowField(AcoularBase):
     """An abstract base class for a spatial flow field."""
 
     #: A unique identifier based on the field properties. (read-only)
-    digest = Property
-
-    @abstractmethod
-    def _get_digest(self):
-        pass
+    digest = Property(fget=AcoularBase._get_digest, depends_on=[])
 
     @abstractmethod
     def v(self, xx):
@@ -394,12 +383,9 @@ class SlotJet(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'flow', 'plane', 'B', 'l'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -508,12 +494,9 @@ class OpenJet(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'D', 'l'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -617,6 +600,7 @@ class RotatingFlow(FlowField):
 
     #: A unique identifier based on the field properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['v0', 'origin', 'rps'],
     )
 
@@ -629,10 +613,6 @@ class RotatingFlow(FlowField):
     @cached_property
     def _get_omega(self):
         return 2 * np.pi * self.rps
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def v(self, xx):
         """
@@ -814,16 +794,13 @@ class GeneralFlowEnvironment(Environment):
 
     #: A unique identifier based on the environment properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['c', 'ff.digest', 'N', 'Om'],
     )
 
     #: A dictionary for storing precomputed interpolators to optimize repeated calculations.
     #: (internal use)
     idict = Dict
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def apparent_r(self, gpos, mpos=0.0):
         """

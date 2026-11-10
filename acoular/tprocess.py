@@ -44,11 +44,11 @@ from os import path
 from warnings import warn as _warn
 
 # acoular imports
-from .base import FiniteTimeOut, SamplesGenerator, TimeOut
+from .base import AcoularBase, FiniteTimeOut, SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
-from .internal import digest, lazyjit, ldigest
+from .internal import lazyjit, ldigest
 from .microphones import MicGeom
 from .process import Cache
 from .tools.utils import find_basename
@@ -132,11 +132,7 @@ class MaskedTimeOut(TimeOut):
     num_samples = Property(depends_on=['start', 'stop', 'source.num_samples'])
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'start', 'stop', 'invalid_channels'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'start', 'stop', 'invalid_channels'])
 
     @cached_property
     def _get_channels(self):
@@ -291,11 +287,7 @@ class ChannelMixer(TimeOut):
     num_channels = Constant(1)
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'weights'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'weights'])
 
     def result(self, num):
         """
@@ -427,6 +419,7 @@ class Trigger(TimeOut):  # pragma: no cover
 
     #: A unique identifier for the trigger, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'source.digest',
             'threshold',
@@ -444,10 +437,6 @@ class Trigger(TimeOut):  # pragma: no cover
             stacklevel=2,
         )
         super().__init__(*args, **kwargs)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_trigger_data(self):
@@ -600,6 +589,7 @@ class AngleTracker(MaskedTimeOut):
 
     #: A unique identifier for the tracker, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'source.digest',
             'trigger.digest',
@@ -658,10 +648,6 @@ class AngleTracker(MaskedTimeOut):
             stacklevel=2,
         )
         super().__init__(*args, **kwargs)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     # helperfunction for trigger index detection
     def _find_nearest_idx(self, peakarray, value):
@@ -876,6 +862,7 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     #: Unique identifier for the current configuration of the interpolator. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'mics_virtual.digest',
@@ -897,10 +884,6 @@ class SpatialInterpolator(TimeOut):  # pragma: no cover
 
     def _get_num_channels(self):
         return self.mics_virtual.num_mics
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_virtNewCoord(self):  # noqa: N802
@@ -1364,6 +1347,7 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
 
     #: Unique identifier for the current configuration of the interpolator. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'source.digest',
             'angle_source.digest',
@@ -1375,10 +1359,6 @@ class SpatialInterpolatorRotation(SpatialInterpolator):  # pragma: no cover
             'interp_at_zero',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
@@ -1440,6 +1420,7 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
 
     #: Unique identifier for the current configuration of the interpolator. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'source.digest',
             'mics.digest',
@@ -1451,10 +1432,6 @@ class SpatialInterpolatorConstantRotation(SpatialInterpolator):  # pragma: no co
             'rotational_speed',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=1):
         """
@@ -1530,11 +1507,7 @@ class Mixer(TimeOut):
 
     #: A unique identifier for the Mixer instance, based on the :attr:`primary source<source>` and
     #: the :attr:`list of additional sources<sources>`.
-    digest = Property(depends_on=['source.digest', 'sdigest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'sdigest'])
 
     def validate_sources(self):
         """
@@ -1863,11 +1836,7 @@ class FiltOctave(Filter):
     sos = Property(depends_on=['band', 'fraction', 'source.digest', 'order'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_sos(self):
@@ -1934,11 +1903,7 @@ class FiltFiltOctave(FiniteTimeOut, FiltOctave):
     order = Int(2)
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'band', 'fraction', 'order'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'band', 'fraction', 'order'])
 
     @cached_property
     def _get_sos(self):
@@ -2052,11 +2017,7 @@ class TimeExpAverage(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'weight'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_sos(self):
@@ -2127,11 +2088,7 @@ class FiltFreqWeight(Filter):
     sos = Property(depends_on=['weight', 'source.digest'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'weight'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'weight'])
 
     @cached_property
     def _get_sos(self):
@@ -2332,11 +2289,7 @@ class OctaveFilterBank(FilterBank):
     num_bands = Property(depends_on=['lband', 'hband', 'fraction'])
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'lband', 'hband', 'fraction', 'order'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'lband', 'hband', 'fraction', 'order'])
 
     @cached_property
     def _get_bands(self):
@@ -2405,11 +2358,7 @@ class WriteWAV(TimeOut):
     max_val = Either(None, Float)
 
     #: A unique identifier for the filter, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'channels'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'channels'])
 
     def _type_info(self):
         dtype = np.dtype(self.encoding)
@@ -2569,7 +2518,7 @@ class WriteH5(TimeOut):
     write_flag = Bool(True)
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     #: Precision of the entries in the HDF5 file, represented as numpy data types.
     #: Default is ``'float32'``.
@@ -2577,10 +2526,6 @@ class WriteH5(TimeOut):
 
     #: Metadata to be stored in the HDF5 file.
     metadata = Dict()
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def create_filename(self):
         """
@@ -2764,11 +2709,7 @@ class TimeConvolve(TimeOut):
     )
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest', 'kernel', 'extend_signal'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest', 'kernel', 'extend_signal'])
 
     def _validate_kernel(self):
         # Validate the dimensions of the convolution kernel.
