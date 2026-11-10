@@ -11,6 +11,10 @@ Upcoming
 
     - use new Acoular themeing for the docs and examples
 
+**Internal**
+
+    - minor code cleanup in :class:`~acoular.tbeamform.BeamformerTimeTraj` for clarity and speedup
+
 **Bugfixes**
 
     - preserves yielded :class:`~acoular.fprocess.RFFT` spectral blocks when the generator advances, so retained full and partial batches remain valid
