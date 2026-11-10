@@ -839,7 +839,7 @@ class SamplesBuffer(InOut):
         Returns
         -------
         :class:`numpy.ndarray`
-            A block of samples (array) copied from the buffer, remaining stable after refilling.
+            A block of samples (array) from the buffer.
 
         Notes
         -----

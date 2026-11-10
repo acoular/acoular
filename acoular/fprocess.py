@@ -158,7 +158,6 @@ class RFFT(BaseSpectra, SpectraOut):
         - The generator compensates for energy or amplitude loss based on the :attr:`scaling`
           attribute.
         - Only complete input sample blocks are transformed into spectra.
-        - Yielded spectral blocks remain unchanged when the generator advances.
         """
         wind = self.window_(self.block_size)
         if self.scaling in {'none', 'energy'}:  # only compensate for the window
