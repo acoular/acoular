@@ -62,7 +62,7 @@ def const_power_weight(bf):
     bins *= bins
     weights = np.sqrt((bins[1:] - bins[:-1]) / count)
     weights /= weights.mean()
-    return weights[ind]
+    return weights[ind].ravel()
 
 
 # possible choices for spatial weights
@@ -390,7 +390,7 @@ class BeamformerTimeTraj(BeamformerTime):
         blockr0 = np.empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
-        weights = self._get_weights()
+        weights = np.asarray(self._get_weights(), dtype=fdtype)  # keep the working precision
 
         # preliminary implementation of different steering vectors
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
@@ -425,7 +425,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
-            p_res = time_block.copy() * weights
+            p_res = time_block * weights
             phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
