@@ -11,6 +11,10 @@ Upcoming
 
     - use new Acoular themeing for the docs and examples
 
+**Internal**
+
+    - minor code cleanup in :class:`~acoular.tbeamform.BeamformerTimeTraj` for clarity and speedup
+
 **Bugfixes**
 
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change

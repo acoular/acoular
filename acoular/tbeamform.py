@@ -35,7 +35,6 @@ from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
 
 import numpy as np
-import scipy.linalg as spla
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
 
 
@@ -336,14 +335,11 @@ class BeamformerTimeTraj(BeamformerTime):
                 yield tpos
 
     def _get_macostheta(self, g1, tpos, rm):
-        vvec = np.array(g1)  # velocity vector
-        ma = spla.norm(vvec) / self.steer.env.c  # machnumber
-        fdv = (vvec / np.sqrt((vvec * vvec).sum()))[:, np.newaxis]  # unit vecor velocity
-        mpos = self.steer.mics.pos[:, np.newaxis, :]
+        v = np.asarray(g1)
+        mpos = self.steer.mics.pos
         # vectors from the grid point (source) to the microphones, as in MovingPointSource,
         # so that the radial Mach number is positive for an approaching source
-        rmv = mpos - tpos[:, :, np.newaxis]
-        return (ma * np.sum(rmv.reshape((3, -1)) * fdv, 0) / rm.reshape(-1)).reshape(rm.shape)
+        return ((v @ mpos)[None, :] - (v @ tpos)[:, None]) / (self.steer.env.c * rm)
 
     def get_r0(self, tpos):
         """
@@ -433,7 +429,6 @@ class BeamformerTimeTraj(BeamformerTime):
 
             try:
                 time_block = next(buffered_result)
-                time_block *= weights
             except StopIteration:
                 break
             if time_block.shape[0] < buffer.result_num:  # last block shorter
@@ -441,7 +436,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
-            p_res = time_block.copy()
+            p_res = time_block.copy() * weights
             phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
