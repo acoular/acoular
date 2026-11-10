@@ -92,6 +92,44 @@ def exact_emission(mic_pos):
     return te, xs, unit, mach
 
 
+@pytest.mark.parametrize('direction', [(0.0, 0.0, 1.0), (1.0, 0.0, 0.0)])
+def test_conv_amp_factor(direction):
+    """``conv_amp=True`` multiplies the output by ``(1 - Mr)**-2`` per microphone and sample.
+
+    The same source is computed with and without ``conv_amp``, and the ratio of the two outputs is
+    compared with ``(1 - Mr)**-2``. The radial Mach number ``Mr`` is computed independently from
+    the exact emission time, not with
+    :meth:`~acoular.sources.MovingPointSourceDipole.get_emission_time`. The test therefore fails
+    if ``conv_amp`` has no effect and also if it is applied with a wrong ``Mr``. The factor
+    amplifies the approaching source (``Mr > 0``) and attenuates the receding source, as for
+    :class:`~acoular.sources.MovingPointSource`.
+
+    For the axis (1, 0, 0), ``cos(theta)`` passes through zero when the source passes the
+    microphones. There, the output is small and its relative rounding error is larger (see the
+    comment on ``atol``).
+    """
+    out_off = get_output(get_source(MICS, direction=direction, conv_amp=False))  # shape (NUM, M)
+    out_on = get_output(get_source(MICS, direction=direction, conv_amp=True))
+    mach = exact_emission(MICS)[3]  # exact radial Mach number, shape (NUM, M)
+    gain = (1 - mach) ** -2  # expected convective amplification, 0.81 ... 1.33 in this scene
+
+    # rtol: accuracy of the factor. atol: the two-pole difference 1/rm1 - 1/rm2 (pole distance
+    # ~5e-7 m at a distance of ~5 m) loses about 7 digits, so its relative rounding error is about
+    # 2e-9 / |cos(theta)|. atol covers the samples close to cos(theta) = 0 (axis (1, 0, 0)).
+    np.testing.assert_allclose(out_on, out_off * gain, rtol=1e-6, atol=1e-8 * np.abs(out_off).max())
+
+    # Direction of the effect: louder when approaching, quieter when receding. Excluded are the
+    # samples close to zero (their ratio is not meaningful) and |Mr| <= 0.01 (factor close to 1).
+    valid = np.abs(out_off) > 1e-3 * np.abs(out_off).max()
+    ratio = out_on[valid] / out_off[valid]
+    assert (ratio[mach[valid] > 0.01] > 1).all()
+    assert (ratio[mach[valid] < -0.01] < 1).all()
+    # Both cases occur in the scene, so the two checks above are not empty (all() of an empty
+    # array is True).
+    assert (mach > 0.01).any()
+    assert (mach < -0.01).any()
+
+
 @pytest.mark.parametrize(('time', 'sign'), [(0.0, 1.0), (0.15, -1.0)], ids=['approaching', 'receding'])
 def test_emission_time_mach_sign_and_translation(time, sign):
     """``get_emission_time`` returns the radial Mach number of :class:`MovingPointSource`.
@@ -159,8 +197,24 @@ def test_single_microphone_at_origin_unchanged(direction, expected):
 
     For a microphone at the origin, the fix of the radial Mach number does not change the output:
     the unit vector from the origin to the source used before is the negative unit vector from the
-    source to the microphone, so the Newton-Raphson iteration is the same.
+    source to the microphone, so the Newton-Raphson iteration is the same. With ``conv_amp=False``,
+    the convective amplification is not applied.
     """
     out = get_output(get_source([MICS[0]], direction=direction))  # shape (NUM, 1)
     indices = [*range(0, NUM, 250), NUM - 1]  # samples 0, 250, ..., 1750 and the last sample 1999
     np.testing.assert_allclose(out[indices, 0], expected, rtol=1e-6, atol=0)
+
+
+@pytest.mark.parametrize(('trait', 'value'), [('conv_amp', True)])
+def test_digest_depends_on(trait, value):
+    """The digest changes with the traits that change the output.
+
+    Acoular uses the digest as the key of cached results. If a trait that changes the output is
+    missing in ``depends_on`` of the digest, two sources that differ only in this trait get the
+    same digest, and a cache may return the result of the other source. Each case sets one trait
+    to a value different from its default and checks that the digest changes.
+    """
+    src = get_source(MICS)  # default values, e.g. conv_amp=False
+    digest = src.digest
+    setattr(src, trait, value)  # set the trait by its name, e.g. src.conv_amp = True
+    assert src.digest != digest

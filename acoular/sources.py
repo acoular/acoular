@@ -991,8 +991,10 @@ class MovingPointSource(PointSource):
     """
 
     #: Determines whether convective amplification is considered. When ``True``, the amplitude of
-    #: the signal is adjusted based on the relative motion between the source and microphones.
-    #: Default is ``False``.
+    #: the signal is adjusted based on the relative motion between the source and microphones:
+    #: in :class:`MovingPointSource` and :class:`MovingPointSourceDipole`, the signal at each
+    #: microphone is multiplied by ``(1 - Mr)**-2``, where ``Mr`` is the radial Mach number at the
+    #: emission time (positive for an approaching source). Default is ``False``.
     conv_amp = Bool(False)
 
     #: Instance of the :class:`~acoular.trajectory.Trajectory` class specifying the source's motion.
@@ -1322,6 +1324,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             'mics.digest',
             'signal.digest',
             'loc',
+            'conv_amp',
             'env.digest',
             'start_t',
             'start',
@@ -1419,8 +1422,10 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
         Notes
         -----
-        Radial Mach number adjustments are applied if :attr:`~MovingPointSource.conv_amp` is
-        enabled.
+        - If :attr:`~MovingPointSource.conv_amp` is enabled, the output at each microphone is
+          multiplied by :math:`(1 - M_r)^{-2}` (convective amplification), with the radial Mach
+          number :math:`M_r` from :meth:`get_emission_time` (positive for an approaching source),
+          as in :class:`MovingPointSource`.
         """
         # If signal samples are needed for te < t_start, then samples are taken
         # from the end of the calculated signal.
@@ -1461,7 +1466,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
             ind = (te - self.start_t + self.start) * self.sample_freq
             if self.conv_amp:
-                rm *= (1 - Mr) ** 2
+                # apply (1 - Mr)**-2 once, as in MovingPointSource (scaling rm as well would cancel)
                 rm1 *= (1 - Mr) ** 2  # assume that Mr is the same for both poles
                 rm2 *= (1 - Mr) ** 2
             try:
