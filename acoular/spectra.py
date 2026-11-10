@@ -458,20 +458,21 @@ class PowerSpectra(BaseSpectra):
     def _get_filecache(self, traitname):
         # Handle caching of results for CSM, eigenvalues, and eigenvectors.
         # Returns the requested data (``csm``, ``eigvals``, or ``eigvecs``) as a NumPy array.
+        func = {'csm': self.calc_csm, 'eigvals': self._calc_eigvals, 'eigvecs': self._calc_eigvecs}[traitname]
+        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
+            return func()
+
         if traitname == 'csm':
-            func = self.calc_csm
             numfreq = int(self.block_size / 2 + 1)
             shape = (numfreq, self.source.num_channels, self.source.num_channels)
             precision = self.precision
         elif traitname == 'eigvals':
-            func = self._calc_eigvals
             shape = self.csm.shape[0:2]
             if self.precision == 'complex128':
                 precision = 'float64'
             elif self.precision == 'complex64':
                 precision = 'float32'
         elif traitname == 'eigvecs':
-            func = self._calc_eigvecs
             shape = self.csm.shape
             precision = self.precision
 
@@ -499,20 +500,14 @@ class PowerSpectra(BaseSpectra):
 
     @property_depends_on(['digest'])
     def _get_csm(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self.calc_csm()
         return self._get_filecache('csm')
 
     @property_depends_on(['digest'])
     def _get_eigvals(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self._calc_eigvals()
         return self._get_filecache('eigvals')
 
     @property_depends_on(['digest'])
     def _get_eigvecs(self):
-        if config.global_caching == 'none' or (config.global_caching == 'individual' and self.cached is False):
-            return self._calc_eigvecs()
         return self._get_filecache('eigvecs')
 
     def synthetic_ev(self, freq, num=0):
