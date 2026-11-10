@@ -210,6 +210,8 @@ def test_independent_config_does_not_reconfigure_logging():
 
 @pytest.mark.parametrize('cls', get_all_classes(hastraits_only=True))
 def test_class_logger_without_instance_or_trait_state(cls):
+    assert issubclass(cls, ac.AcoularBase)
+    assert cls.logger is ac.AcoularBase.logger
     obj = create_instance(cls)
     before = obj.__dict__.copy()
     log = obj.logger
@@ -656,15 +658,17 @@ def test_operation_failures_are_not_logged(caplog):
     assert al._display is None
 
 
-def test_pink_depth_warning_preserves_signal(caplog):
+def test_pink_depth_log_preserves_signal_under_warning_errors(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
     requested = ac.PNoiseGenerator(num_samples=64, depth=16, seed=7)
     supported = ac.PNoiseGenerator(num_samples=64, depth=6, seed=7)
-    with pytest.warns(UserWarning, match='requested_depth=16, depth=6, samples=64') as emitted:
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
         actual = requested.signal()
-    assert len(emitted) == 1
     np.testing.assert_array_equal(actual, supported.signal())
     assert requested.depth == 16
-    assert not caplog.records
+    assert caplog.messages == ['Pink-noise depth reduced (requested_depth=16, depth=6, samples=64)']
+    assert caplog.records[0].levelno == logging.WARNING
 
 
 def test_invalid_band_width_raises_without_logging(caplog):
@@ -715,7 +719,7 @@ def test_nested_calculation_progress_cleanup(calculation_setup, caplog, mocker):
     assert al._display is None
 
 
-def test_spectrum_cache_hit_has_no_info(calculation_setup, caplog, monkeypatch, tmp_path):
+def test_spectrum_cache_hit_reports_reuse_without_calculation(calculation_setup, caplog, monkeypatch, tmp_path):
     spectra, _ = calculation_setup
     monkeypatch.setattr(ac.config, 'global_caching', 'all')
     monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
@@ -729,8 +733,11 @@ def test_spectrum_cache_hit_has_no_info(calculation_setup, caplog, monkeypatch, 
 
     monkeypatch.setattr(ac.PowerSpectra, 'calc_csm', unexpected_calculation)
     np.testing.assert_array_equal(other.csm, expected)
-    assert not any(record.levelno == logging.INFO for record in caplog.records)
-    assert any(message.startswith('Reused cached spectra') for message in caplog.messages)
+    summaries = [record.getMessage() for record in caplog.records if record.levelno == logging.INFO]
+    assert len(summaries) == 1
+    assert summaries[0].startswith('Reused cached spectra')
+    assert 'result=csm' in summaries[0]
+    assert not any(message.startswith('Computed') for message in caplog.messages)
 
 
 def test_beamforming_summarizes_original_batch(calculation_setup, caplog, monkeypatch):
@@ -752,6 +759,54 @@ def test_beamforming_summarizes_original_batch(calculation_setup, caplog, monkey
     caplog.clear()
     np.testing.assert_array_equal(beamformer.result[1:4], result)
     assert len(calls) == 1
+    assert len(caplog.records) == 1
+    assert caplog.messages[0] == 'Reused beamforming maps (frequencies=3)'
+
+
+def test_beamforming_reuse_logs_by_default_after_reopening_cache(calculation_setup, monkeypatch, tmp_path, capsys):
+    logging.getLogger().handlers.clear()
+    spectra, beamformer = calculation_setup
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    expected = beamformer.synthetic(500).copy()
+    capsys.readouterr()
+    reopened = ac.BeamformerBase(
+        freq_data=ac.PowerSpectra(source=spectra.source, block_size=128), steer=beamformer.steer
+    )
+
+    def unexpected_calculation(*_args):
+        pytest.fail('A cached example must not recalculate just to emit a log')
+
+    monkeypatch.setattr(ac.PowerSpectra, 'calc_csm', unexpected_calculation)
+    monkeypatch.setattr(ac.BeamformerBase, '_calc', unexpected_calculation)
+    np.testing.assert_array_equal(reopened.synthetic(500), expected)
+    out, err = capsys.readouterr()
+    assert out == ''
+    assert err.count('Reused beamforming maps') == 1
+    assert 'INFO' in err
+    assert 'frequencies=1' in err
+    assert 'Computed' not in err
+
+    stream = application_logging(logging.WARNING)
+    np.testing.assert_array_equal(reopened.synthetic(500), expected)
+    assert stream.getvalue() == ''
+    assert capsys.readouterr() == ('', '')
+
+
+def test_empty_beamforming_selection_is_quiet(calculation_setup, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    result = calculation_setup[1].result[:0]
+    assert result.shape == (0, 2)
+    assert not caplog.records
+
+
+def test_failed_cached_selection_does_not_report_success(calculation_setup, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    beamformer = calculation_setup[1]
+    _ = beamformer.result[1:4]
+    caplog.clear()
+    with pytest.raises(IndexError):
+        _ = beamformer.result[1:4, 99]
     assert not caplog.records
 
 
@@ -932,12 +987,14 @@ def test_recording_overflow_warning_and_summary(caplog):
     stream = sd.InputStream.return_value.__enter__.return_value
     stream.read.side_effect = [(np.ones((4, 1)), overflow) for overflow in [True, False, True]]
     source = ac.SoundDeviceSamplesGenerator(num_samples=10)
-    with pytest.warns(UserWarning, match='Input overflow detected') as emitted:
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
         blocks = list(source.result(4))
-    assert len(emitted) == 1
     assert [len(block) for block in blocks] == [4, 4, 2]
     assert not source.running
-    assert len(caplog.records) == 2
+    assert len(caplog.records) == 3
+    assert sum(record.levelno == logging.WARNING for record in caplog.records) == 1
+    assert caplog.messages[1].startswith('Input overflow detected')
     assert caplog.messages[0].startswith('Started recording')
     assert caplog.messages[-1].startswith('Stopped recording')
     assert 'overflow_reads=2' in caplog.messages[-1]
@@ -945,27 +1002,23 @@ def test_recording_overflow_warning_and_summary(caplog):
     stream.read.assert_called_with(4)
 
 
-@pytest.mark.parametrize('warning_error', [False, True])
+@pytest.mark.parametrize('overflow', [False, True])
 @pytest.mark.usefixtures('setup_sounddevice_mocks')
-def test_recording_close_and_warning_error_cleanup(caplog, warning_error):
+def test_recording_close_with_python_warning_errors(caplog, overflow):
     import sounddevice as sd
 
     caplog.set_level(logging.INFO, logger='acoular')
     stream = sd.InputStream.return_value.__enter__.return_value
-    stream.read.return_value = (np.ones((4, 1)), warning_error)
+    stream.read.return_value = (np.ones((4, 1)), overflow)
     source = ac.SoundDeviceSamplesGenerator(num_samples=10)
     iterator = source.result(4)
-    if warning_error:
-        with warnings.catch_warnings():
-            warnings.simplefilter('error', UserWarning)
-            with pytest.raises(UserWarning, match='Input overflow'):
-                next(iterator)
-        assert len(caplog.records) == 1  # Start only; propagated failures aren't logged.
-    else:
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
         next(iterator)
         iterator.close()
-        assert 'samples=4' in caplog.messages[-1]
-        assert 'reason=consumer_closed' in caplog.messages[-1]
+    assert sum(record.levelno == logging.WARNING for record in caplog.records) == int(overflow)
+    assert 'samples=4' in caplog.messages[-1]
+    assert 'reason=consumer_closed' in caplog.messages[-1]
     assert not source.running
     sd.InputStream.return_value.__exit__.assert_called_once()
     assert al._display is None
@@ -1005,3 +1058,227 @@ def test_download_failure_has_no_duplicate_log(tmp_path, monkeypatch, mocker, ca
     connection.close.assert_called_once()
     assert not caplog.records
     assert not (tmp_path / 'logging_missing.bin').exists()
+
+
+@pytest.mark.parametrize('kind', ['helper', 'beamformer'])
+@pytest.mark.parametrize('condition', ['outside', 'selected', 'empty_band'])
+def test_frequency_adjustments_log_without_python_warnings(kind, condition, calculation_setup, caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    beamformer = calculation_setup[1]
+    frequencies = np.array([0.0, 1000.0, 2000.0])
+    data = np.arange(6).reshape(3, 2)
+    requested = 9000 if condition == 'outside' else 100 if condition == 'empty_band' else 125.25
+    num = 24 if condition == 'empty_band' else 0
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        if kind == 'helper':
+            result = ac.synthetic(data, frequencies, requested, num=num)[0]
+        else:
+            frequencies = beamformer.freq_data.fftfreq()
+            result = beamformer.synthetic(requested, num=num)
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelno == logging.WARNING
+    message = caplog.messages[0]
+    shape = (2,) if kind == 'helper' else beamformer.steer.grid.shape
+    assert result.shape == shape
+    if condition == 'selected':
+        selected = np.searchsorted(frequencies, requested)
+        expected = data[selected] if kind == 'helper' else beamformer.result[selected].reshape(shape)
+        np.testing.assert_array_equal(result, expected)
+        assert f'selected_frequency={frequencies[selected]:g} Hz' in message
+    else:
+        np.testing.assert_array_equal(result, np.zeros(shape))
+        assert 'returning zeros' in message
+    assert message.count(' Hz') == (2 if condition in {'selected', 'empty_band'} else 1)
+
+
+def test_multichannel_signal_logs_and_keeps_channel_zero(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    data = np.arange(12).reshape(6, 2)
+    signal = ac.GenericSignalGenerator(source=ac.TimeSamples(data=data, sample_freq=8000))
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        result = signal.signal()
+    np.testing.assert_array_equal(result, data[:, 0])
+    assert caplog.messages == ['Selecting channel 0 from multichannel signal (channels=2, selected_channel=0)']
+
+
+def test_coincident_locations_log_without_raising_warning(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    source = ac.PointSource(mics=ac.MicGeom(pos_total=np.zeros((3, 1))), loc=(0, 0, 0))
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        source._validate_locations()
+    assert caplog.messages == ['Source and microphone locations are identical']
+
+
+def test_aiaa_transpose_log_preserves_metadata_update(caplog):
+    from acoular.aiaa import TimeSamplesAIAABenchmark
+
+    caplog.set_level(logging.WARNING, logger='acoular')
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        source = TimeSamplesAIAABenchmark(data=np.zeros((2, 8)))
+    assert source.num_samples == 8 and source.num_channels == 2
+    assert source._data_transposed
+    assert caplog.messages == ['Interpreting transposed input data (input_rows=2, input_columns=8)']
+
+
+def test_aiaa_sample_count_mismatch_is_logged(caplog):
+    from acoular.aiaa import TimeSamplesAIAABenchmark
+    from acoular.h5files import H5FileBase
+
+    class MetadataFile(H5FileBase):
+        def get_node_attribute(self, _node, _name):
+            return 99
+
+    caplog.set_level(logging.WARNING, logger='acoular')
+    source = TimeSamplesAIAABenchmark()
+    source._h5f = MetadataFile()
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        source.data = np.zeros((8, 2))
+    assert source.num_samples == 8 and source.num_channels == 2
+    assert caplog.messages == [
+        'Input sample count mismatch; using row count (expected_samples=99, samples=8, channels=2)'
+    ]
+
+
+def test_wav_runtime_conditions_log_and_preserve_output(tmp_path, caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    filename = tmp_path / 'multichannel.wav'
+    source = ac.TimeSamples(data=np.full((6, 3), 0.1), sample_freq=8000.25)
+    writer = ac.WriteWAV(source=source, file=filename, channels=[0, 1, 2], max_val=1)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        writer.save()
+    assert caplog.messages == [
+        'Exporting WAV with more than two channels (channels=3)',
+        'Rounding sample frequency for WAV export (sample_freq=8000.25 Hz, output_sample_freq=8000 Hz)',
+    ]
+    with wave.open(str(filename), 'rb') as file:
+        assert file.getnchannels() == 3
+        assert file.getframerate() == 8000
+        assert file.getnframes() == 6
+
+
+def test_wav_clipping_logs_without_changing_encoding(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    writer = ac.WriteWAV(encoding='int16')
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        encoded = writer._encode(np.array([[2.0], [-2.0]]))
+    np.testing.assert_array_equal(np.frombuffer(encoded, dtype='int16'), [32767, -32768])
+    assert caplog.messages == ['Clipping during WAV export; consider increasing max_val (dtype=int16)']
+
+
+@pytest.mark.parametrize('cls', [ac.Trigger, ac.SpatialInterpolator])
+def test_deprecations_stay_warnings_but_passthrough_logs(cls, caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    source = ac.TimeSamples(data=np.arange(6).reshape(6, 1), sample_freq=8000)
+    with pytest.warns(DeprecationWarning):
+        block = cls(source=source)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        output = np.concatenate(list(block.result(2)))
+    np.testing.assert_array_equal(output, source.data)
+    assert caplog.messages == ['Result method not implemented; forwarding source output']
+
+
+def test_buffer_overflow_warning_logs_but_error_policy_still_raises(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    source = ac.TimeSamples(data=np.ones((4, 1)), sample_freq=8000)
+    splitter = ac.SampleSplitter(source=source, buffer_size=1)
+    slow = ac.TimePower(source=splitter)
+    fast = ac.TimePower(source=splitter)
+    splitter.register_object(slow, fast)
+    splitter.buffer_overflow_treatment[slow] = 'warning'
+    splitter.block_buffer[slow].append(np.ones((1, 1)))
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        splitter._inspect_buffer_levels([slow])
+    assert not splitter._buffer_overflow
+    assert caplog.messages == ['Buffer overflow; data will be lost (consumer=TimePower, buffer_size=1)']
+
+    caplog.clear()
+    splitter.buffer_overflow_treatment[slow] = 'error'
+    splitter.buffer_overflow_treatment[fast] = 'none'
+    iterator = fast.result(1)
+    next(iterator)
+    with pytest.raises(OSError, match='Maximum size of block buffer'):
+        next(iterator)
+    assert not caplog.records
+
+
+def test_incomplete_readonly_cache_logs_and_uses_source(tmp_path, monkeypatch, caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    source = ac.TimeSamples(data=np.arange(4, dtype=float).reshape(4, 1), sample_freq=8000)
+    cached = ac.Cache(source=source)
+    iterator = cached.result(2)
+    next(iterator)
+    iterator.close()
+    monkeypatch.setattr(ac.config, 'global_caching', 'readonly')
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        output = np.concatenate(list(ac.Cache(source=source).result(2)))
+    np.testing.assert_array_equal(output, source.data)
+    assert len(caplog.records) == 1
+    assert caplog.messages[0].startswith('Incomplete cache entry ignored in readonly mode')
+
+
+def test_trigger_estimated_threshold_is_logged(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    source = ac.TimeSamples(data=np.array([0, 0, 0, 1, 0, 0, 0, 1]).reshape(8, 1), sample_freq=8000)
+    with pytest.warns(DeprecationWarning):
+        trigger = ac.Trigger(source=source)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        threshold = trigger._threshold(4)
+    assert threshold == pytest.approx(0.5625)
+    assert caplog.messages == ['Estimated missing trigger threshold (threshold=0.5625)']
+
+
+def test_trigger_irregular_intervals_are_logged(caplog):
+    caplog.set_level(logging.WARNING, logger='acoular')
+    data = np.zeros((32, 1))
+    data[[2, 10, 25]] = 1
+    source = ac.MaskedTimeSamples(data=data, sample_freq=8000)
+    with pytest.warns(DeprecationWarning):
+        trigger = ac.Trigger(source=source, threshold=0.5, max_variation_of_duration=0.01, hunk_length=0.01)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        peaks, longest, shortest = trigger.trigger_data
+    np.testing.assert_array_equal(peaks, [2, 10, 25])
+    assert (longest, shortest) == (15, 8)
+    assert caplog.messages == ['Trigger intervals vary beyond allowed duration (irregular_intervals=2, first_sample=2)']
+
+
+@pytest.mark.parametrize('app_level', ['WARNING', 'ERROR'])
+def test_openblas_conflict_logs_only_after_configuration_is_ready(app_level):
+    code = f"""
+import io
+import logging
+import os
+import warnings
+import numpy as np
+import numba as nb
+np.show_config = lambda: print('openblas')
+os.environ['OPENBLAS_NUM_THREADS'] = '2'
+stream = io.StringIO()
+logging.basicConfig(level=logging.{app_level}, stream=stream)
+with warnings.catch_warnings():
+    warnings.simplefilter('error')
+    warnings.filterwarnings(
+        'ignore', message='The TBB threading layer requires TBB version', category=nb.core.errors.NumbaWarning
+    )
+    import acoular
+assert nb.get_num_threads() == 1
+assert hasattr(acoular.config, 'log_level')
+output = stream.getvalue()
+assert ('NumPy already uses OpenBLAS' in output) == ({app_level!r} == 'WARNING'), output
+"""
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, check=False)  # noqa: S603
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == result.stderr == ''

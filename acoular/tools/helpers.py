@@ -17,7 +17,6 @@
 import http.client
 import urllib.parse
 from pathlib import Path
-from warnings import warn as _warn
 
 from acoular.logger import get_logger
 from acoular.tools.utils import mole_fraction_of_water_vapor
@@ -80,20 +79,16 @@ def synthetic(data, freqs, f, num=3):
         for i in f:
             ind = np.searchsorted(freqs, i)
             if ind >= len(freqs):
-                _warn(
-                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                get_logger(__name__).warning(
+                    'Requested frequency is outside resolved range; returning zeros', frequency=i
                 )
                 h = np.zeros_like(data[0])
             else:
                 if freqs[ind] != i:
-                    _warn(
-                        f'Queried frequency ({i:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freqs[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
+                    get_logger(__name__).warning(
+                        'Requested frequency is not an FFT frequency; using selected FFT frequency',
+                        frequency=i,
+                        selected_frequency=freqs[ind],
                     )
                 h = data[ind]
             res += [h]
@@ -106,12 +101,10 @@ def synthetic(data, freqs, f, num=3):
             ind1 = np.searchsorted(freqs, f1)
             ind2 = np.searchsorted(freqs, f2)
             if ind1 == ind2:
-                _warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                get_logger(__name__).warning(
+                    'Requested band contains no FFT frequencies; returning zeros',
+                    lower_frequency=f1,
+                    upper_frequency=f2,
                 )
                 h = np.zeros_like(data[0])
             else:

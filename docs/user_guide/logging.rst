@@ -2,14 +2,15 @@ Logging and progress
 ====================
 
 Acoular provides standard Python logging with Rich console output and optional
-progress displays. Importing Acoular does not modify the root logger or install
-console handlers. The default output is initialized when an object's ``logger``
+progress displays. Acoular does not configure the root logger. Its default
+console output is normally initialized when an object's ``logger``
 attribute is accessed, :func:`acoular.logger.get_logger` is called, or a progress
 task starts. No user setup is required.
 
 Selected computations and I/O operations emit concise summaries and automatically
 use progress displays when appropriate. Routine processing blocks remain quiet at
-INFO. Existing Python warnings retain their filtering and exception semantics.
+INFO. Runtime conditions use WARNING log records; deprecation warnings retain
+Python's filtering and exception semantics.
 
 Common settings
 ---------------
@@ -72,7 +73,8 @@ apply normally.
 Class-specific levels retain normal Python logging behavior. File handlers,
 rotating files, custom formatters, filters and destinations should be configured
 with Python's :mod:`logging` module, rather than Acoular-specific settings.
-Python warnings and Numba's own diagnostic loggers remain independent.
+Deprecation warnings, dependency warnings, and Numba's own diagnostic loggers
+remain independent. Acoular does not install process-wide warning capture.
 
 Object loggers
 --------------
@@ -128,8 +130,9 @@ Levels have the following meanings:
   details. These messages do not dump arrays or complete object representations.
 * **INFO**: concise summaries of selected major computations and user-facing I/O.
   Recording starts are also reported because acquisition may run indefinitely.
-* **WARNING**: recoverable operational anomalies where a Python warning is not
-  the appropriate API. Do not report the same event through both mechanisms.
+* **WARNING**: runtime conditions requiring attention, such as parameter
+  substitutions, clipping or input overflow. These are log records, not Python
+  warnings; the same event is not also emitted with ``warnings.warn``.
 * **ERROR**: a failure handled by Acoular without propagating an exception.
   Propagated exceptions are not also logged; their messages provide context.
 * **CRITICAL**: no planned use in ordinary library code.
@@ -138,9 +141,12 @@ Automatic INFO summaries cover CSM computation, batch eigendecomposition,
 frequency-domain beamforming requests, time-domain beamforming runs, recordings,
 file exports and downloads. Nested major computations produce separate summaries;
 PSFs, individual frequencies and routine transforms do not produce INFO chatter.
-Cached results do not announce a new computation. Local data-file resolution is
-DEBUG; an actual successful download is INFO. Solver implementations and their
-explicit third-party output controls are not instrumented.
+Cached results do not announce a new computation. Reusing beamforming maps or
+loading spectra from the persistent cache produces a concise INFO reuse summary,
+so repeated example runs remain visible without recalculating results. Low-level
+cache decisions, file opens and reference counts remain DEBUG. Local data-file
+resolution is DEBUG; an actual successful download is INFO. Solver implementations
+and their explicit third-party output controls are not instrumented.
 
 ``elapsed`` is inclusive wall-clock time, measured with a monotonic clock. It
 includes nested work, input reads and first-call compilation during the operation,
@@ -159,14 +165,30 @@ actual counts and ``reason=consumer_closed``. Explicit stop flags use
 duplicate ERROR records. Export files and acquisition streams are closed before
 their stop summaries are emitted.
 
-Python warnings keep their normal presentation and filtering; Acoular does not
-install process-wide warning capture. New data-quality warnings cover pink-noise
-depth reduction and the first audio-input overflow per recording. The final
-recording summary includes ``overflow_reads``, not an invented lost-sample count.
-These warnings can intentionally become exceptions under ``-Werror``. The
-``overflow`` trait continues to describe the last read. Unsupported
-``barspectrum(..., num=...)`` widths now raise ``ValueError`` instead of printing
-and returning a sentinel tuple.
+Runtime diagnostics use ``logger.warning(...)`` and follow application logging
+levels and filters. They no longer respond to Python warning filters or
+``-Werror``. This includes frequency substitutions, pink-noise depth reduction,
+input overflow, channel selection, metadata fallbacks and WAV export diagnostics.
+Normal deprecation warnings remain ``DeprecationWarning`` objects. Legacy runtime
+warnings inside the CLEAN, DAMAS+ and GIB calculation methods are deliberately
+unchanged while solver code is being reworked. Dependency warnings are not
+intercepted.
+
+Logging does not apply Python's implicit once-per-call-site deduplication. The
+input-overflow diagnostic retains its explicit once-per-recording guard, and the
+final summary includes ``overflow_reads``, not an invented lost-sample count.
+Other conditions log when encountered; for example, clipping can be reported
+for multiple output blocks. The ``overflow`` trait still describes the last read.
+
+The OpenBLAS import diagnostic is deferred until the configuration singleton is
+ready. The Numba thread limit is still applied immediately, before further
+Acoular initialization. A real conflict can therefore emit a WARNING during
+import without changing the root logger or raising a Python warning.
+
+Propagated exceptions are unchanged. In particular, unsupported
+``barspectrum(..., num=...)`` widths raise ``ValueError``. Traits retains its own
+observer exception policy: it can log an observer failure without re-raising it;
+that is not successful recovery, and Acoular does not add a duplicate error log.
 
 ASCII demo maps remain result output on stdout. The demo's optional Matplotlib
 fallback notice is INFO. Developer-only diagnostic output remains explicit,

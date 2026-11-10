@@ -129,7 +129,16 @@ def _format_fields(fields):
     for key, value in fields.items():
         if value is None:
             continue
-        if key in ('elapsed', 'sample_freq', 'default_sample_freq', 'frequency'):
+        if key in (
+            'elapsed',
+            'sample_freq',
+            'default_sample_freq',
+            'output_sample_freq',
+            'frequency',
+            'selected_frequency',
+            'lower_frequency',
+            'upper_frequency',
+        ):
             unit = 's' if key == 'elapsed' else 'Hz'
             value = format(value, '.3g' if key == 'elapsed' else 'g') + f' {unit}'
         elif isinstance(value, (str, Path)):
@@ -211,24 +220,6 @@ def get_logger(name='acoular'):
     _configure(logger)
     with _lock:
         return _get_adapter(logger)
-
-
-class _LoggingMixin:
-    """Provide class-level logging without adding Traits or instance state."""
-
-    @property
-    def logger(self):
-        """The formatting adapter shared by instances of this concrete class.
-
-        Ownership and default levels are refreshed on access. Saved logger references
-        do not trigger another refresh. User subclasses remain under ``acoular`` so
-        the same configuration and fallback apply to them.
-        """
-        cls = type(self)
-        name = f'{cls.__module__}.{cls.__qualname__}'
-        if not name.startswith('acoular.'):
-            name = f'acoular.{name}'
-        return get_logger(name)
 
 
 def _progress_enabled(console, logger=None):

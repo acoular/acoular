@@ -10,7 +10,6 @@
 """
 
 import logging
-from warnings import warn as _warn
 
 # acoular imports
 from .base import AcoularBase, SamplesGenerator
@@ -116,11 +115,11 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         Samples in blocks of shape (num, :attr:`num_channels`).
             The last block may be shorter than num.
 
-        Warns
+        Notes
         -----
-        UserWarning
-            On the first input overflow per recording. The final INFO summary counts
-            flagged reads, not lost samples. Normal Python warning filters apply.
+        The first input overflow per recording emits a WARNING log. The final INFO
+        summary counts flagged reads, not lost samples. Python warning filters do
+        not affect these log records.
 
         """
         sd = _import_sounddevice()
@@ -165,10 +164,8 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
                         if self.overflow:
                             fields['overflow_reads'] += 1
                             if fields['overflow_reads'] == 1:
-                                _warn(
-                                    f'Input overflow detected; recorded samples may be missing (device={self.device})',
-                                    UserWarning,
-                                    stacklevel=2,
+                                logger.warning(
+                                    'Input overflow detected; recorded samples may be missing', device=self.device
                                 )
                         data = data[:anz]
                         task.advance(data.shape[0])

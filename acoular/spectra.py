@@ -508,7 +508,7 @@ class PowerSpectra(BaseSpectra):
             ac[:] = func()
             self._h5f.flush()
         else:
-            self.logger.debug('Reused cached spectra', result=traitname, node=nodename)
+            self.logger.info('Reused cached spectra', result=traitname, frequencies=shape[0], channels=shape[1])
         return ac
 
     @property_depends_on(['digest'])

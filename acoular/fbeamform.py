@@ -274,7 +274,8 @@ class LazyBfResult:
         if isinstance(sl, (int, np.integer)):
             sl = slice(sl, sl + 1)
         # indices which are missing
-        missingind = np.arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
+        indices = np.arange(*sl.indices(self.bf._numfreq))
+        missingind = indices[self.bf._fr[sl] == 0]
         # calc if needed
         if missingind.size:
             with self.bf.logger.operation(
@@ -285,10 +286,10 @@ class LazyBfResult:
                 self.bf._calc(missingind)
                 if self.bf._h5f:
                     self.bf._h5f.flush()
-        else:
-            self.bf.logger.debug('Reused beamforming maps')
-
-        return self.bf._ac.__getitem__(key)
+        result = self.bf._ac.__getitem__(key)
+        if not missingind.size and indices.size:
+            self.bf.logger.info('Reused beamforming maps', frequencies=indices.size)
+        return result
 
 
 class BeamformerBase(AcoularBase):
@@ -550,20 +551,14 @@ class BeamformerBase(AcoularBase):
             # single frequency line
             ind = np.searchsorted(freq, f)
             if ind >= len(freq):
-                _warn(
-                    f'Queried frequency ({f:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
+                self.logger.warning('Requested frequency is outside resolved range; returning zeros', frequency=f)
                 h = np.zeros_like(res[0])
             else:
                 if freq[ind] != f:
-                    _warn(
-                        f'Queried frequency ({f:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freq[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
+                    self.logger.warning(
+                        'Requested frequency is not an FFT frequency; using selected FFT frequency',
+                        frequency=f,
+                        selected_frequency=freq[ind],
                     )
                 h = res[ind]
         else:
@@ -577,12 +572,10 @@ class BeamformerBase(AcoularBase):
             ind1 = np.searchsorted(freq, f1)
             ind2 = np.searchsorted(freq, f2)
             if ind1 == ind2:
-                _warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                self.logger.warning(
+                    'Requested band contains no FFT frequencies; returning zeros',
+                    lower_frequency=f1,
+                    upper_frequency=f2,
                 )
                 h = np.zeros_like(res[0])
             else:

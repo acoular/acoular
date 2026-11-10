@@ -31,7 +31,7 @@ from functools import wraps
 
 # acoular imports
 from .internal import digest
-from .logger import _LoggingMixin
+from .logger import get_logger
 
 from traits.api import (
     ABCHasStrictTraits,
@@ -45,13 +45,27 @@ from traits.api import (
 )
 
 
-class AcoularBase(_LoggingMixin, ABCHasStrictTraits):
-    """Common base class for Acoular objects with dependency-based digests.
+class AcoularBase(ABCHasStrictTraits):
+    """Common base class for Acoular objects with logging and dependency-based digests.
 
     Subclasses declare their digest dependencies with a Traits :class:`~traits.traits.Property`
     and explicitly select ``AcoularBase._get_digest`` as its ``fget``. Traits does not use an
     inherited getter when a subclass redeclares a property.
     """
+
+    @property
+    def logger(self):
+        """The formatting adapter shared by instances of this concrete class.
+
+        Ownership and default levels are refreshed on access. Saved logger references
+        do not trigger another refresh. User subclasses remain under ``acoular`` so
+        the same configuration and fallback apply to them.
+        """
+        cls = type(self)
+        name = f'{cls.__module__}.{cls.__qualname__}'
+        if not name.startswith('acoular.'):
+            name = f'acoular.{name}'
+        return get_logger(name)
 
     @cached_property
     def _get_digest(self):

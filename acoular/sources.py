@@ -33,7 +33,6 @@ Measured multichannel data management and simulation of acoustic sources.
 # imports from other packages
 
 import contextlib
-from warnings import warn as _warn
 
 from .base import AcoularBase, SamplesGenerator
 
@@ -719,7 +718,7 @@ class PointSource(SamplesGenerator):
     def _validate_locations(self):
         dist = self.env.apparent_r(self.loc, self.mics.pos)
         if np.any(dist < 1e-7):
-            _warn('Source and microphone locations are identical.', Warning, stacklevel=2)
+            self.logger.warning('Source and microphone locations are identical')
 
     #: An :class:`~acoular.environments.Environment` or derived object providing sound propagation
     #: details, such as :attr:`speed of sound in the medium<acoular.environments.Environment.c>`.
