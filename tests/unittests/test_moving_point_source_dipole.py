@@ -258,14 +258,22 @@ def test_single_microphone_at_origin_unchanged(direction, expected):
     np.testing.assert_allclose(out[indices, 0], expected, rtol=1e-6, atol=0)
 
 
-@pytest.mark.parametrize(('trait', 'value'), [('conv_amp', True)])
+@pytest.mark.parametrize(
+    ('trait', 'value'),
+    [
+        ('conv_amp', True),  # default False
+        ('rvec', np.array((0.0, 0.0, 1.0))),  # default (0, 0, 0), i.e. no rotation of the dipole
+        ('trajectory', get_trajectory((1.0, 0.0, 0.0))),  # the trajectory shifted by 1 m in x
+    ],
+    ids=['conv_amp', 'rvec', 'trajectory'],
+)
 def test_digest_depends_on(trait, value):
     """The digest changes with the traits that change the output.
 
     Acoular uses the digest as the key of cached results. If a trait that changes the output is
     missing in ``depends_on`` of the digest, two sources that differ only in this trait get the
     same digest, and a cache may return the result of the other source. Each case sets one trait
-    to a value different from its default and checks that the digest changes.
+    to a value different from the one set by ``get_source`` and checks that the digest changes.
     """
     src = get_source(MICS)  # default values, e.g. conv_amp=False
     digest = src.digest

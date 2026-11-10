@@ -1330,6 +1330,8 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
             'start',
             'up',
             'direction',
+            'trajectory.digest',
+            'rvec',
         ],
     )
 
