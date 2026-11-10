@@ -12,7 +12,7 @@ from tests.utils import get_all_classes
 
 import numpy as np
 import pytest
-from traits.api import Instance, Int, Property, TraitError
+from traits.api import Instance, Int, Property, TraitError, property_depends_on
 
 
 class DigestObject(ac.AcoularBase):
@@ -31,6 +31,15 @@ class NestedDigestObject(ac.AcoularBase):
     source = Instance(DigestObject)
 
     digest = Property(fget=ac.AcoularBase._get_digest, depends_on=['source.digest'])
+
+
+@pytest.fixture(params=[ac.Generator, ac.SamplesGenerator, ac.SpectraGenerator])
+def generator_cls(request):
+    class ConcreteGenerator(request.param):
+        def result(self, num):
+            yield np.zeros((num, self.num_channels))
+
+    return ConcreteGenerator
 
 
 def test_acoular_base_rejects_unknown_traits():
@@ -116,11 +125,113 @@ def test_timeout_classes_use_shared_cached_getter(block_cls):
     assert '_get_digest' not in block_cls.__dict__
 
 
-@pytest.mark.parametrize(
-    'block_cls', [ac.Generator, ac.SamplesGenerator, ac.SpectraGenerator, ac.BeamformerTime, ac.Environment]
-)
-def test_uncached_digest_getters_are_preserved(block_cls):
-    assert not block_cls.class_traits()['digest'].cached
+def test_environment_digest_remains_uncached():
+    assert not ac.Environment.class_traits()['digest'].cached
+
+
+def test_generator_digest_caches_and_tracks_dependencies(generator_cls, mocker):
+    getter = mocker.spy(ac.base, 'digest')
+    obj = generator_cls(sample_freq=48000, num_samples=16, num_channels=2)
+    before = obj.digest
+    assert obj.digest == before
+    assert getter.call_count == 1
+    assert before == digest(obj)
+    downstream = ac.Cache(source=obj)
+
+    for name in obj.trait('digest').depends_on:
+        before = obj.digest
+        downstream_before = downstream.digest
+        setattr(obj, name, getattr(obj, name) + 1)
+        assert obj.digest != before
+        assert obj.digest == digest(obj)
+        assert downstream.digest != downstream_before
+        assert downstream.digest == digest(downstream)
+
+
+def test_generator_digest_tracks_computed_properties(generator_cls):
+    class ComputedGenerator(generator_cls):
+        length = Int(16)
+        num_samples = Property(depends_on=['length'])
+
+        @property_depends_on(['length'])
+        def _get_num_samples(self):
+            return self.length
+
+    obj = ComputedGenerator()
+    before = obj.digest
+    obj.length = 32
+    assert obj.digest != before
+    assert obj.digest == digest(obj)
+
+
+def test_generator_subclass_can_override_digest_getter(generator_cls):
+    class CustomGenerator(generator_cls):
+        def _get_digest(self):
+            return f'custom_{self.num_samples}'
+
+    obj = CustomGenerator(num_samples=16)
+    assert obj.digest == 'custom_16'
+    obj.num_samples = 32
+    assert obj.digest == 'custom_32'
+
+
+def test_beamformer_time_digest_caches_and_tracks_pipeline_changes(mocker):
+    getter = mocker.spy(ac.base, 'digest')
+    obj = ac.BeamformerTime(
+        source=ac.TimeSamples(data=np.ones((16, 2)), sample_freq=48000),
+        steer=ac.SteeringVector(grid=ac.RectGrid(), mics=ac.MicGeom(pos_total=np.zeros((3, 2))), env=ac.Environment()),
+    )
+    before = obj.digest
+    assert obj.digest == before
+    assert sum(call.args[0] is obj for call in getter.call_args_list) == 1
+    assert before == digest(obj)
+    downstream = ac.TimePower(source=obj)
+
+    changes = [
+        ('source.sample_freq', 44100),
+        ('steer.env.c', 340.0),
+        ('steer.grid.increment', 0.2),
+        ('steer.mics.pos_total', np.ones((3, 2))),
+        ('steer.mics.invalid_channels', [0]),
+        ('steer.ref', 1.0),
+        ('steer.steer_type', 'classic'),
+        ('weights', 'power'),
+        ('source', ac.TimeSamples(data=np.ones((16, 2)), sample_freq=32000)),
+        (
+            'steer',
+            ac.SteeringVector(grid=ac.RectGrid(), mics=ac.MicGeom(pos_total=np.zeros((3, 2))), env=ac.Environment()),
+        ),
+    ]
+    for path, value in changes:
+        before = obj.digest
+        downstream_before = downstream.digest
+        target = obj
+        *parents, name = path.split('.')
+        for parent in parents:
+            target = getattr(target, parent)
+        setattr(target, name, value)
+        assert obj.digest != before, path
+        assert obj.digest == digest(obj), path
+        assert downstream.digest != downstream_before, path
+        assert downstream.digest == digest(downstream), path
+
+    before = obj.digest
+    downstream_before = downstream.digest
+    obj.steer.mics.invalid_channels.append(0)
+    assert obj.digest != before
+    assert obj.digest == digest(obj)
+    assert downstream.digest != downstream_before
+
+
+def test_beamformer_time_subclass_can_override_digest_getter():
+    class CustomBeamformer(ac.BeamformerTime):
+        def _get_digest(self):
+            return f'custom_{self.weights}'
+
+    obj = CustomBeamformer()
+    assert obj.digest == 'custom_none'
+    obj.weights = 'power'
+    assert obj.digest == 'custom_power'
 
 
 def test_timeout_digest_tracks_pipeline_changes():

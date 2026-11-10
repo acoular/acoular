@@ -66,7 +66,9 @@ class Generator(AcoularBase):
     (:attr:`sample_freq`), the number of samples (:attr:`num_samples`), and the number of channels
     (:attr:`num_channels`). A private trait :attr:`digest` is used to store the internal identifier
     of the object, which is a hash of the object's attributes.
-    This is used to check if the object's internal state has changed.
+    This is used to check if the object's internal state has changed. The digest is cached until
+    a declared dependency changes. Subclasses with computed metadata properties must declare those
+    properties' dependencies so that changes invalidate the digest.
 
     """
 
@@ -80,10 +82,7 @@ class Generator(AcoularBase):
     num_channels = CInt
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
-
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     @abstractmethod
     def result(self, num):
@@ -117,12 +116,6 @@ class SamplesGenerator(Generator):
     own and should not be used directly.
 
     """
-
-    #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
-
-    def _get_digest(self):
-        return digest(self)
 
     @abstractmethod
     def result(self, num):
@@ -160,10 +153,10 @@ class SpectraGenerator(Generator):
     block_size = CInt
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'])
-
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'],
+    )
 
     @abstractmethod
     def result(self, num=1):

@@ -27,9 +27,6 @@ Implements beamformers in the time domain.
 from .base import AcoularBase, SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
-
-# acoular imports
-from .internal import digest
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
@@ -97,14 +94,12 @@ class BeamformerTime(TimeOut):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['steer.digest', 'source.digest', 'weights'],
     )
 
     def _get_num_channels(self):
         return self.steer.grid.size
-
-    def _get_digest(self):
-        return digest(self)
 
     def _get_weights(self):
         return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
