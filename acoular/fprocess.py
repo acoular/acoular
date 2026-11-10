@@ -173,6 +173,7 @@ class RFFT(BaseSpectra, SpectraOut):
             ).reshape(-1)
             if j == num - 1:
                 yield fftdata
+                fftdata = np.empty_like(fftdata)
         if j < num - 1:  # yield remaining fft spectra
             yield fftdata[: j + 1]
 

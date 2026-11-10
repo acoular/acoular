@@ -843,7 +843,7 @@ class SamplesBuffer(InOut):
         """
         rnum = num if self.result_num is None else self.result_num
         rnum = min(rnum, self.level)
-        data = self._buffer[self._index : self._index + rnum]
+        data = self._buffer[self._index : self._index + rnum].copy()
         if self.shift_index_by == 'result_num':
             self._index += rnum
         else:
