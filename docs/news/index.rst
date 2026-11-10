@@ -13,13 +13,26 @@ Upcoming
 
 **Internal**
 
+    - adds :class:`~acoular.base.AcoularBase` and removes duplicate cached digest getters
+    - caches digests in the generator base classes, :class:`~acoular.tbeamform.BeamformerTime`,
+      and :class:`~acoular.environments.Environment` without changing digest values
+    - centralizes the disk-cache policy for :class:`~acoular.spectra.PowerSpectra`;
+      imported spectra continue to bypass disk caching
+
+**Bugfixes**
+
+    - updates the cached eigenvalue index in :class:`~acoular.fbeamform.BeamformerEig`,
+      :class:`~acoular.fbeamform.BeamformerMusic`, and :class:`~acoular.fbeamform.BeamformerGIB`
+      when the microphone count changes, including channel exclusion or restoration
     - minor code cleanup in :class:`~acoular.tbeamform.BeamformerTimeTraj` for clarity and speedup
 
 **Bugfixes**
 
+    - preserves yielded :class:`~acoular.fprocess.RFFT` spectral blocks when the generator advances, so retained full and partial batches remain valid
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change
     - fixes :class:`~acoular.sources.MovingPointSourceDipole`: ``conv_amp=True`` now applies ``(1 - Mr)**-2`` as in :class:`~acoular.sources.MovingPointSource` (it had no effect before), each microphone uses the source position at its own emission time (before: the one of the first microphone), :meth:`~acoular.sources.MovingPointSourceDipole.get_emission_time` returns ``Mr`` with the sign convention of :class:`~acoular.sources.MovingPointSource` (positive for an approaching source), and the digest now depends on ``conv_amp``, ``trajectory`` and ``rvec``; results with ``conv_amp=True`` or with more than one microphone change
-
+    - preserves blocks returned by :class:`~acoular.process.SamplesBuffer` across refills, including buffered :class:`~acoular.fprocess.IRFFT` output
+    - fixes ``weights='power'`` in the time-domain beamformers: :func:`~acoular.tbeamform.const_power_weight` returned weights of wrong shape with numpy >= 2.0, and :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) failed with ``precision=32``
 
 26.08
 ------------------------

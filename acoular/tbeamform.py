@@ -24,12 +24,9 @@ Implements beamformers in the time domain.
     IntegratorSectorTime
 """
 
-from .base import SamplesGenerator, TimeOut
+from .base import AcoularBase, SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
-
-# acoular imports
-from .internal import digest
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
@@ -65,7 +62,7 @@ def const_power_weight(bf):
     bins *= bins
     weights = np.sqrt((bins[1:] - bins[:-1]) / count)
     weights /= weights.mean()
-    return weights[ind]
+    return weights[ind].ravel()
 
 
 # possible choices for spatial weights
@@ -96,14 +93,12 @@ class BeamformerTime(TimeOut):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['steer.digest', 'source.digest', 'weights'],
     )
 
     def _get_num_channels(self):
         return self.steer.grid.size
-
-    def _get_digest(self):
-        return digest(self)
 
     def _get_weights(self):
         return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
@@ -232,12 +227,9 @@ class BeamformerTimeSq(BeamformerTime):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['steer.digest', 'source.digest', 'r_diag', 'weights'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -285,6 +277,7 @@ class BeamformerTimeTraj(BeamformerTime):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'steer.digest',
             'source.digest',
@@ -295,10 +288,6 @@ class BeamformerTimeTraj(BeamformerTime):
             'trajectory.digest',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _get_moving_gpos(self):
         """Python generator that yields the moving grid coordinates samplewise."""
@@ -401,7 +390,7 @@ class BeamformerTimeTraj(BeamformerTime):
         blockr0 = np.empty((num, self.steer.grid.size), dtype=fdtype)
         movgpos = self._get_moving_gpos()  # create moving grid pos generator
         movgspeed = self.trajectory.traj(0.0, delta_t=1 / self.source.sample_freq, der=1)
-        weights = self._get_weights()
+        weights = np.asarray(self._get_weights(), dtype=fdtype)  # keep the working precision
 
         # preliminary implementation of different steering vectors
         steer_func = self.steer._steer_funcs_time[self.steer.steer_type]
@@ -436,7 +425,7 @@ class BeamformerTimeTraj(BeamformerTime):
                 n_index = np.arange(num, dtype=idtype)[:, np.newaxis]
                 flag = False
             # init step
-            p_res = time_block.copy() * weights
+            p_res = time_block * weights
             phi, autopow = self._delay_and_sum(num, p_res, d_interp2, d_index, amp)
             if 'Cleant' not in self.__class__.__name__:
                 if 'Sq' not in self.__class__.__name__:
@@ -517,6 +506,7 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'steer.digest',
             'source.digest',
@@ -528,10 +518,6 @@ class BeamformerTimeSqTraj(BeamformerTimeSq, BeamformerTimeTraj):
             'trajectory.digest',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -577,12 +563,9 @@ class BeamformerCleant(BeamformerTime):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -622,12 +605,9 @@ class BeamformerCleantSq(BeamformerCleant):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['steer.digest', 'source.digest', 'weights', 'damp', 'n_iter', 'r_diag'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -667,6 +647,7 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'steer.digest',
             'source.digest',
@@ -679,10 +660,6 @@ class BeamformerCleantTraj(BeamformerCleant, BeamformerTimeTraj):
             'trajectory.digest',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -722,6 +699,7 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'steer.digest',
             'source.digest',
@@ -735,10 +713,6 @@ class BeamformerCleantSqTraj(BeamformerCleantTraj, BeamformerTimeSq):
             'r_diag',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=2048):
         """
@@ -785,12 +759,9 @@ class IntegratorSectorTime(TimeOut):
 
     #: A unique identifier for the integrator, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['sectors', 'clip', 'grid.digest', 'source.digest'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_num_channels(self):

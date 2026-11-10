@@ -11,6 +11,7 @@ from .configuration import config
 
 from . import demo, tools, aiaa
 from .base import (
+    AcoularBase,
     Generator,
     InOut,
     SamplesGenerator,

@@ -21,9 +21,8 @@ Implements blockwise processing methods in the frequency domain.
 """
 
 # acoular imports
-from .base import SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
+from .base import AcoularBase, SamplesGenerator, SpectraGenerator, SpectraOut, TimeOut
 from .fastFuncs import calcCSM
-from .internal import digest
 from .process import SamplesBuffer
 from .spectra import BaseSpectra
 
@@ -83,11 +82,10 @@ class RFFT(BaseSpectra, SpectraOut):
     _block_size = Int(1024)
 
     #: A unique identifier based on the process properties.
-    digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'],
+    )
 
     @cached_property
     def _get_num_freqs(self):
@@ -175,6 +173,7 @@ class RFFT(BaseSpectra, SpectraOut):
             ).reshape(-1)
             if j == num - 1:
                 yield fftdata
+                fftdata = np.empty_like(fftdata)
         if j < num - 1:  # yield remaining fft spectra
             yield fftdata[: j + 1]
 
@@ -214,16 +213,15 @@ class IRFFT(TimeOut):
     _buffer = CArray()
 
     #: A unique identifier based on the process properties.
-    digest = Property(depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'])
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['source.digest', 'scaling', 'precision', '_block_size', 'window', 'overlap'],
+    )
 
     def _get_num_samples(self):
         if self.source.num_samples >= 0:
             return int(self.source.num_samples * self.source.block_size)
         return -1
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _validate(self):
         if not self.source.block_size or self.source.block_size < 0:
@@ -312,11 +310,9 @@ class AutoPowerSpectra(SpectraOut):
     precision = Enum('float64', 'float32')
 
     #: A unique identifier based on the computation properties.
-    digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['source.digest', 'precision', 'scaling', 'single_sided']
+    )
 
     def _get_scaling_value(self):
         scale = 1 / self.block_size**2
@@ -409,16 +405,15 @@ class CrossPowerSpectra(AutoPowerSpectra):
     num_channels = Property(depends_on=['source.num_channels'])
 
     #: A unique identifier based on the computation properties.
-    digest = Property(depends_on=['source.digest', 'precision', 'scaling', 'single_sided', 'calc_mode'])
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['source.digest', 'precision', 'scaling', 'single_sided', 'calc_mode'],
+    )
 
     @cached_property
     def _get_num_channels(self):
         n = self.source.num_channels
         return n**2 if self.calc_mode == 'full' else int(n + n * (n - 1) / 2)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=1):
         """

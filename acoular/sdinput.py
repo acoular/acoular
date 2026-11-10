@@ -10,11 +10,10 @@
 """
 
 # acoular imports
-from .base import SamplesGenerator
+from .base import AcoularBase, SamplesGenerator
 from .configuration import config
-from .internal import digest
 
-from traits.api import Any, Bool, Enum, Float, Int, Property, cached_property, observe
+from traits.api import Any, Bool, Enum, Float, Int, Property, observe
 
 
 def _import_sounddevice():
@@ -69,11 +68,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
     stream = Any
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['device', 'num_channels', 'num_samples'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['device', 'num_channels', 'num_samples'])
 
     # checks that num_channels are not more than device can provide
     @observe('device, num_channels')

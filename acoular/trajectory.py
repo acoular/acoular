@@ -11,14 +11,14 @@
 
 # imports from other packages
 # acoular imports
-from .internal import digest
+from .base import AcoularBase
 
 import numpy as np
 from scipy.interpolate import splev, splprep
-from traits.api import Dict, Float, HasStrictTraits, Property, Tuple, cached_property, property_depends_on
+from traits.api import Dict, Float, Property, Tuple, property_depends_on
 
 
-class Trajectory(HasStrictTraits):
+class Trajectory(AcoularBase):
     """
     Represents a trajectory as a continuous curve derived from sampled points.
 
@@ -92,11 +92,7 @@ class Trajectory(HasStrictTraits):
     tck = Property()
 
     #: A unique identifier for the trajectory, based on its points. (read-only)
-    digest = Property(depends_on=['points[]'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['points[]'])
 
     @property_depends_on(['points[]'])
     def _get_interval(self):

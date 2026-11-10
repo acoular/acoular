@@ -35,12 +35,12 @@ Measured multichannel data management and simulation of acoustic sources.
 import contextlib
 from warnings import warn as _warn
 
-from .base import SamplesGenerator
+from .base import AcoularBase, SamplesGenerator
 
 # acoular imports
 from .environments import Environment
 from .h5files import H5FileBase, _get_h5file_class
-from .internal import digest, lazyjit, ldigest
+from .internal import lazyjit, ldigest
 from .microphones import MicGeom
 from .signals import NoiseGenerator, SignalGenerator
 from .tools.utils import get_file_basename
@@ -373,14 +373,13 @@ class TimeSamples(SamplesGenerator):
     _datachecksum = Property(depends_on=['data'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
-    digest = Property(depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples'])
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['basename', '_datachecksum', 'sample_freq', 'num_channels', 'num_samples'],
+    )
 
     def _get__datachecksum(self):
         return self.data[0, :].sum()
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_basename(self):
@@ -542,11 +541,9 @@ class MaskedTimeSamples(TimeSamples):
     num_samples = Property(depends_on=['start', 'stop', 'num_samples_total'])
 
     #: A unique identifier for the samples, based on its properties. (read-only)
-    digest = Property(depends_on=['basename', 'start', 'stop', 'invalid_channels', '_datachecksum'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['basename', 'start', 'stop', 'invalid_channels', '_datachecksum']
+    )
 
     @cached_property
     def _get_channels(self):
@@ -755,6 +752,7 @@ class PointSource(SamplesGenerator):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -766,10 +764,6 @@ class PointSource(SamplesGenerator):
             'prepadding',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
@@ -869,6 +863,7 @@ class SphericalHarmonicSource(PointSource):
 
     # Unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -882,10 +877,6 @@ class SphericalHarmonicSource(PointSource):
             'prepadding',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def transform(self, signals):
         """
@@ -1007,6 +998,7 @@ class MovingPointSource(PointSource):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1019,10 +1011,6 @@ class MovingPointSource(PointSource):
             'prepadding',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def get_moving_direction(self, direction, time=0):
         """
@@ -1189,6 +1177,7 @@ class PointSourceDipole(PointSource):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1201,10 +1190,6 @@ class PointSourceDipole(PointSource):
             'prepadding',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
@@ -1320,6 +1305,7 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1339,10 +1325,6 @@ class MovingPointSourceDipole(PointSourceDipole, MovingPointSource):
     #: rotation for the dipole directivity. If set to ``(0, 0, 0)``, the dipole is only translated
     #: along the :attr:`~MovingPointSource.trajectory` without rotation. Default is ``(0, 0, 0)``.
     rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)))
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def get_emission_time(self, t, direction):
         """
@@ -1542,6 +1524,7 @@ class LineSource(PointSource):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1555,10 +1538,6 @@ class LineSource(PointSource):
             'coherence',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
@@ -1657,6 +1636,7 @@ class MovingLineSource(LineSource, MovingPointSource):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1674,10 +1654,6 @@ class MovingLineSource(LineSource, MovingPointSource):
     #: translated along the :attr:`~MovingPointSource.trajectory` without rotation. Default is
     #: ``(0, 0, 0)``.
     rvec = CArray(dtype=float, shape=(3,), value=np.array((0, 0, 0)))
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def get_emission_time(self, t, direction):
         """
@@ -1916,6 +1892,7 @@ class UncorrelatedNoiseSource(SamplesGenerator):
 
     #: A unique identifier for the current state of the source, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'mics.digest',
             'signal.digest',
@@ -1925,10 +1902,6 @@ class UncorrelatedNoiseSource(SamplesGenerator):
             'start',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
@@ -2113,11 +2086,7 @@ class SourceMixer(SamplesGenerator):
 
     #: A unique identifier for the current state of the source,
     #: based on the states of the sources and the weights. (read-only)
-    digest = Property(depends_on=['sdigest', 'weights'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['sdigest', 'weights'])
 
     @cached_property
     def _get_sample_freq(self):
@@ -2285,7 +2254,7 @@ class PointSourceConvolve(PointSource):
 
     #: Unique identifier for the current state of the source,
     #: based on microphone geometry, input signal, source location, and kernel. (read-only)
-    digest = Property(depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['mics.digest', 'signal.digest', 'loc', 'kernel'])
 
     #: Controls whether to extend the output to include the full convolution result.
     #:
@@ -2298,10 +2267,6 @@ class PointSourceConvolve(PointSource):
     #:
     #: Default is ``False``.
     extend_signal = Bool(False)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def result(self, num=128):
         """
