@@ -1,11 +1,11 @@
 # ------------------------------------------------------------------------------
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
-"""Implements base classes for signal processing blocks in Acoular.
+"""Implements common object and signal processing base classes in Acoular.
 
-The classes in this module are abstract base classes that provide a common interface for all classes
-that generate an output via the ``result`` generator in block-wise manner. They are not intended to
-be used directly, but to be subclassed by classes that implement the actual signal processing.
+The signal processing classes provide a common interface for classes that generate output via the
+``result`` generator in block-wise manner. They are abstract base classes, not intended to be used
+directly, but to be subclassed by classes that implement the actual signal processing.
 
 .. inheritance-diagram::
                 acoular.base
@@ -16,6 +16,7 @@ be used directly, but to be subclassed by classes that implement the actual sign
 .. autosummary::
     :toctree: generated/
 
+    AcoularBase
     Generator
     SamplesGenerator
     SpectraGenerator
@@ -43,7 +44,20 @@ from traits.api import (
 )
 
 
-class Generator(ABCHasStrictTraits):
+class AcoularBase(ABCHasStrictTraits):
+    """Common base class for Acoular objects with dependency-based digests.
+
+    Subclasses declare their digest dependencies with a Traits :class:`~traits.traits.Property`
+    and explicitly select ``AcoularBase._get_digest`` as its ``fget``. Traits does not use an
+    inherited getter when a subclass redeclares a property.
+    """
+
+    @cached_property
+    def _get_digest(self):
+        return digest(self)
+
+
+class Generator(AcoularBase):
     """Interface for any generating signal processing block.
 
     It provides a common interface for all classes, which generate an output via the generator
@@ -52,7 +66,9 @@ class Generator(ABCHasStrictTraits):
     (:attr:`sample_freq`), the number of samples (:attr:`num_samples`), and the number of channels
     (:attr:`num_channels`). A private trait :attr:`digest` is used to store the internal identifier
     of the object, which is a hash of the object's attributes.
-    This is used to check if the object's internal state has changed.
+    This is used to check if the object's internal state has changed. The digest is cached until
+    a declared dependency changes. Subclasses with computed metadata properties must declare those
+    properties' dependencies so that changes invalidate the digest.
 
     """
 
@@ -66,10 +82,7 @@ class Generator(ABCHasStrictTraits):
     num_channels = CInt
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
-
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['sample_freq', 'num_samples', 'num_channels'])
 
     @abstractmethod
     def result(self, num):
@@ -103,12 +116,6 @@ class SamplesGenerator(Generator):
     own and should not be used directly.
 
     """
-
-    #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels'])
-
-    def _get_digest(self):
-        return digest(self)
 
     @abstractmethod
     def result(self, num):
@@ -146,10 +153,10 @@ class SpectraGenerator(Generator):
     block_size = CInt
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'])
-
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest,
+        depends_on=['sample_freq', 'num_samples', 'num_channels', 'num_freqs', 'block_size'],
+    )
 
     @abstractmethod
     def result(self, num=1):
@@ -198,11 +205,7 @@ class TimeOut(SamplesGenerator):
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num):
@@ -274,11 +277,7 @@ class SpectraOut(SpectraGenerator):
     block_size = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num=1):
@@ -332,11 +331,7 @@ class InOut(SamplesGenerator, SpectraGenerator):
     num_samples = Delegate('source')
 
     #: A unique identifier for the generator, based on its properties. (read-only)
-    digest = Property(depends_on=['source.digest'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['source.digest'])
 
     @abstractmethod
     def result(self, num):

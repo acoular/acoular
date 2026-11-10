@@ -45,6 +45,7 @@ import warnings
 from warnings import warn as _warn
 
 # acoular imports
+from .base import AcoularBase
 from .configuration import config
 from .environments import Environment
 from .fastFuncs import beamformerFreq, calcPointSpreadFunction, calcTransfer, damasSolverGaussSeidel
@@ -66,7 +67,6 @@ from traits.api import (
     Dict,
     Enum,
     Float,
-    HasStrictTraits,
     Instance,
     Int,
     List,
@@ -102,7 +102,7 @@ def _get_sklearn_ndict():
 BEAMFORMER_BASE_DIGEST_DEPENDENCIES = ['freq_data.digest', 'r_diag', 'r_diag_norm', 'precision', 'steer.digest']
 
 
-class SteeringVector(HasStrictTraits):
+class SteeringVector(AcoularBase):
     """
     Basic class for implementing steering vectors with monopole source transfer models.
 
@@ -178,7 +178,9 @@ class SteeringVector(HasStrictTraits):
         return self._ref
 
     #: A unique identifier for the steering vector, based on its properties. (read-only)
-    digest = Property(depends_on=['steer_type', 'env.digest', 'grid.digest', 'mics.digest', '_ref'])
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=['steer_type', 'env.digest', 'grid.digest', 'mics.digest', '_ref']
+    )
 
     #: A unique identifier for the grid, excluding :attr:`steer_type`.
     #: Use for inverse methods. (read-only)
@@ -195,10 +197,6 @@ class SteeringVector(HasStrictTraits):
     @property_depends_on(['grid.digest', 'mics.digest', 'env.digest'])
     def _get_rm(self):
         return np.atleast_2d(self.env.apparent_r(self.grid.pos, self.mics.pos))
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @cached_property
     def _get_inv_digest(self):
@@ -286,7 +284,7 @@ class LazyBfResult:
         return self.bf._ac.__getitem__(key)
 
 
-class BeamformerBase(HasStrictTraits):
+class BeamformerBase(AcoularBase):
     """Beamforming using the basic delay-and-sum algorithm in the frequency domain."""
 
     #: Instance of :class:`~acoular.fbeamform.SteeringVector` or its derived classes
@@ -327,7 +325,7 @@ class BeamformerBase(HasStrictTraits):
     result = Property()
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
     # private traits
     #: beamforming result
@@ -338,10 +336,6 @@ class BeamformerBase(HasStrictTraits):
     _f = CArray(dtype='float64')
     #: number of frequencies
     _numfreq = Int()
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _get_filecache(self):
         """
@@ -703,11 +697,7 @@ class BeamformerFunctional(BeamformerBase):
     r_diag_norm = Enum(1.0)
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['gamma'])
 
     def _calc(self, ind):
         """
@@ -835,13 +825,9 @@ class BeamformerEig(BeamformerBase):
     na = Property()
 
     #: A uniquernal identifier for the beamformer, based on its properties. (read-only)
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
+    digest = Property(fget=AcoularBase._get_digest, depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n'])
 
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    @property_depends_on(['steer.mics', 'n'])
+    @property_depends_on(['steer.mics.num_mics', 'n'])
     def _get_na(self):
         na = self.n
         nm = self.steer.mics.num_mics
@@ -945,7 +931,7 @@ class BeamformerMusic(BeamformerEig):
             self._fr[i] = 1
 
 
-class PointSpreadFunction(HasStrictTraits):
+class PointSpreadFunction(AcoularBase):
     """
     The point spread function.
 
@@ -997,11 +983,7 @@ class PointSpreadFunction(HasStrictTraits):
     _h5f = Instance(H5CacheFileBase, transient=True)
 
     #: A unique identifier for the object, based on its properties. (read-only)
-    digest = Property(depends_on=['steer.digest', 'precision'], cached=True)
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['steer.digest', 'precision'], cached=True)
 
     def _get_filecache(self):
         """
@@ -1157,12 +1139,9 @@ class BeamformerDamas(BeamformerBase):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _calc(self, ind):
         """
@@ -1242,12 +1221,9 @@ class BeamformerDamasPlus(BeamformerDamas):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['alpha', 'method', 'n_iter', 'unit_mult'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _calc(self, ind):
         """
@@ -1351,12 +1327,9 @@ class BeamformerOrth(BeamformerBase):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['eva_list'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @observe('n')
     def _update_eva_list(self, event):  # noqa: ARG002
@@ -1422,11 +1395,9 @@ class BeamformerCleansc(BeamformerBase):
     stopn = Int(3)
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
-    digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn'])
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
+    digest = Property(
+        fget=AcoularBase._get_digest, depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'stopn']
+    )
 
     def _calc(self, ind):
         """
@@ -1528,12 +1499,9 @@ class BeamformerClean(BeamformerBase):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES + ['n_iter', 'damp', 'psf_precision'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _calc(self, ind):
         """Calculates the result for the frequencies defined by :attr:`freq_data`.
@@ -1647,6 +1615,7 @@ class BeamformerCMF(BeamformerBase):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'freq_data.digest',
             'alpha',
@@ -1658,10 +1627,6 @@ class BeamformerCMF(BeamformerBase):
             'steer.inv_digest',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @observe('method')
     def _validate(self, event):  # noqa: ARG002
@@ -1864,6 +1829,7 @@ class BeamformerSODIX(BeamformerBase):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'freq_data.digest',
             'alpha',
@@ -1875,10 +1841,6 @@ class BeamformerSODIX(BeamformerBase):
             'steer.inv_digest',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     def _calc(self, ind):
         """
@@ -2051,6 +2013,7 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=[
             'steer.inv_digest',
             'freq_data.digest',
@@ -2066,18 +2029,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
             'm',
         ],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
-
-    @property_depends_on('n')
-    def _get_na(self):
-        na = self.n
-        nm = self.steer.mics.num_mics
-        if na < 0:
-            na = max(nm + na, 0)
-        return min(nm - 1, na)
 
     def _calc(self, ind):
         """
@@ -2318,12 +2269,9 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
 
     #: A unique identifier for the beamformer, based on its properties. (read-only)
     digest = Property(
+        fget=AcoularBase._get_digest,
         depends_on=['freq_data.digest', 'steer.digest', 'precision', 'r_diag', 'eva_list', 'bounds', 'shgo'],
     )
-
-    @cached_property
-    def _get_digest(self):
-        return digest(self)
 
     @observe('n')
     def _update_eva_list(self, event):  # noqa: ARG002

@@ -13,6 +13,17 @@ Upcoming
 
 **Internal**
 
+    - adds :class:`~acoular.base.AcoularBase` and removes duplicate cached digest getters
+    - caches digests in the generator base classes, :class:`~acoular.tbeamform.BeamformerTime`,
+      and :class:`~acoular.environments.Environment` without changing digest values
+    - centralizes the disk-cache policy for :class:`~acoular.spectra.PowerSpectra`;
+      imported spectra continue to bypass disk caching
+
+**Bugfixes**
+
+    - updates the cached eigenvalue index in :class:`~acoular.fbeamform.BeamformerEig`,
+      :class:`~acoular.fbeamform.BeamformerMusic`, and :class:`~acoular.fbeamform.BeamformerGIB`
+      when the microphone count changes, including channel exclusion or restoration
     - minor code cleanup in :class:`~acoular.tbeamform.BeamformerTimeTraj` for clarity and speedup
 
 **Bugfixes**
