@@ -17,7 +17,6 @@
     PowerSpectraImport
 """
 
-import logging
 from warnings import warn
 
 # acoular imports
@@ -27,7 +26,6 @@ from .deprecation import deprecated_alias
 from .fastFuncs import calcCSM
 from .h5cache import H5cache
 from .h5files import H5CacheFileBase
-from .logger import _event, _operation
 from .tools.utils import find_basename
 
 import numpy as np
@@ -348,12 +346,9 @@ class PowerSpectra(BaseSpectra):
             eigvals_dtype = 'float64'
         elif self.precision == 'complex64':
             eigvals_dtype = 'float32'
-        fields = {}
-        with _operation(
-            self.logger, 'Computing eigendecompositions', 'Computed eigendecompositions', fields=fields
-        ) as task:
+        with self.logger.operation('Computing eigendecompositions', 'Computed eigendecompositions') as task:
             csm_shape = self.csm.shape
-            fields.update(frequencies=csm_shape[0], channels=csm_shape[1])
+            task.fields.update(frequencies=csm_shape[0], channels=csm_shape[1])
             task.update(total=csm_shape[0])
             eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
             eigvecs = np.empty(csm_shape, dtype=self.precision)
@@ -397,20 +392,17 @@ class PowerSpectra(BaseSpectra):
             msg = 'PowerSpectra requires a finite source'
             raise ValueError(msg)
 
-        fields = {}
-        with _operation(
-            self.logger,
+        with self.logger.operation(
             'Computing cross-spectral matrices',
             'Computed cross-spectral matrices',
             count='fft_blocks',
-            fields=fields,
         ) as task:
             wind = self.window_(self.block_size)
             weight = np.dot(wind, wind)
             wind = wind[np.newaxis, :].swapaxes(0, 1)
             numfreq = int(self.block_size / 2 + 1)
             csm_shape = (numfreq, t.num_channels, t.num_channels)
-            fields.update(frequencies=numfreq, channels=csm_shape[1])
+            task.fields.update(frequencies=numfreq, channels=csm_shape[1])
             task.update(total=max(0, int(self.num_blocks)))
             csm_upper = np.zeros(csm_shape, dtype=self.precision)
             # get time data blockwise
@@ -516,7 +508,7 @@ class PowerSpectra(BaseSpectra):
             ac[:] = func()
             self._h5f.flush()
         else:
-            _event(self.logger, logging.DEBUG, 'Reused cached spectra', result=traitname, node=nodename)
+            self.logger.debug('Reused cached spectra', result=traitname, node=nodename)
         return ac
 
     @property_depends_on(['digest'])

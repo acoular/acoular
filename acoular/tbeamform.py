@@ -30,7 +30,6 @@ from functools import wraps
 from .base import AcoularBase, SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
-from .logger import _operation
 from .process import SamplesBuffer
 from .tfastfuncs import _delayandsum4, _delayandsum5, _delays
 from .trajectory import Trajectory
@@ -44,20 +43,17 @@ def _log_result(method):
 
     @wraps(method)
     def wrapped(self, num=2048):
-        fields = {}
         with (
-            _operation(
-                self.logger,
+            self.logger.operation(
                 'Computing time-domain beamforming',
                 'Computed time-domain beamforming',
                 count='samples',
                 stopped='Stopped time-domain beamforming',
-                fields=fields,
             ) as task,
             closing(method(self, num)) as blocks,
         ):
             for block in blocks:
-                fields['grid_points'] = block.shape[1]
+                task.fields['grid_points'] = block.shape[1]
                 task.advance(block.shape[0])
                 yield block
 

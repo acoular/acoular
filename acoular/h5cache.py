@@ -5,14 +5,12 @@
 """Implements a cache for HDF5 files used in Acoular."""
 
 import gc
-import logging
 from pathlib import Path
 from weakref import WeakValueDictionary
 
 from .base import AcoularBase
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
-from .logger import _event
 
 from traits.api import Bool, Delegate, Dict, Instance
 
@@ -39,7 +37,7 @@ class HDF5Cache(AcoularBase):
         filename = Path(cachefile.filename)
         self.open_file_reference.pop(filename)
         cachefile.close()
-        _event(self.logger, logging.DEBUG, 'Closed cache file', file=filename)
+        self.logger.debug('Closed cache file', file=filename)
 
     def get_open_cachefiles(self):
         """Get an iterator over all open cache files."""
@@ -89,14 +87,14 @@ class HDF5Cache(AcoularBase):
         if config.global_caching == 'readonly' and not filename.exists():
             obj._h5f = None
             self.busy = False
-            _event(logger, logging.DEBUG, 'Skipped cache file', file=filename, reason='missing_readonly')
+            logger.debug('Skipped cache file', file=filename, reason='missing_readonly')
             return  # cachefile is not created in readonly mode
 
         if isinstance(obj._h5f, file_cls):
             h5filename = Path(obj._h5f.filename).resolve()
             if h5filename == filename:
                 self.busy = False
-                _event(logger, logging.DEBUG, 'Reused cache file', file=filename)
+                logger.debug('Reused cache file', file=filename)
                 return
             self._decrease_file_reference_counter(h5filename)
 
@@ -115,7 +113,7 @@ class HDF5Cache(AcoularBase):
         self.close_unreferenced_cachefiles()
 
         self.busy = False
-        _event(logger, logging.DEBUG, event, file=filename, references=self.open_file_reference[filename])
+        logger.debug(event, file=filename, references=self.open_file_reference[filename])
 
 
 H5cache = HDF5Cache(config=config)

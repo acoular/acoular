@@ -4,7 +4,8 @@ Logging and progress
 Acoular provides standard Python logging with Rich console output and optional
 progress displays. Importing Acoular does not modify the root logger or install
 console handlers. The default output is initialized when an object's ``logger``
-attribute is accessed or a progress task starts. No user setup is required.
+attribute is accessed, :func:`acoular.logger.get_logger` is called, or a progress
+task starts. No user setup is required.
 
 Selected computations and I/O operations emit concise summaries and automatically
 use progress displays when appropriate. Routine processing blocks remain quiet at
@@ -76,16 +77,41 @@ Python warnings and Numba's own diagnostic loggers remain independent.
 Object loggers
 --------------
 
-Acoular's Traits-based objects expose an ordinary :class:`logging.Logger`
-through ``self.logger``. Instances of the same concrete class share that logger;
+Acoular's Traits-based objects expose a small :class:`logging.LoggerAdapter`
+through ``self.logger``. Instances of the same concrete class share that adapter;
 accessing it adds no instance state or Traits and does not change computation
 digests. A built-in class such as ``WNoiseGenerator`` uses the logger name
 ``acoular.signals.WNoiseGenerator``.
 
+The usual ``debug``, ``info``, ``warning``, ``error`` and ``exception`` methods
+accept flat scalar context keywords. Common fields such as ``elapsed`` and
+``sample_freq`` receive their units automatically. Context is formatted only when
+the logger's level is enabled and is included in the ordinary message before
+handler dispatch, not just by Rich. An application's ``%(message)s`` formatter
+therefore receives the complete message, with no custom message objects required.
+Positional ``%`` formatting and the standard ``extra``, ``exc_info``, ``stack_info`` and
+``stacklevel`` keywords retain their normal meanings; these keywords are not
+context fields.
+
+Module-level code needs only the logger factory:
+
+.. literalinclude:: ../../examples/introductory_examples/example_logging.py
+   :language: python
+   :start-after: # Obtain a module-level logger with flat context fields.
+   :end-before: # %%
+
+The adapter has no independent handlers or logging threshold. Its ``logger``
+attribute is exactly the object returned by ``logging.getLogger(name)``.
+Application configuration of that named logger, its ancestors, or the root logger
+works unchanged. Standard configuration methods such as ``setLevel``,
+``addHandler`` and ``removeHandler`` are delegated, as are configuration
+attributes including ``handlers``, ``filters``, ``propagate`` and ``disabled``.
+For APIs requiring a concrete :class:`logging.Logger`, use ``obj.logger.logger``.
+
 User subclasses also receive class-named loggers. Classes outside the Acoular
 package have their module and qualified class name prefixed with ``acoular.``
-so that Acoular's configuration also applies to them. No custom log methods or
-log levels are added to logger objects.
+so that Acoular's configuration also applies to them. Registered logger objects
+and log levels remain standard; only Acoular's adapter adds the convenience API.
 
 Message policy
 --------------
@@ -120,8 +146,9 @@ explicit third-party output controls are not instrumented.
 includes nested work, input reads and first-call compilation during the operation,
 not just numerical kernel time. Streaming durations include time spent suspended
 between yields: they measure session lifetime, not isolated execution time.
-Nested durations are not additive. Progress and summaries count actual work without splitting numerical batches or evaluating
-lazy results merely to populate messages. Counts and metadata are included when
+Nested durations are not additive. Progress and summaries count actual work
+without splitting numerical batches or evaluating lazy results merely to populate
+messages. Counts and metadata are included when
 available; a frequency-domain request may use an indeterminate display because
 its solver exposes no intermediate updates.
 
@@ -148,14 +175,24 @@ and no third-party stdout/stderr streams are captured.
 Progress tasks
 --------------
 
-Use :func:`acoular.logger.progress` for explicit task lifetime and updates:
+Use ``self.logger.operation(...)`` to combine a progress task with a timed
+summary. Pass context fields directly rather than importing lifecycle helpers:
+
 
 .. literalinclude:: ../../examples/introductory_examples/example_logging.py
    :language: python
    :start-after: # Process samples with a known total.
    :end-before: # %%
 
-Use ``total=None`` (the default) when the amount of work is unknown. For example,
+The operation's ``count`` names the actual-work counter in its summary. Additional
+metadata discovered during processing can be added with ``task.fields.update(...)``.
+Normal completion emits the supplied outcome message. The optional ``stopped``
+message distinguishes intentional early closure; exceptions are propagated
+without a success record.
+
+For a display without an automatic log summary, the standalone
+:func:`acoular.logger.progress` helper remains available. Use ``total=None``
+(the default) when the amount of work is unknown. For example,
 indefinite sources must not pass their ``num_samples=-1`` sentinel as a total.
 An unknown-duration task can wrap sample generation:
 

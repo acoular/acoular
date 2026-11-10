@@ -14,7 +14,7 @@ Selected computations and file operations also report summaries and progress aut
 import logging
 
 import acoular as ac
-from acoular.logger import progress, track
+from acoular.logger import get_logger, progress, track
 
 # %%
 # Configure common settings.
@@ -32,10 +32,22 @@ with progress('Generating samples'):
 # Process samples with a known total.
 source = ac.TimeSamples(data=samples[:, None], sample_freq=noise.sample_freq)
 powers = []
-with progress('Processing samples', total=source.num_samples) as task:
+with source.logger.operation(
+    'Processing samples',
+    'Processed samples',
+    total=source.num_samples,
+    count='samples',
+    channels=source.num_channels,
+    sample_freq=source.sample_freq,
+) as task:
     for block in source.result(1024):
         powers.append((block**2).mean())
         task.advance(len(block))
+
+# %%
+# Obtain a module-level logger with flat context fields.
+logger = get_logger('acoular.example')
+logger.debug('Configured sample processing', channels=source.num_channels, sample_freq=source.sample_freq)
 
 # %%
 # Track an iterable and emit class-level messages.

@@ -15,12 +15,11 @@
 """
 
 import http.client
-import logging
 import urllib.parse
 from pathlib import Path
 from warnings import warn as _warn
 
-from acoular.logger import _event, _get_logger, _operation
+from acoular.logger import get_logger
 from acoular.tools.utils import mole_fraction_of_water_vapor
 
 import numpy as np
@@ -418,14 +417,13 @@ def get_data_file(file):
     :class:`pathlib.Path`
         Path to the file.
     """
-    logger = _get_logger(__name__)
+    logger = get_logger(__name__)
     data_file = Path('../data') / file
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
             quoted_file = urllib.parse.quote(file)
-            fields = {'file': data_file}
-            with _operation(logger, 'Downloading data file', 'Downloaded data file', fields=fields):
+            with logger.operation('Downloading data file', 'Downloaded data file', file=data_file) as task:
                 connection = http.client.HTTPSConnection('raw.githubusercontent.com')
                 try:
                     connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
@@ -435,9 +433,9 @@ def get_data_file(file):
                         raise OSError(msg)
                     data = response.read()
                     data_file.write_bytes(data)
-                    fields['bytes'] = len(data)
+                    task.fields['bytes'] = len(data)
                 finally:
                     connection.close()
             return data_file
-    _event(logger, logging.DEBUG, 'Resolved data file', file=data_file)
+    logger.debug('Resolved data file', file=data_file)
     return data_file

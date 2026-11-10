@@ -7,11 +7,10 @@
     :toctree: generated/
 """
 
-import logging
 from pathlib import Path
 
 import acoular as ac
-from acoular.logger import _event, _get_logger
+from acoular.logger import get_logger
 
 
 def create_three_sources(mg, h5savefile='three_sources.h5'):
@@ -98,7 +97,7 @@ def run():
         show()
 
     else:
-        _event(_get_logger(__name__), logging.INFO, 'Using ASCII output', reason='matplotlib unavailable')
+        get_logger(__name__).info('Using ASCII output', reason='matplotlib unavailable')
         grayscale = '@%#*+=-:. '[::-1]
         ind = ((spl.T - spl.max() + 9).clip(0, 9)).astype(int)[::-1]
         print(78 * '-')

@@ -15,7 +15,6 @@ from warnings import warn as _warn
 # acoular imports
 from .base import AcoularBase, SamplesGenerator
 from .configuration import config
-from .logger import _event, _operation
 
 from traits.api import Any, Bool, Enum, Float, Int, Property, observe
 
@@ -128,9 +127,7 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
         logger = self.logger
         if logger.isEnabledFor(logging.DEBUG):
             properties = self.device_properties()
-            _event(
-                logger,
-                logging.DEBUG,
+            logger.debug(
                 'Selected input device',
                 device=self.device,
                 name=properties.get('name'),
@@ -144,26 +141,23 @@ class SoundDeviceSamplesGenerator(SamplesGenerator):
             samplerate=self.sample_freq,
             dtype=self.precision,
         )
-        fields = {
-            'device': self.device,
-            'channels': self.num_channels,
-            'sample_freq': self.sample_freq,
-            'overflow_reads': 0,
-        }
         total = self.num_samples if self.num_samples >= 0 else None
-        with _operation(
-            logger,
+        with logger.operation(
             'Recording samples',
             'Stopped recording',
             total=total,
             count='samples',
             stopped='Stopped recording',
-            fields=fields,
+            device=self.device,
+            channels=self.num_channels,
+            sample_freq=self.sample_freq,
+            overflow_reads=0,
         ) as task:
+            fields = task.fields
             try:
                 with stream_obj as stream:
                     self.running = True
-                    _event(logger, logging.INFO, 'Started recording', **fields)
+                    logger.info('Started recording', **fields)
                     samples_count = 0
                     while (self.num_samples == -1 and self.collect_samples) or samples_count < self.num_samples:
                         anz = num if self.num_samples == -1 else min(num, self.num_samples - samples_count)

@@ -49,8 +49,7 @@ from .base import AcoularBase, FiniteTimeOut, SamplesGenerator, TimeOut
 from .configuration import config
 from .environments import cartToCyl, cylToCart
 from .h5files import _get_h5file_class
-from .internal import lazyjit, ldigest
-from .logger import _closing_iterator, _operation
+from .internal import _closing_iterator, lazyjit, ldigest
 from .microphones import MicGeom
 from .process import Cache
 from .tools.utils import find_basename
@@ -2442,14 +2441,15 @@ class WriteWAV(TimeOut):
             name = self.file
 
         with (
-            _operation(
-                self.logger,
+            self.logger.operation(
                 'Writing WAV file',
                 'Wrote WAV file',
                 total=self.source.num_samples if self.source.num_samples >= 0 else None,
                 count='samples',
                 stopped='Stopped WAV export',
-                fields={'file': name, 'channels': nc, 'sample_freq': fs},
+                file=name,
+                channels=nc,
+                sample_freq=fs,
             ) as task,
             wave.open(name, 'w') as wf,
         ):
@@ -2593,19 +2593,17 @@ class WriteH5(TimeOut):
             msg = 'WriteH5.save requires a finite source; use result with num_samples_write instead'
             raise ValueError(msg)
 
-        fields = {'file': self.file or None}
         with (
-            _operation(
-                self.logger,
+            self.logger.operation(
                 'Writing HDF5 file',
                 'Wrote HDF5 file',
                 total=self.source.num_samples,
                 count='samples',
-                fields=fields,
+                file=self.file or None,
             ) as task,
             closing(self.get_initialized_file()) as f5h,
         ):
-            fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
+            task.fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
             ac = f5h.get_data_by_reference('time_data')
             with _closing_iterator(self.source.result(4096)) as blocks:
                 for data in blocks:
@@ -2662,21 +2660,19 @@ class WriteH5(TimeOut):
         self.write_flag = True
         scount = 0
         stotal = self.num_samples_write
-        fields = {'file': self.file or None}
         with (
-            _operation(
-                self.logger,
+            self.logger.operation(
                 'Writing HDF5 file',
                 'Wrote HDF5 file',
                 total=stotal if stotal >= 0 else None,
                 count='samples',
                 stopped='Stopped HDF5 export',
-                fields=fields,
+                file=self.file or None,
             ) as task,
             closing(self.get_initialized_file()) as f5h,
             _closing_iterator(self.source.result(num)) as source_gen,
         ):
-            fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
+            task.fields.update(file=self.file, channels=self.num_channels, sample_freq=self.sample_freq)
             ac = f5h.get_data_by_reference('time_data')
             while self.write_flag:
                 sleft = stotal - scount
@@ -2697,7 +2693,7 @@ class WriteH5(TimeOut):
                 yield data
                 scount += anz
             if not self.write_flag:
-                fields['reason'] = 'requested_stop'
+                task.fields['reason'] = 'requested_stop'
 
 
 class TimeConvolve(TimeOut):

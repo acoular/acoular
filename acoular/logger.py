@@ -3,13 +3,14 @@
 # ------------------------------------------------------------------------------
 """Standard logging and optional live progress for Acoular.
 
-Acoular objects expose a class-named :class:`logging.Logger` through ``self.logger``.
+Acoular objects expose a class-named :class:`logging.LoggerAdapter` through ``self.logger``.
 Common settings live on :data:`acoular.config`; application logging takes precedence
 by default. Logging and progress belong in Python, not in compiled Numba kernels.
 
 .. autosummary::
     :toctree: generated/
 
+    get_logger
     progress
     track
 """
@@ -18,6 +19,7 @@ import logging
 import sys
 from contextlib import contextmanager, suppress
 from copy import copy
+from functools import cache
 from importlib.util import find_spec
 from os import environ
 from pathlib import Path
@@ -121,17 +123,8 @@ def _configure(logger=None):
         _managed_level = level
 
 
-def _get_logger(name):
-    """Obtain a standard logger and refresh Acoular's output ownership."""
-    logger = logging.getLogger(name)
-    _configure(logger)
-    return logger
-
-
-def _event(logger, level, message, **fields):
-    """Emit scalar context in the common human-readable message format."""
-    if not logger.isEnabledFor(level):
-        return
+def _format_fields(fields):
+    """Render scalar context identically for every logging destination."""
     context = []
     for key, value in fields.items():
         if value is None:
@@ -144,10 +137,80 @@ def _event(logger, level, message, **fields):
             if any(not char.isprintable() or char.isspace() or char in ',()' for char in value):
                 value = repr(value)
         context.append(f'{key}={value}')
-    if context:
-        logger.log(level, '%s (%s)', message, ', '.join(context), stacklevel=2)
-    else:
-        logger.log(level, '%s', message, stacklevel=2)
+    return ', '.join(context)
+
+
+class _LoggerAdapter(logging.LoggerAdapter):
+    """Add flat formatted fields without owning logging configuration or output."""
+
+    _CONFIG_ATTRIBUTES = frozenset({'level', 'handlers', 'filters', 'propagate', 'disabled', 'parent'})
+    _LOG_KEYWORDS = frozenset({'exc_info', 'extra', 'stack_info', 'stacklevel'})
+
+    def __init__(self, logger=None):
+        super().__init__(_namespace if logger is None else logger, {})
+
+    def __getattr__(self, name):
+        # Pickle can inspect an adapter before its logger has been restored.
+        logger = self.__dict__.get('logger')
+        if logger is None:
+            raise AttributeError(name)
+        return getattr(logger, name)
+
+    def __setattr__(self, name, value):
+        if name in self._CONFIG_ATTRIBUTES:
+            setattr(self.logger, name, value)
+        else:
+            super().__setattr__(name, value)
+
+    def process(self, msg, kwargs):
+        """Preserve explicit standard extra attributes, including on Python 3.11."""
+        if self.extra:
+            kwargs['extra'] = {**self.extra, **(kwargs.get('extra') or {})}
+        return msg, kwargs
+
+    def log(self, level, msg, *args, **kwargs):
+        """Accept scalar fields alongside the standard logging keyword arguments."""
+        if self.isEnabledFor(level):
+            fields = {key: kwargs.pop(key) for key in tuple(kwargs) if key not in self._LOG_KEYWORDS}
+            context = _format_fields(fields)
+            if context:
+                # Fields are literal text, not part of the caller's %-template.
+                if args:
+                    context = context.replace('%', '%%')
+                msg = f'{msg} ({context})'
+            kwargs['stacklevel'] = kwargs.get('stacklevel', 1) + 1
+            super().log(level, msg, *args, **kwargs)
+
+    def operation(self, description, completed, *, total=None, count=None, stopped=None, **fields):
+        """Time work and report its outcome; update late metadata via task.fields."""
+        return _operation(self, description, completed, total=total, count=count, stopped=stopped, fields=fields)
+
+
+@cache
+def _get_adapter(logger):
+    return _LoggerAdapter(logger)
+
+
+def get_logger(name='acoular'):
+    """Return a shared formatting adapter around the standard named logger.
+
+    Parameters
+    ----------
+    name : str, optional
+        Logger name. Acoular modules use their full ``acoular.*`` name.
+
+    Returns
+    -------
+    logging.LoggerAdapter
+        Adapter accepting flat context keywords on ``debug``, ``info``, etc.,
+        and providing ``operation(...)``. Its ``logger`` attribute is exactly
+        ``logging.getLogger(name)``. Configuration remains on that standard logger.
+        Ordinary logging keywords retain their normal meaning.
+    """
+    logger = logging.getLogger(name)
+    _configure(logger)
+    with _lock:
+        return _get_adapter(logger)
 
 
 class _LoggingMixin:
@@ -155,7 +218,7 @@ class _LoggingMixin:
 
     @property
     def logger(self):
-        """The standard logger shared by instances of this concrete class.
+        """The formatting adapter shared by instances of this concrete class.
 
         Ownership and default levels are refreshed on access. Saved logger references
         do not trigger another refresh. User subclasses remain under ``acoular`` so
@@ -165,7 +228,7 @@ class _LoggingMixin:
         name = f'{cls.__module__}.{cls.__qualname__}'
         if not name.startswith('acoular.'):
             name = f'acoular.{name}'
-        return _get_logger(name)
+        return get_logger(name)
 
 
 def _progress_enabled(console, logger=None):
@@ -298,17 +361,6 @@ def _progress(description, total, logger):
 
 
 @contextmanager
-def _closing_iterator(iterator):
-    """Close upstream generators without requiring close() on ordinary iterators."""
-    try:
-        yield iterator
-    finally:
-        close = getattr(iterator, 'close', None)
-        if close is not None:
-            close()
-
-
-@contextmanager
 def _operation(logger, description, completed, *, total=None, count=None, stopped=None, fields=None):
     """Time selected work; report success or intentional closure, never exceptions.
 
@@ -316,9 +368,11 @@ def _operation(logger, description, completed, *, total=None, count=None, stoppe
     an intentional stop. Counts track actual work even with display disabled.
     """
     fields = {} if fields is None else fields
+    _configure(logger.logger)
     start = perf_counter()
-    _event(logger, logging.DEBUG, description, **fields)
-    with _progress(description, total, logger) as task:
+    logger.debug(description, **fields)
+    with _progress(description, total, logger.logger) as task:
+        task.fields = fields
 
         def summarize(message, reason=None):
             context = fields.copy()
@@ -327,7 +381,7 @@ def _operation(logger, description, completed, *, total=None, count=None, stoppe
             if reason is not None:
                 context['reason'] = reason
             context['elapsed'] = perf_counter() - start
-            _event(logger, logging.INFO, message, **context)
+            logger.info(message, **context)
 
         try:
             yield task

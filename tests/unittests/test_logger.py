@@ -4,6 +4,7 @@
 """Logging ownership, configuration and live display lifecycle."""
 
 import io
+import json
 import logging
 import pickle
 import subprocess
@@ -11,6 +12,8 @@ import sys
 import warnings
 import wave
 from concurrent.futures import ThreadPoolExecutor
+from logging.handlers import QueueHandler
+from queue import Queue
 
 import acoular as ac
 from acoular import logger as al
@@ -25,16 +28,18 @@ from traits.trait_errors import TraitError
 @pytest.fixture(autouse=True)
 def logging_state(monkeypatch):
     """Isolate logging without closing or replacing pytest's own handlers."""
+    al._get_adapter.cache_clear()
     root = logging.getLogger()
     namespace = logging.getLogger('acoular')
     saved = {}
     for log in [root, namespace, *logging.Logger.manager.loggerDict.values()]:
         if isinstance(log, logging.Logger) and (log is root or log.name.startswith('acoular')):
-            saved[log] = (log.handlers[:], log.level, log.propagate, log.disabled)
+            saved[log] = (log.handlers[:], log.filters[:], log.level, log.propagate, log.disabled)
     settings = ac.config.trait_get('log_level', 'log_color', 'log_progress')
     ac.config.trait_setq(log_level='auto', log_color='off', log_progress='off')
     for log in saved:
         log.handlers = []
+        log.filters = []
         log.setLevel(logging.WARNING if log is root else logging.NOTSET)
         log.propagate = True
         log.disabled = False
@@ -53,14 +58,17 @@ def logging_state(monkeypatch):
         for log in list(logging.Logger.manager.loggerDict.values()):
             if isinstance(log, logging.Logger) and log.name.startswith('acoular') and log not in saved:
                 log.handlers = []
+                log.filters = []
                 log.setLevel(logging.NOTSET)
                 log.propagate = True
                 log.disabled = False
-        for log, (handlers, level, propagate, disabled) in saved.items():
+        for log, (handlers, filters, level, propagate, disabled) in saved.items():
             log.handlers = handlers
+            log.filters = filters
             log.setLevel(level)
             log.propagate = propagate
             log.disabled = disabled
+        al._get_adapter.cache_clear()
 
 
 def application_logging(level=logging.WARNING, handler_level=logging.NOTSET, name=''):
@@ -205,7 +213,8 @@ def test_class_logger_without_instance_or_trait_state(cls):
     obj = create_instance(cls)
     before = obj.__dict__.copy()
     log = obj.logger
-    assert isinstance(log, logging.Logger)
+    assert isinstance(log, logging.LoggerAdapter)
+    assert log.logger is logging.getLogger(log.name)
     assert log.name == f'{cls.__module__}.{cls.__qualname__}'
     assert obj.logger is log
     assert 'logger' not in obj.traits()
@@ -425,10 +434,8 @@ def test_console_formatter_preserves_record_names():
 
 def test_event_fields_and_disabled_formatting(caplog):
     caplog.set_level(logging.INFO, logger='acoular')
-    logger = al._get_logger('acoular.tools.helpers')
-    al._event(
-        logger, logging.INFO, 'Wrote file', file='folder/file name.h5', sample_freq=51200, elapsed=0.125, optional=None
-    )
+    logger = al.get_logger('acoular.tools.helpers')
+    logger.info('Wrote file', file='folder/file name.h5', sample_freq=51200, elapsed=0.125, optional=None)
     assert caplog.messages == ["Wrote file (file='folder/file name.h5', sample_freq=51200 Hz, elapsed=0.125 s)"]
 
     class Unformattable:
@@ -436,8 +443,181 @@ def test_event_fields_and_disabled_formatting(caplog):
             msg = 'Disabled messages must not format fields'
             raise AssertionError(msg)
 
-    al._event(logger, logging.DEBUG, 'Not emitted', value=Unformattable())
+    logger.debug('Not emitted', value=Unformattable())
     assert len(caplog.records) == 1
+
+
+@pytest.mark.parametrize('late', [False, True])
+def test_adapter_fields_reach_application_handlers(late, capsys):
+    logging.getLogger().handlers.clear()
+    obj = ac.WNoiseGenerator()
+    if late:
+        _ = obj.logger
+    stream = application_logging(logging.INFO)
+    obj.logger.info('Recorded samples', samples=128, sample_freq=8000)
+    assert stream.getvalue() == 'Recorded samples (samples=128, sample_freq=8000 Hz)\n'
+    assert capsys.readouterr() == ('', '')
+
+
+@pytest.mark.parametrize(
+    ('message', 'args', 'expected'),
+    [
+        ('Processed %d%%', (50,), 'Processed 50%'),
+        ('Processed %(samples)d samples', ({'samples': 4},), 'Processed 4 samples'),
+    ],
+)
+def test_adapter_keeps_standard_argument_formatting(message, args, expected, caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    logger = al.get_logger('acoular.test')
+    logger.info(message, *args, file='100% samples.h5', elapsed=0.125)
+    assert caplog.messages == [f"{expected} (file='100% samples.h5', elapsed=0.125 s)"]
+    assert caplog.records[0].name == 'acoular.test'
+    assert isinstance(caplog.records[0].msg, str)
+    assert caplog.records[0].args == (args[0] if isinstance(args[0], dict) else args)
+
+
+def test_adapter_preserves_extra_and_exception_keywords(caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    logger = al.get_logger('acoular.test')
+    logger.extra['component'] = 'base'
+    try:
+        msg = 'calculation failed'
+        raise RuntimeError(msg)
+    except RuntimeError:
+        logger.exception('Failed calculation %s', 'example', samples=4, extra={'component': 'override', 'trace_id': 7})
+    record = caplog.records[0]
+    assert record.getMessage() == 'Failed calculation example (samples=4)'
+    assert record.exc_info[0] is RuntimeError
+    assert record.component == 'override'
+    assert record.trace_id == 7
+    assert record.funcName == 'test_adapter_preserves_extra_and_exception_keywords'
+
+
+def test_adapter_stacklevel_and_stack_info(caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    logger = al.get_logger('acoular.test')
+
+    def helper():
+        logger.info('Processed samples', samples=4, stacklevel=2, stack_info=True)
+
+    helper()
+    record = caplog.records[0]
+    assert record.funcName == 'test_adapter_stacklevel_and_stack_info'
+    assert record.stack_info.startswith('Stack (most recent call last):')
+    assert 'stacklevel' not in record.getMessage()
+    assert 'stack_info' not in record.getMessage()
+
+
+def test_adapter_is_shared_on_concurrent_first_access():
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        adapters = list(pool.map(lambda _: al.get_logger('acoular.threaded'), range(20)))
+    assert all(adapter is adapters[0] for adapter in adapters)
+    assert adapters[0].logger is logging.getLogger('acoular.threaded')
+
+
+def test_adapter_direct_configuration_reaches_registered_logger(capsys):
+    logging.getLogger().handlers.clear()
+    adapter = ac.WNoiseGenerator().logger
+    raw = logging.getLogger('acoular.signals.WNoiseGenerator')
+    assert adapter.logger is raw
+    assert al.get_logger(raw.name) is adapter
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    adapter.addHandler(handler)
+    adapter.setLevel(logging.DEBUG)
+    adapter.propagate = False
+    assert adapter.handlers is raw.handlers
+    assert adapter.level == raw.level == logging.DEBUG
+    assert not raw.propagate
+    adapter.debug('Processed samples', samples=4)
+    assert stream.getvalue() == 'Processed samples (samples=4)\n'
+    adapter.disabled = True
+    adapter.error('Suppressed', samples=4)
+    assert raw.disabled
+    adapter.disabled = False
+    adapter.removeHandler(handler)
+    assert handler not in raw.handlers
+    assert capsys.readouterr() == ('', '')
+
+
+def test_adapter_respects_application_filters(caplog):
+    logger = al.get_logger('acoular.test')
+    logger.setLevel(logging.INFO)
+    logger.addFilter(lambda _record: False)
+    logger.info('Filtered', samples=4)
+    assert not caplog.records
+    assert logger.filters is logger.logger.filters
+    assert len(logger.filters) == 1
+
+
+def test_adapter_standard_queue_handler_gets_complete_message(capsys):
+    logging.getLogger().handlers.clear()
+    queue = Queue()
+    logging.getLogger().addHandler(QueueHandler(queue))
+    logging.getLogger().setLevel(logging.INFO)
+    ac.WNoiseGenerator().logger.info('Processed samples', samples=4, elapsed=0.125)
+    record = queue.get_nowait()
+    assert record.name == 'acoular.signals.WNoiseGenerator'
+    assert record.getMessage() == 'Processed samples (samples=4, elapsed=0.125 s)'
+    assert capsys.readouterr() == ('', '')
+
+
+def test_adapter_records_need_no_custom_json_encoder(caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    al.get_logger('acoular.test').info('Processed samples', samples=np.int64(4), elapsed=0.125)
+    record = json.loads(json.dumps(caplog.records[0].__dict__))
+    assert record['msg'] == 'Processed samples (samples=4, elapsed=0.125 s)'
+    assert record['name'] == 'acoular.test'
+
+
+def test_adapter_supports_application_dict_config():
+    code = """
+import io
+import logging
+import logging.config
+import acoular
+obj = acoular.WNoiseGenerator()
+saved = obj.logger
+stream = io.StringIO()
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'app': {'class': 'logging.StreamHandler', 'stream': stream}},
+    'root': {'level': 'WARNING', 'handlers': ['app']},
+})
+assert obj.logger is saved
+assert saved.logger is logging.getLogger('acoular.signals.WNoiseGenerator')
+saved.info('hidden', samples=4)
+saved.warning('visible', samples=4)
+assert stream.getvalue() == 'visible (samples=4)\\n', stream.getvalue()
+assert logging.getLoggerClass() is logging.Logger
+"""
+    result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, check=False)  # noqa: S603
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == result.stderr == ''
+
+
+def test_adapter_operation_accepts_flat_and_late_fields(caplog):
+    caplog.set_level(logging.INFO, logger='acoular')
+    with ac.WNoiseGenerator().logger.operation(
+        'Processing', 'Processed', count='samples', channels=2, sample_freq=8000
+    ) as task:
+        task.fields['file'] = 'measurement.h5'
+        task.advance(4)
+    assert len(caplog.records) == 1
+    assert caplog.messages[0].startswith('Processed (channels=2, sample_freq=8000 Hz, file=measurement.h5, samples=4,')
+    assert 'fields=' not in caplog.messages[0]
+
+
+def test_adapter_saved_operation_refreshes_application_policy(capsys):
+    logging.getLogger().handlers.clear()
+    saved = ac.WNoiseGenerator().logger
+    stream = application_logging(logging.WARNING)
+    with saved.operation('Processing', 'Processed', samples=4):
+        pass
+    assert saved.getEffectiveLevel() == logging.WARNING
+    assert stream.getvalue() == ''
+    assert capsys.readouterr() == ('', '')
 
 
 def test_operation_respects_class_handler_ownership(monkeypatch):
@@ -448,7 +628,7 @@ def test_operation_respects_class_handler_ownership(monkeypatch):
     ac.config.log_progress = 'auto'
     monkeypatch.setattr(sys.stderr, 'isatty', lambda: True)
     monkeypatch.setenv('TERM', 'xterm-256color')
-    with al._operation(ac.WNoiseGenerator().logger, 'Processing', 'Processed'):
+    with ac.WNoiseGenerator().logger.operation('Processing', 'Processed'):
         assert al._display is None
     assert log.getEffectiveLevel() == logging.WARNING
     assert stream.getvalue() == ''
@@ -457,7 +637,7 @@ def test_operation_respects_class_handler_ownership(monkeypatch):
 def test_operation_counts_and_timing(caplog, monkeypatch):
     caplog.set_level(logging.INFO, logger='acoular')
     monkeypatch.setattr(al, 'perf_counter', iter([10.0, 12.5]).__next__)
-    with al._operation(al._get_logger('acoular.test'), 'Processing', 'Processed', count='samples') as task:
+    with al.get_logger('acoular.test').operation('Processing', 'Processed', count='samples') as task:
         task.advance(3)
         task.update(completed=5)
     assert caplog.messages == ['Processed (samples=5, elapsed=2.5 s)']
@@ -468,7 +648,7 @@ def test_operation_failures_are_not_logged(caplog):
     ac.config.log_progress = 'on'
     with (
         pytest.raises(RuntimeError, match='failed'),
-        al._operation(al._get_logger('acoular.test'), 'Processing', 'Processed'),
+        al.get_logger('acoular.test').operation('Processing', 'Processed'),
     ):
         msg = 'failed'
         raise RuntimeError(msg)
