@@ -276,6 +276,7 @@ class Cache(InOut):
 
     def _write_data_to_cache(self, num):
         nodename = 'tc_' + self.digest
+        ac = None
         for i, data in enumerate(self.source.result(num)):
             if i == 0:
                 self._h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
@@ -285,7 +286,8 @@ class Cache(InOut):
             self._h5f.append_data(ac, data)
             self._h5f.flush()
             yield data
-        self._h5f.set_node_attribute(ac, 'complete', True)
+        if ac is not None:
+            self._h5f.set_node_attribute(ac, 'complete', True)
 
     def _get_data_from_cache(self, num):
         nodename = 'tc_' + self.digest
@@ -305,6 +307,7 @@ class Cache(InOut):
             nblocks += 1
             i += num
         self._h5f.remove_data(nodename)
+        ac = None
         for j, data in enumerate(self.source.result(num)):
             if j == 0:
                 self._h5f.create_extendable_array(nodename, (0, data.shape[1]), data.dtype.name)
@@ -315,7 +318,8 @@ class Cache(InOut):
             if j >= nblocks:
                 self._h5f.flush()
                 yield data
-        self._h5f.set_node_attribute(ac, 'complete', True)
+        if ac is not None:
+            self._h5f.set_node_attribute(ac, 'complete', True)
 
     # result generator: delivers input, possibly from cache
     def result(self, num):

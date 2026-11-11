@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 import acoular as ac
+from acoular.h5cache import H5cache
 from acoular.h5files import H5CacheFileH5py, H5CacheFileTables
 
 from tests.cases.test_caching_cases import Caching
@@ -127,6 +128,54 @@ def test_filecache_created(case, file_cache_options):
         ac.config.global_caching = 'none'
         result_uncache = calc(obj2)
         np.testing.assert_allclose(result, result_uncache)
+
+
+@pytest.mark.parametrize('h5library', ['pytables', 'h5py'])
+@pytest.mark.parametrize('mode', ['none', 'individual', 'all', 'readonly', 'overwrite'])
+@pytest.mark.parametrize('source_type', ['average', 'rfft'])
+def test_cache_empty_source(tmp_path, monkeypatch, h5library, mode, source_type):
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'h5library', h5library)
+    monkeypatch.setattr(ac.config, 'global_caching', mode)
+    source = ac.TimeSamples(data=np.ones((1, 1)), sample_freq=48000)
+    if source_type == 'average':
+        source = ac.Average(source=source, num_per_average=2)
+    else:
+        source = ac.RFFT(source=source, block_size=128)
+    cache = ac.Cache(source=source)
+
+    try:
+        assert list(source.result(1)) == []
+        for _ in range(2):
+            assert list(cache.result(1)) == []
+            if cache._h5f is not None:
+                assert not cache._h5f.is_cached('tc_' + cache.digest)
+    finally:
+        if cache._h5f is not None:
+            cache._h5f.close()
+
+
+@pytest.mark.parametrize('h5library', ['pytables', 'h5py'])
+@pytest.mark.parametrize('complete', [None, False])
+def test_cache_empty_source_incomplete_cache(tmp_path, monkeypatch, h5library, complete):
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'h5library', h5library)
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    source = ac.TimeSamples(data=np.ones((1, 1)), sample_freq=48000)
+    cache = ac.Cache(source=ac.Average(source=source, num_per_average=2))
+    H5cache.get_cache_file(cache, cache.basename)
+    nodename = 'tc_' + cache.digest
+
+    try:
+        cache._h5f.create_extendable_array(nodename, (0, 1), 'float64')
+        if complete is not None:
+            node = cache._h5f.get_data_by_reference(nodename)
+            cache._h5f.set_node_attribute(node, 'complete', complete)
+        for _ in range(2):
+            assert list(cache.result(1)) == []
+            assert not cache._h5f.is_cached(nodename)
+    finally:
+        cache._h5f.close()
 
 
 @pytest.mark.parametrize(
