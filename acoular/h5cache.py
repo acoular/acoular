@@ -8,13 +8,14 @@ import gc
 from pathlib import Path
 from weakref import WeakValueDictionary
 
+from .base import AcoularBase
 from .configuration import Config, config
 from .h5files import _get_cachefile_class
 
-from traits.api import Bool, Delegate, Dict, HasStrictTraits, Instance
+from traits.api import Bool, Delegate, Dict, Instance
 
 
-class HDF5Cache(HasStrictTraits):
+class HDF5Cache(AcoularBase):
     """Cache class that handles opening and closing 'tables.File' objects."""
 
     config = Instance(Config)
@@ -33,8 +34,10 @@ class HDF5Cache(HasStrictTraits):
 
     def close_cachefile(self, cachefile):
         """Close a cache file and remove it from the reference counter."""
-        self.open_file_reference.pop(Path(cachefile.filename))
+        filename = Path(cachefile.filename)
+        self.open_file_reference.pop(filename)
         cachefile.close()
+        self.logger.debug('Closed cache file', file=filename)
 
     def get_open_cachefiles(self):
         """Get an iterator over all open cache files."""
@@ -73,41 +76,35 @@ class HDF5Cache(HasStrictTraits):
         """Return a list of all used cache directories (if multiple paths exist)."""
         return list({str(k.parent) for k in self.open_file_reference})
 
-    def _print_open_files(self):
-        """Prints open cache files and the number of objects referencing a cache file.
-
-        If multiple cache files are open at different paths, the full path is printed.
-        Otherwise, only the filename is logged.
-        """
-        if len(self.open_file_reference.values()) > 1:
-            print(list({str(k): v for k, v in self.open_file_reference.items()}.items()))
-        else:
-            print(list({str(k.name): v for k, v in self.open_file_reference.items()}.items()))
-
     def get_cache_file(self, obj, basename, mode='a'):
         """Returns pytables .h5 file to _h5f trait of calling object for caching."""
         self._idle_if_busy()
         self.busy = True
         file_cls = _get_cachefile_class()
         filename = (Path(self.cache_dir) / (basename + '_cache.h5')).resolve()
+        logger = self.logger
 
         if config.global_caching == 'readonly' and not filename.exists():
             obj._h5f = None
             self.busy = False
+            logger.debug('Skipped cache file', file=filename, reason='missing_readonly')
             return  # cachefile is not created in readonly mode
 
         if isinstance(obj._h5f, file_cls):
             h5filename = Path(obj._h5f.filename).resolve()
             if h5filename == filename:
                 self.busy = False
+                logger.debug('Reused cache file', file=filename)
                 return
             self._decrease_file_reference_counter(h5filename)
 
+        event = 'Reused cache file'
         if filename not in self.open_files:  # or tables.file._open_files.filenames
             if config.global_caching == 'readonly':
                 mode = 'r'
             file = file_cls(filename, mode)
             self.open_files[filename] = file
+            event = 'Opened cache file'
 
         obj._h5f = self.open_files[filename]
         self._increase_file_reference_counter(filename)
@@ -116,7 +113,7 @@ class HDF5Cache(HasStrictTraits):
         self.close_unreferenced_cachefiles()
 
         self.busy = False
-        self._print_open_files()
+        logger.debug(event, file=filename, references=self.open_file_reference[filename])
 
 
 H5cache = HDF5Cache(config=config)

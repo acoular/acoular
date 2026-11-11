@@ -266,4 +266,4 @@ def _modf(delays, interp2, index):
 
 if __name__ == '__main__':
     foo = _delays
-    print(foo.parallel_diagnostics(level=4))
+    print(foo.parallel_diagnostics(level=4))  # noqa: T201 - Explicit developer diagnostics

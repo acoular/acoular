@@ -25,7 +25,6 @@ Implements signal generators for the simulation of acoustic sources.
 
 # imports from other packages
 from abc import abstractmethod
-from warnings import warn as _warn
 
 # acoular imports
 from .base import AcoularBase, SamplesGenerator
@@ -302,7 +301,8 @@ class PNoiseGenerator(NoiseGenerator):
         -----
         - The "depth" parameter controls the number of octaves included in the pink noise
           simulation. If the specified depth exceeds the maximum possible value based on
-          the number of samples, it is automatically adjusted, and a warning is printed.
+          the number of samples, it is automatically adjusted, and a WARNING log
+          is emitted.
         - The output signal is scaled to have the same overall level as white noise by dividing
           the result by ``np.sqrt(depth + 1.5)``.
         """
@@ -312,8 +312,8 @@ class PNoiseGenerator(NoiseGenerator):
         max_depth = int(np.log(nums) / np.log(2))
 
         if depth > max_depth:
+            self.logger.warning('Pink-noise depth reduced', requested_depth=depth, depth=max_depth, samples=nums)
             depth = max_depth
-            print(f'Pink noise filter depth set to maximum possible value of {max_depth:d}.')
 
         rnd_gen = np.random.RandomState(self.seed)
         s = rnd_gen.standard_normal(nums)
@@ -614,14 +614,12 @@ class GenericSignalGenerator(SignalGenerator):
 
         Warnings
         --------
-        A warning is raised if the source has more than one channel.
+        A WARNING is logged if the source has more than one channel.
         """
         block = 1024
         if self.source.num_channels > 1:
-            _warn(
-                'Signal source has more than one channel. Only channel 0 will be used for signal.',
-                Warning,
-                stacklevel=2,
+            self.logger.warning(
+                'Selecting channel 0 from multichannel signal', channels=self.source.num_channels, selected_channel=0
             )
         nums = self.num_samples
         track = np.zeros(nums)

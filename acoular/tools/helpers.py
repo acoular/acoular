@@ -17,8 +17,8 @@
 import http.client
 import urllib.parse
 from pathlib import Path
-from warnings import warn as _warn
 
+from acoular.logger import get_logger
 from acoular.tools.utils import mole_fraction_of_water_vapor
 
 import numpy as np
@@ -79,20 +79,16 @@ def synthetic(data, freqs, f, num=3):
         for i in f:
             ind = np.searchsorted(freqs, i)
             if ind >= len(freqs):
-                _warn(
-                    f'Queried frequency ({i:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                get_logger(__name__).warning(
+                    'Requested frequency is outside resolved range; returning zeros', frequency=i
                 )
                 h = np.zeros_like(data[0])
             else:
                 if freqs[ind] != i:
-                    _warn(
-                        f'Queried frequency ({i:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freqs[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
+                    get_logger(__name__).warning(
+                        'Requested frequency is not an FFT frequency; using selected FFT frequency',
+                        frequency=i,
+                        selected_frequency=freqs[ind],
                     )
                 h = data[ind]
             res += [h]
@@ -105,12 +101,10 @@ def synthetic(data, freqs, f, num=3):
             ind1 = np.searchsorted(freqs, f1)
             ind2 = np.searchsorted(freqs, f2)
             if ind1 == ind2:
-                _warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                get_logger(__name__).warning(
+                    'Requested band contains no FFT frequencies; returning zeros',
+                    lower_frequency=f1,
+                    upper_frequency=f2,
                 )
                 h = np.zeros_like(data[0])
             else:
@@ -189,10 +183,15 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
     fc : array of floats
         Evaluated band center frequencies.
 
+    Raises
+    ------
+    ValueError
+        If ``num`` is neither 1 (octave) nor 3 (third-octave).
+
     """
     if num not in [1, 3]:
-        print('Only octave and third-octave bands supported at this moment.')
-        return (0, 0, 0)
+        msg = f'num must be 1 (octave) or 3 (third-octave); got {num!r}'
+        raise ValueError(msg)
 
     # preferred center freqs after din en iso 266 for third-octave bands
     fcbase = np.array([31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250])
@@ -230,7 +229,6 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
     else:
         flulist = fc[i_low:i_high]
         plist = p[0, :]
-    # print(flulist.shape, plist.shape)
     return (flulist, plist, fc[i_low:i_high])
 
 
@@ -282,7 +280,6 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
     else:
         flulist = fc
         plist = data
-    # print(flulist.shape, plist.shape)
     if masked > -360:
         plist = np.ma.masked_where(plist <= masked, plist)
     return (flulist, plist)
@@ -411,21 +408,25 @@ def get_data_file(file):
     :class:`pathlib.Path`
         Path to the file.
     """
+    logger = get_logger(__name__)
     data_file = Path('../data') / file
     if not data_file.exists():
         data_file = Path().cwd() / file
         if not data_file.exists():
             quoted_file = urllib.parse.quote(file)
-            connection = http.client.HTTPSConnection('raw.githubusercontent.com')
-            try:
-                connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
-                response = connection.getresponse()
-                if response.status != 200:
-                    msg = f'Failed to download data file {file!r}: HTTP {response.status}'
-                    raise OSError(msg)
-                data_file.write_bytes(response.read())
-            finally:
-                connection.close()
-        print(f'Calibration file location: {data_file}')
-
+            with logger.operation('Downloading data file', 'Downloaded data file', file=data_file) as task:
+                connection = http.client.HTTPSConnection('raw.githubusercontent.com')
+                try:
+                    connection.request('GET', f'/acoular/acoular/master/examples/data/{quoted_file}')
+                    response = connection.getresponse()
+                    if response.status != 200:
+                        msg = f'Failed to download data file {file!r}: HTTP {response.status}'
+                        raise OSError(msg)
+                    data = response.read()
+                    data_file.write_bytes(data)
+                    task.fields['bytes'] = len(data)
+                finally:
+                    connection.close()
+            return data_file
+    logger.debug('Resolved data file', file=data_file)
     return data_file

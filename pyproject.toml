@@ -31,6 +31,7 @@ classifiers = [
 dependencies = [
     "numba",
     "numpy",
+    "rich",
     "scikit-learn",
     "scipy >= 1.16.1; python_version > '3.10'",
     "tables",
@@ -139,7 +140,7 @@ env = [
 
 [tool.ruff]
 extend = ".venv/share/ruff/ruff.acoular.toml"
-extend-exclude = ["docs/source", "tests/unsupported"]
+extend-exclude = ["tests/unsupported"]
 
 [tool.ruff.lint]
 extend-ignore = [
@@ -148,7 +149,6 @@ extend-ignore = [
   "PERF4",  # list performance improvements
   "PTH",  # migrate to Pathlib
   "SLF001",  # private attr access
-  "T20",  # deactivate when logging is implemented
   "FBT003",  # boolean-positional
   "PLR2004",  # magic-value-comparison
   "PLR091",  # too-many-arguments/statements
@@ -156,7 +156,6 @@ extend-ignore = [
   "RUF005",  # needs carefull checking
   "RUF059",  # unused-packed-variable
   "PLW2901",  # overwritten loop variable
-  "PLR0912",  # too many branches
   "S318",  # ignore XML parser security rule globally for now
   "S301",  # ignore pickle security rule globally for now
 ]
@@ -165,9 +164,8 @@ extend-ignore = [
 banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 
 [tool.ruff.lint.per-file-ignores]
-"!acoular/*" = ["D"]
+"!acoular/*" = ["D", "T20"]
 "acoular/__init__.py" = ["F401"]
-"acoular/demo/__init__.py" = ["F401"]
 "acoular/tools/__init__.py" = ["F401"]
 "acoular/aiaa/__init__.py" = ["F401"]
 "acoular/environments.py" = ["N806"]
@@ -176,24 +174,18 @@ banned-module-level-imports = ["matplotlib", "pylops", "sounddevice"]
 "acoular/sources.py" = ["N806"]
 "acoular/tools/helpers.py" = ["D205"]
 "acoular/tprocess.py" = ["N806"]
-# "docs/generate_switcher_json.py" = ["S603"]
 "docs/plots/*" = [
     "TID253",  # matplotlib imports are ok
 ]
-"tests/*" = ["FIX", "PLC0415", "PT", "RUF", "S101", "TRY"]
+"tests/*" = ["FIX", "PLC0415", "PT", "RUF007", "RUF043", "S101", "TRY"]
 "tests/cases/*" = ["N802"]
 "examples/*" = [
   "A001",
   "B007",
-  "D4",
   "E4",
-  "E701",
   "EXE",
-  "F4",
-  "UP036",
   "S101",
   "SIM108",
-  "SLF001",
   "TID253",  # matplotlib imports are ok
   "INP001"
 ]

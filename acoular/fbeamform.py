@@ -274,14 +274,22 @@ class LazyBfResult:
         if isinstance(sl, (int, np.integer)):
             sl = slice(sl, sl + 1)
         # indices which are missing
-        missingind = np.arange(*sl.indices(self.bf._numfreq))[self.bf._fr[sl] == 0]
+        indices = np.arange(*sl.indices(self.bf._numfreq))
+        missingind = indices[self.bf._fr[sl] == 0]
         # calc if needed
         if missingind.size:
-            self.bf._calc(missingind)
-            if self.bf._h5f:
-                self.bf._h5f.flush()
-
-        return self.bf._ac.__getitem__(key)
+            with self.bf.logger.operation(
+                'Computing beamforming maps',
+                'Computed beamforming maps',
+                frequencies=missingind.size,
+            ):
+                self.bf._calc(missingind)
+                if self.bf._h5f:
+                    self.bf._h5f.flush()
+        result = self.bf._ac.__getitem__(key)
+        if not missingind.size and indices.size:
+            self.bf.logger.info('Reused beamforming maps', frequencies=indices.size)
+        return result
 
 
 class BeamformerBase(AcoularBase):
@@ -343,20 +351,15 @@ class BeamformerBase(AcoularBase):
 
         Returns (None, None) if no cachefile/data exist and global caching mode is 'readonly'.
         """
-        #        print("get cachefile:", self.freq_data.basename)
         H5cache.get_cache_file(self, self.freq_data.basename)
         if not self._h5f:
-            #            print("no cachefile:", self.freq_data.basename)
             return (None, None, None)  # only happens in case of global caching readonly
 
         nodename = self.__class__.__name__ + self.digest
-        #        print("collect filecache for nodename:",nodename)
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            #            print("remove existing data for nodename",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
-            #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
             numfreq = self.freq_data.fftfreq().shape[0]
@@ -488,7 +491,6 @@ class BeamformerBase(AcoularBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            # print(f'compute{i}')
             csm = np.array(self.freq_data.csm[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
@@ -543,20 +545,14 @@ class BeamformerBase(AcoularBase):
             # single frequency line
             ind = np.searchsorted(freq, f)
             if ind >= len(freq):
-                _warn(
-                    f'Queried frequency ({f:g} Hz) not in resolved frequency range. Returning zeros.',
-                    Warning,
-                    stacklevel=2,
-                )
+                self.logger.warning('Requested frequency is outside resolved range; returning zeros', frequency=f)
                 h = np.zeros_like(res[0])
             else:
                 if freq[ind] != f:
-                    _warn(
-                        f'Queried frequency ({f:g} Hz) not in set of '
-                        'discrete FFT sample frequencies. '
-                        f'Using frequency {freq[ind]:g} Hz instead.',
-                        Warning,
-                        stacklevel=2,
+                    self.logger.warning(
+                        'Requested frequency is not an FFT frequency; using selected FFT frequency',
+                        frequency=f,
+                        selected_frequency=freq[ind],
                     )
                 h = res[ind]
         else:
@@ -570,12 +566,10 @@ class BeamformerBase(AcoularBase):
             ind1 = np.searchsorted(freq, f1)
             ind2 = np.searchsorted(freq, f2)
             if ind1 == ind2:
-                _warn(
-                    f'Queried frequency band ({f1:g} to {f2:g} Hz) does not '
-                    'include any discrete FFT sample frequencies. '
-                    'Returning zeros.',
-                    Warning,
-                    stacklevel=2,
+                self.logger.warning(
+                    'Requested band contains no FFT frequencies; returning zeros',
+                    lower_frequency=f1,
+                    upper_frequency=f2,
                 )
                 h = np.zeros_like(res[0])
             else:
@@ -993,18 +987,14 @@ class PointSpreadFunction(AcoularBase):
         """
         filename = 'psf' + self.digest
         nodename = (f'Hz_{self.freq:.2f}').replace('.', '_')
-        #        print("get cachefile:", filename)
         H5cache.get_cache_file(self, filename)
         if not self._h5f:  # only happens in case of global caching readonly
-            #            print("no cachefile:", filename)
             return (None, None)  # only happens in case of global caching readonly
 
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            #            print("remove existing data for nodename",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
-            #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None)
             gs = self.steer.grid.size
@@ -1046,8 +1036,11 @@ class PointSpreadFunction(AcoularBase):
             if cache_active and config.global_caching == 'readonly':
                 ac, gp = ac[:], gp[:]
             self.calc_psf(ac, gp, grid_indices)
+            self.logger.debug('Computed point spread functions', frequency=self.freq)
             if cache_active and self._h5f and config.global_caching != 'readonly':
                 self._h5f.flush()
+        if not missing:
+            self.logger.debug('Reused point spread functions', frequency=self.freq)
         if grid_indices.size == gs and np.array_equal(grid_indices, np.arange(gs)):
             return ac[:]
         result = np.empty((gs, grid_indices.size), dtype=self.precision)
@@ -2106,7 +2099,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 # matrix
                                 leftpoints = int(np.round(num_points * self.beta ** (it + 1)))
                                 idx = np.argsort(abs(qi[s, locpoints]))[::-1]
-                                # print(it, leftpoints, locpoints, idx )
                                 locpoints = np.delete(locpoints, [idx[leftpoints::]])
                                 qix = np.zeros([n + m, leftpoints], dtype='complex128')
                                 qix[s, :] = qi[s, locpoints]
@@ -2174,7 +2166,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                             model.fit(AB / norms, R)
                         # recover normalization in the coef's
                         qi_real, qi_imag = np.hsplit(model.coef_[:] / norms / unit, 2)
-                        # print(s,qi.size)
                         qi[s, locpoints] = qi_real + qi_imag * 1j
                 else:
                     _warn(
@@ -2331,7 +2322,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             k = 2 * np.pi * f[i] / env.c
             for j, n in enumerate(eva_list):
-                # print(f[i],n)
 
                 def func(xy):
                     # function to minimize globally

@@ -21,6 +21,7 @@ The following modules are part of Acoular:
     fbeamform
     fprocess
     grids
+    logger
     microphones
     process
     sdinput

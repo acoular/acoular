@@ -2,10 +2,22 @@
 # Copyright (c) Acoular Development Team.
 # ------------------------------------------------------------------------------
 
-"""Implements a digest function for caching of traits based on a unique identifier."""
+"""Internal helpers for caching, compilation, and iterator cleanup."""
 
+from contextlib import contextmanager
 from functools import wraps
 from hashlib import blake2b
+
+
+@contextmanager
+def _closing_iterator(iterator):
+    """Close upstream generators without requiring close() on ordinary iterators."""
+    try:
+        yield iterator
+    finally:
+        close = getattr(iterator, 'close', None)
+        if close is not None:
+            close()
 
 
 def lazyjit(decorator):

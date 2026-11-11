@@ -13,7 +13,6 @@
 import importlib.util
 import sys
 from os import environ, mkdir, path
-from warnings import warn as _warn
 
 # WARNING: DO NOT ADD ANY IMPORTS HERE THAT MIGHT IMPORT NUMPY
 
@@ -36,30 +35,26 @@ if 'numpy' in sys.modules:
     sys.stdout = temp_stdout
     np.show_config()
     sys.stdout = orig_stdout
-    # check if it uses OpenBLAS or another library
-    if 'openblas' in temp_stdout.getvalue().lower() and environ.get('OPENBLAS_NUM_THREADS') != '1':
+    # Defer reporting until the configuration singleton exists, not the thread limit.
+    _openblas_conflict = 'openblas' in temp_stdout.getvalue().lower() and environ.get('OPENBLAS_NUM_THREADS') != '1'
+    if _openblas_conflict:
         # it's OpenBLAS, set numba threads=1 to avoid overcommittment
         import numba as nb
 
         nb.set_num_threads(1)
-        _warn(
-            'We detected that Numpy is already loaded and uses OpenBLAS. Because '
-            'this conflicts with Numba parallel execution, we disable parallel '
-            'execution for now and processing might be slower. To speed up, '
-            'either import Numpy after Acoular or set environment variable '
-            'OPENBLAS_NUM_THREADS=1 before start of the program.',
-            UserWarning,
-            stacklevel=2,
-        )
 else:
     # numpy is not loaded, make sure that OpenBLAS runs single threaded
     environ['OPENBLAS_NUM_THREADS'] = '1'
+    _openblas_conflict = False
+
+from .base import AcoularBase
+from .logger import _configure
 
 # this loads numpy, so we have to defer loading until OpenBLAS check is done
-from traits.api import Bool, Enum, HasStrictTraits, File, Property, cached_property  # noqa: I001
+from traits.api import Bool, Enum, File, Property, cached_property
 
 
-class Config(HasStrictTraits):
+class Config(AcoularBase):
     """Implements the global configuration of the Acoular package.
 
     An instance of this class can be accessed for adjustment of the following
@@ -79,8 +74,23 @@ class Config(HasStrictTraits):
     """
 
     def __init__(self):
-        HasStrictTraits.__init__(self)
+        super().__init__()
         self._assert_h5library()
+
+    #: Logging threshold: INFO standalone, or application levels in 'auto' mode.
+    #: An explicit standard level overrides the automatic Acoular threshold.
+    log_level = Enum('auto', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'NOTSET')
+
+    #: Color policy for Acoular-owned output. Application handlers are untouched.
+    log_color = Enum('auto', 'on', 'off')
+
+    #: Progress policy: automatic interactive display, explicitly on, or off.
+    #: Automatic progress steps aside when application logging is present.
+    log_progress = Enum('auto', 'on', 'off')
+
+    def _log_level_changed(self):
+        if self is globals().get('config'):
+            _configure()
 
     #: Flag that globally defines caching behaviour of Acoular classes
     #: defaults to 'individual'.
@@ -246,3 +256,9 @@ Example:
     >>> acoular.config.h5library = "h5py"
     >>> acoular.config.global_caching = "overwrite"
 """
+
+if _openblas_conflict:
+    config.logger.warning(
+        'NumPy already uses OpenBLAS; disabled Numba parallel execution. '
+        'Import Acoular before NumPy or set OPENBLAS_NUM_THREADS=1 to retain parallel processing'
+    )
