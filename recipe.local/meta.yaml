@@ -20,6 +20,7 @@ requirements:
     - scikit-learn
     - numba
     - numpy
+    - rich
     - scipy >=1.16.1
     - traits >=6.0
     - pytables
