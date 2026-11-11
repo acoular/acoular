@@ -21,6 +21,7 @@ Upcoming
 
 **Bugfixes**
 
+    - fixes :class:`~acoular.process.Cache` crashing when its source yields no blocks, including when rebuilding an incomplete cache
     - updates the cached eigenvalue index in :class:`~acoular.fbeamform.BeamformerEig`,
       :class:`~acoular.fbeamform.BeamformerMusic`, and :class:`~acoular.fbeamform.BeamformerGIB`
       when the microphone count changes, including channel exclusion or restoration
