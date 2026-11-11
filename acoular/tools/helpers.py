@@ -229,7 +229,6 @@ def barspectrum(data, fftfreqs, num=3, bar=True, xoffset=0.0):
     else:
         flulist = fc[i_low:i_high]
         plist = p[0, :]
-    # print(flulist.shape, plist.shape)
     return (flulist, plist, fc[i_low:i_high])
 
 
@@ -281,7 +280,6 @@ def bardata(data, fc, num=3, bar=True, xoffset=0.0, masked=-360):
     else:
         flulist = fc
         plist = data
-    # print(flulist.shape, plist.shape)
     if masked > -360:
         plist = np.ma.masked_where(plist <= masked, plist)
     return (flulist, plist)

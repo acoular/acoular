@@ -351,20 +351,15 @@ class BeamformerBase(AcoularBase):
 
         Returns (None, None) if no cachefile/data exist and global caching mode is 'readonly'.
         """
-        #        print("get cachefile:", self.freq_data.basename)
         H5cache.get_cache_file(self, self.freq_data.basename)
         if not self._h5f:
-            #            print("no cachefile:", self.freq_data.basename)
             return (None, None, None)  # only happens in case of global caching readonly
 
         nodename = self.__class__.__name__ + self.digest
-        #        print("collect filecache for nodename:",nodename)
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            #            print("remove existing data for nodename",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
-            #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None, None)
             numfreq = self.freq_data.fftfreq().shape[0]
@@ -496,7 +491,6 @@ class BeamformerBase(AcoularBase):
         normfactor = self.sig_loss_norm()
         param_steer_type, steer_vector = self._beamformer_params()
         for i in ind:
-            # print(f'compute{i}')
             csm = np.array(self.freq_data.csm[i], dtype='complex128')
             beamformerOutput = beamformerFreq(
                 param_steer_type,
@@ -993,18 +987,14 @@ class PointSpreadFunction(AcoularBase):
         """
         filename = 'psf' + self.digest
         nodename = (f'Hz_{self.freq:.2f}').replace('.', '_')
-        #        print("get cachefile:", filename)
         H5cache.get_cache_file(self, filename)
         if not self._h5f:  # only happens in case of global caching readonly
-            #            print("no cachefile:", filename)
             return (None, None)  # only happens in case of global caching readonly
 
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            #            print("remove existing data for nodename",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
-            #            print("no data existent for nodename:", nodename)
             if config.global_caching == 'readonly':
                 return (None, None)
             gs = self.steer.grid.size
@@ -2109,7 +2099,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                                 # matrix
                                 leftpoints = int(np.round(num_points * self.beta ** (it + 1)))
                                 idx = np.argsort(abs(qi[s, locpoints]))[::-1]
-                                # print(it, leftpoints, locpoints, idx )
                                 locpoints = np.delete(locpoints, [idx[leftpoints::]])
                                 qix = np.zeros([n + m, leftpoints], dtype='complex128')
                                 qix[s, :] = qi[s, locpoints]
@@ -2177,7 +2166,6 @@ class BeamformerGIB(BeamformerEig):  # BeamformerEig #BeamformerBase
                             model.fit(AB / norms, R)
                         # recover normalization in the coef's
                         qi_real, qi_imag = np.hsplit(model.coef_[:] / norms / unit, 2)
-                        # print(s,qi.size)
                         qi[s, locpoints] = qi_real + qi_imag * 1j
                 else:
                     _warn(
@@ -2334,7 +2322,6 @@ class BeamformerGridlessOrth(BeamformerAdaptiveGrid):
             eigvecs = np.array(self.freq_data.eigvecs[i], dtype='complex128')
             k = 2 * np.pi * f[i] / env.c
             for j, n in enumerate(eva_list):
-                # print(f[i],n)
 
                 def func(xy):
                     # function to minimize globally

@@ -494,13 +494,11 @@ class PowerSpectra(BaseSpectra):
 
         nodename = traitname + '_' + self.digest
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            # print("remove existing node",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
             if config.global_caching == 'readonly':
                 return func()
-            #            print("create array, data not cached for",nodename)
             self._h5f.create_compressible_array(nodename, shape, precision)
 
         ac = self._h5f.get_data_by_reference(nodename)

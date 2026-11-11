@@ -45,8 +45,8 @@ def test_set_traits(acoular_cls):
                     elif tr.is_trait_type(Bool):
                         setattr(obj, k, False)
                     elif tr.is_trait_type(Range):
-                        low = tr.handler._low  # noqa: SLF001
-                        high = tr.handler._high  # noqa: SLF001
+                        low = tr.handler._low
+                        high = tr.handler._high
                         setattr(obj, k, low if high is None else (high + low) / 2)
                     elif tr.is_trait_type(TraitEnum) or tr.is_trait_type(Enum):
                         v = tr.handler.values
