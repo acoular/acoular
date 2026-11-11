@@ -384,8 +384,8 @@ class PowerSpectra(BaseSpectra):
         >>> print(ts.num_channels, ts.num_samples, ts.sample_freq)
         4 1000 51200.0
         >>> ps = PowerSpectra(source=ts, block_size=128, window='Blackman')
-        >>> ps.csm.shape
-        (65, 4, 4)
+        >>> ps.csm.shape == (65, 4, 4)
+        True
         """
         t = self.source
         if t.num_samples == -1:

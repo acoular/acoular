@@ -243,7 +243,6 @@ class Cache(InOut):
     >>> cache = ac.Cache(source=fft)  # cache the output of the FFT in cache file
     >>> for block in cache.result(num=1):  # read the cached data block-wise
     ...     print(block.shape)
-    [('void_cache.h5', 1)]
     (1, 513)
 
     Disabling caching globally:

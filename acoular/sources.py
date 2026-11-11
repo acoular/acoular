@@ -2018,8 +2018,6 @@ class SourceMixer(SamplesGenerator):
     >>> # Generate and process the mixed output block by block
     >>> for block in mixer.result(num=256):  # Generate blocks of 256 samples
     ...     print(block.shape)
-    Pink noise filter depth set to maximum possible value of 10.
-    Pink noise filter depth set to maximum possible value of 10.
     (256, 9)
     (256, 9)
     (256, 9)
