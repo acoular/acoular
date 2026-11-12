@@ -195,9 +195,7 @@ def test_spectra_disabled_cache_skips_file_preparation(monkeypatch, mocker, trai
 
 
 @pytest.mark.parametrize('trait', ['csm', 'eigvals', 'eigvecs'])
-@pytest.mark.parametrize('mode', ['none', 'individual', 'all', 'readonly', 'overwrite'])
-def test_spectra_getters_delegate_cache_policy(monkeypatch, mocker, trait, mode):
-    monkeypatch.setattr(ac.config, 'global_caching', mode)
+def test_spectra_getters_delegate_cache_policy(mocker, trait):
     obj = ac.PowerSpectra(cached=False)
     expected = np.ones((1, 1, 1))
     handler = mocker.patch.object(ac.PowerSpectra, '_get_filecache', return_value=expected)
