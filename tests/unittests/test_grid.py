@@ -78,6 +78,44 @@ def test_empty_subdomain(grid, sector):
     assert grid.subdomain(sector)[0].shape[0] == 0, 'Subdomain is not empty'
 
 
+def test_rect_grid_index_nearest_and_boundaries():
+    grid = ac.RectGrid(x_min=-1, x_max=1, y_min=0, y_max=1, increment=0.5)
+    assert grid.index(-0.7, 0.8) == (1, 2)
+    assert grid.index(-1, 0) == (0, 0)
+    assert grid.index(1, 1) == (4, 2)
+
+
+@pytest.mark.parametrize(('point', 'axis'), [((-1.1, 0.5), 'x'), ((1.1, 0.5), 'x'), ((0, -0.1), 'y'), ((0, 1.1), 'y')])
+def test_rect_grid_index_outside(point, axis):
+    grid = ac.RectGrid(x_min=-1, x_max=1, y_min=0, y_max=1, increment=0.5)
+    with pytest.raises(ValueError, match=f'{axis}-value out of range'):
+        grid.index(*point)
+
+
+def test_rect_grid_3d_index_with_per_axis_increment():
+    grid = ac.RectGrid3D(x_min=0, x_max=1, y_min=0, y_max=2, z_min=0, z_max=3, increment=(0.5, 1, 1.5))
+    assert grid.index(0.7, 1.2, 2.8) == (1, 1, 2)
+    assert grid.index(0, 0, 0) == (0, 0, 0)
+    assert grid.index(1, 2, 3) == (2, 2, 2)
+
+
+@pytest.mark.parametrize(
+    ('point', 'axis'),
+    [
+        ((-0.1, 1, 1), 'x'),
+        ((1.1, 1, 1), 'x'),
+        ((0.5, -0.1, 1), 'y'),
+        ((0.5, 2.1, 1), 'y'),
+        ((0.5, 1, -0.1), 'z'),
+        ((0.5, 1, 3.1), 'z'),
+    ],
+)
+def test_rect_grid_3d_index_outside(point, axis):
+    grid = ac.RectGrid3D(x_min=0, x_max=1, y_min=0, y_max=2, z_min=0, z_max=3, increment=0.5)
+    with pytest.raises(ValueError, match=f'{axis}-value out of range'):
+        grid.index(*point)
+
+
 @fixture(scope='module')
 def import_grid():
     """Fixture for creating a rectangular ImportGrid object with 4 grid points."""
