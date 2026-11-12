@@ -2,6 +2,7 @@ import re
 
 import acoular as ac
 from acoular.tools import c_air
+from acoular.tools.helpers import synthetic
 
 import numpy as np
 import pytest
@@ -46,6 +47,30 @@ def test_value_error(t, h, p, co2):
 
     with pytest.raises(ValueError, match=re.escape(match)):
         c_air(t=t, h=h, p=p, co2=co2)
+
+
+def test_synthetic_sums_frequency_bands():
+    freqs = np.array([0, 500, 900, 1000, 1100, 2000])
+    data = np.array([[0, 0], [1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+
+    np.testing.assert_array_equal(synthetic(data, freqs, 1000, num=3), [[9, 90]])
+    np.testing.assert_array_equal(synthetic(data, freqs, [500, 1100], num=0), [[1, 10], [4, 40]])
+
+
+@pytest.mark.parametrize(
+    ('frequency', 'num', 'warning', 'expected'),
+    [
+        (501, 0, 'Using frequency 900 Hz instead', [2, 20]),
+        (2001, 0, 'not in resolved frequency range', [0, 0]),
+        (600, 3, 'does not include any discrete FFT sample frequencies', [0, 0]),
+    ],
+)
+def test_synthetic_unresolved_frequencies(frequency, num, warning, expected):
+    freqs = np.array([0, 500, 900, 1000, 1100, 2000])
+    data = np.array([[0, 0], [1, 10], [2, 20], [3, 30], [4, 40], [5, 50]])
+    with pytest.warns(Warning, match=warning):
+        result = synthetic(data, freqs, frequency, num=num)
+    np.testing.assert_array_equal(result, [expected])
 
 
 @pytest.mark.xfail(strict=True)

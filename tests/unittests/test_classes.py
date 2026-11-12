@@ -61,16 +61,13 @@ xfails = {
     'CsmAIAABenchmark': 'Issue #418',
     'SpatialInterpolator': 'Issue #420',
 }
-for c in all_hastraits_classes.copy():
-    try:
-        if c.__name__ in xfails:
-            all_hastraits_classes.remove(c)
-            all_hastraits_classes.append(pytest.param(c, marks=pytest.mark.xfail(reason=xfails[c.__name__])))
-    except AttributeError:
-        pass
+dependency_classes = [
+    pytest.param(cls, marks=pytest.mark.xfail(reason=xfails[cls.__name__])) if cls.__name__ in xfails else cls
+    for cls in all_hastraits_classes
+]
 
 
-@pytest.mark.parametrize('acoular_cls', all_hastraits_classes)
+@pytest.mark.parametrize('acoular_cls', dependency_classes)
 def test_trait_dependencies(acoular_cls):
     """Assert that any property that is being depended on itself depends on something."""
 
