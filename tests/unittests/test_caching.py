@@ -58,7 +58,7 @@ def expected_results(h5library):
 @fixture
 @pytest.mark.parametrize('h5library', ['pytables', 'h5py'])
 @pytest.mark.parametrize('caching_flag', ['none', 'individual', 'all', 'readonly', 'overwrite'])
-def file_cache_options(tmp_path, h5library, caching_flag):
+def file_cache_options(tmp_path, monkeypatch, h5library, caching_flag):
     """Fixture to set up file cache options.
 
     Parameters
@@ -70,9 +70,9 @@ def file_cache_options(tmp_path, h5library, caching_flag):
     caching_flag : str
         Cache flag to use ('none', 'individual', 'all', 'readonly', 'overwrite').
     """
-    ac.config.cache_dir = str(tmp_path)
-    ac.config.h5library = h5library
-    ac.config.global_caching = caching_flag
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'h5library', h5library)
+    monkeypatch.setattr(ac.config, 'global_caching', caching_flag)
     return ac.config.h5library, ac.config.global_caching
 
 
@@ -255,7 +255,8 @@ def test_imported_spectra_bypasses_file_cache(monkeypatch, mocker, mode):
     handler.assert_not_called()
 
 
-def test_timesamples_file_change(tmp_path):
+@pytest.mark.parametrize('h5library', ['pytables', 'h5py'])
+def test_timesamples_file_change(tmp_path, monkeypatch, h5library):
     """Test that changing the file attribute of a TimeSamples object works correctly.
 
     This test verifies the fix for issue #474, where changing the file attribute
@@ -270,14 +271,16 @@ def test_timesamples_file_change(tmp_path):
         Temporary directory for cache files (built-in pytest fixture).
     """
     # Configure caching
-    ac.config.cache_dir = str(tmp_path)
-    ac.config.global_caching = 'all'
+    monkeypatch.setattr(ac.config, 'cache_dir', str(tmp_path))
+    monkeypatch.setattr(ac.config, 'global_caching', 'all')
+    monkeypatch.setattr(ac.config, 'h5library', h5library)
 
     # Generate some random time data
+    rng = np.random.default_rng(1)
     file1, file2 = tmp_path / 'timesamples1.h5', tmp_path / 'timesamples2.h5'
-    ts1 = ac.TimeSamples(data=np.random.randn(1024, 4), sample_freq=51200)
+    ts1 = ac.TimeSamples(data=rng.standard_normal((1024, 4)), sample_freq=51200)
     ac.WriteH5(source=ts1, file=file1).save()
-    ts2 = ac.TimeSamples(data=np.random.randn(1024, 4), sample_freq=51200)
+    ts2 = ac.TimeSamples(data=rng.standard_normal((1024, 4)), sample_freq=51200)
     ac.WriteH5(source=ts2, file=file2).save()
 
     ts = ac.TimeSamples(file=file1)
