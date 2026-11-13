@@ -341,6 +341,15 @@ class BeamformerBase(HasStrictTraits):
     digest = Property(depends_on=BEAMFORMER_BASE_DIGEST_DEPENDENCIES)
 
     # private traits
+    #: Collect solver diagnostics for future solver runs if supported by the respective beamformer.
+    #: Disabling collection clears existing diagnostics without invalidating numerical results.
+    _collect_solver_info = Bool(False, transient=True)
+
+    #: Holds the solver info per frequency index.
+    #: Values retain their backend-specific scaling. 
+    #: This mapping is not persisted in the H5 cache.
+    _solver_info = Dict(key_trait=Int, value_trait=Dict, transient=True)
+
     #: beamforming result
     _ac = Any()
     #: flag for beamforming result at frequency index
@@ -353,6 +362,15 @@ class BeamformerBase(HasStrictTraits):
     @cached_property
     def _get_digest(self):
         return digest(self)
+
+    @observe('digest')
+    def _reset_solver_info(self, event):  # noqa: ARG002
+        self._solver_info.clear()
+
+    @observe('_collect_solver_info')
+    def _reset_solver_info_if_disabled(self, event):
+        if not event.new:
+            self._solver_info.clear()
 
     def _get_filecache(self):
         """
@@ -1324,7 +1342,10 @@ class BeamformerDamasPlus(BeamformerDamas):
                 cT = -1 * psf.sum(1)  # turn the minimization into a maximization
                 self._ac[i] = linprog(c=cT, A_ub=psf, b_ub=y).x / unit  # defaults to simplex method and non-negative x
             else:
-                self._ac[i] = problem.solve(psf, y).solution
+                result = problem.solve(psf, y)
+                self._ac[i] = result.solution
+                if self._collect_solver_info:
+                    self._solver_info[i] = result.info
             self._fr[i] = 1
 
 
@@ -1794,6 +1815,8 @@ class BeamformerCMF(BeamformerBase):
             # start_value defaults to None; per-frequency warm-starting could be added here later
             result = problem.solve(A, R[:, 0])
             self._ac[i] = result.solution
+            if self._collect_solver_info:
+                self._solver_info[i] = result.info
             self._fr[i] = 1
 
 
