@@ -59,14 +59,7 @@ def sector_case_filter(case, t='empty'):
 
 
 def get_result(obj, num, f=next):
-    """For classes with no explicit result method a warning is expected and is caught here to
-    prevent test failure.
-    See https://github.com/acoular/acoular/issues/382 for details.
-    """
-    missing_result = {'Trigger', 'SpatialInterpolator'}
-    if obj.__class__.__name__ in missing_result:
-        with pytest.warns(Warning, match='result method not implemented yet!'):
-            return f(obj.result(num))
+    """Retrieve output; pass-through fallbacks now report through logging."""
     return f(obj.result(num))
 
 

@@ -24,6 +24,9 @@ Implements beamformers in the time domain.
     IntegratorSectorTime
 """
 
+from contextlib import closing
+from functools import wraps
+
 from .base import AcoularBase, SamplesGenerator, TimeOut
 from .fbeamform import SteeringVector
 from .grids import RectGrid
@@ -33,6 +36,28 @@ from .trajectory import Trajectory
 
 import numpy as np
 from traits.api import Bool, CArray, Enum, Float, Instance, Int, List, Map, Property, Range, cached_property
+
+
+def _log_result(method):
+    """Summarize the two implementing generators, not their forwarding overrides."""
+
+    @wraps(method)
+    def wrapped(self, num=2048):
+        with (
+            self.logger.operation(
+                'Computing time-domain beamforming',
+                'Computed time-domain beamforming',
+                count='samples',
+                stopped='Stopped time-domain beamforming',
+            ) as task,
+            closing(method(self, num)) as blocks,
+        ):
+            for block in blocks:
+                task.fields['grid_points'] = block.shape[1]
+                task.advance(block.shape[0])
+                yield block
+
+    return wrapped
 
 
 def const_power_weight(bf):
@@ -103,6 +128,7 @@ class BeamformerTime(TimeOut):
     def _get_weights(self):
         return self.weights_(self)[np.newaxis] if self.weights_ else 1.0
 
+    @_log_result
     def result(self, num=2048):
         """
         Python generator that yields the time-domain beamformer output.
@@ -173,7 +199,6 @@ class BeamformerTime(TimeOut):
                 j = 0
                 # deconvolution
                 while self.n_iter > j:
-                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
                     pow_phi = (phi[:num] ** 2 - autopow).sum(0).clip(min=0) if self.r_diag else (phi[:num] ** 2).sum(0)
                     imax = np.argmax(pow_phi)
                     t_float = d_interp2[imax] + d_index[imax] + n_index
@@ -189,13 +214,11 @@ class BeamformerTime(TimeOut):
                         pow_next_phi = (next_phi[:num] ** 2 - next_autopow).sum(0).clip(min=0)
                     else:
                         pow_next_phi = (next_phi[:num] ** 2).sum(0)
-                    # print(f"total signal power: {pow_phi.sum()}")
                     if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
                         gamma[:num, imax] += self.damp * phi[:num, imax]
                         gamma_autopow[:num, imax] = autopow[:num, imax].copy()
                         phi = next_phi
                         autopow = next_autopow
-                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
                         j += 1
                     else:
                         break
@@ -320,7 +343,6 @@ class BeamformerTimeTraj(BeamformerTime):
                 rm = np.array((dx, dy, dz)).T  # rotation matrix
                 rm /= np.sqrt((rm * rm).sum(0))  # column normalized
                 tpos = np.dot(rm, gpos) + loc[:, np.newaxis]  # rotation+translation
-                #                print(loc[:])
                 yield tpos
 
     def _get_macostheta(self, g1, tpos, rm):
@@ -348,6 +370,7 @@ class BeamformerTimeTraj(BeamformerTime):
             return self.steer.ref  # full((self.steer.grid.size,), self.steer.ref)
         return self.steer.env.apparent_r(tpos)
 
+    @_log_result
     def result(self, num=2048):
         """
         Python generator that yields the time-domain beamformer output.
@@ -443,7 +466,6 @@ class BeamformerTimeTraj(BeamformerTime):
                 t_ind = np.arange(p_res.shape[0], dtype=idtype)
                 # deconvolution
                 while self.n_iter > j:
-                    # print(f"start clean iteration {j+1} of max {self.n_iter}")
                     if self.r_diag:
                         pow_phi = (phi[:num] * phi[:num] - autopow).sum(0).clip(min=0)
                     else:
@@ -470,13 +492,11 @@ class BeamformerTimeTraj(BeamformerTime):
                         pow_next_phi = (next_phi[:num] * next_phi[:num] - next_autopow).sum(0).clip(min=0)
                     else:
                         pow_next_phi = (next_phi[:num] * next_phi[:num]).sum(0)
-                    # print(f"total signal power: {pow_phi.sum()}")
                     if pow_next_phi.sum() < pow_phi.sum():  # stopping criterion
                         gamma[:num, imax] += self.damp * phi[:num, imax]
                         gamma_autopow[:num, imax] = autopow[:num, imax].copy()
                         phi = next_phi
                         autopow = next_autopow
-                        # print(f"clean max: {L_p((gamma**2).sum(0)/num).max()} dB")
                         j += 1
                     else:
                         break

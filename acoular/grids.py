@@ -58,7 +58,6 @@ import scipy.linalg as spla
 # from matplotlib.path import Path
 from scipy.spatial import Delaunay
 from traits.api import (
-    ABCHasStrictTraits,
     Bool,
     CArray,
     File,
@@ -967,7 +966,7 @@ class MergeGrid(Grid):
         return np.unique(bpos, axis=1)
 
 
-class Sector(ABCHasStrictTraits):
+class Sector(AcoularBase):
     """
     Abstract base class for all sector types.
 

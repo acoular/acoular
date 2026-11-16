@@ -6,10 +6,16 @@ Upcoming
 **New features**
 
     - Extends functionality of :class:`~acoular.aiaa.TimeSamplesAIAABenchmark` to handle transposed data
+    - adds class-specific loggers through :attr:`~acoular.base.AcoularBase.logger`, with context
+      fields and timed operation summaries; major computations, cache reuse, and I/O report concise messages
+    - adds Rich console output and optional progress displays, controlled by ``config.log_level``,
+      ``config.log_color``, and ``config.log_progress``; application logging takes precedence by default,
+      without changes to the root logger or application handlers
 
 **Documentation**
 
     - use new Acoular themeing for the docs and examples
+    - adds a :doc:`logging and progress guide <../user_guide/logging>` and a runnable logging example
 
 **Internal**
 

@@ -26,7 +26,6 @@ Examples
 """  # noqa: W505
 
 import contextlib
-from warnings import warn as _warn
 
 from acoular.base import AcoularBase
 from acoular.h5files import H5FileBase, _get_h5file_class
@@ -84,20 +83,16 @@ class TimeSamplesAIAABenchmark(TimeSamples):
                 self.num_samples, self.num_channels = data_shape
             elif data_shape[1] == data_nominal_samples:
                 self._data_transposed = True
-                _warn(
-                    f'Data is of shape ({data_shape[0]}, {data_shape[1]}) and may be stored as '
-                    '(num_channels, num_samples). It will be transposed for further processing.',
-                    Warning,
-                    stacklevel=2,
+                self.logger.warning(
+                    'Interpreting transposed input data', input_rows=data_shape[0], input_columns=data_shape[1]
                 )
                 self.num_channels, self.num_samples = self.data.shape
             else:
-                _warn(
-                    f'Data shape ({data_shape[0]}, {data_shape[1]}) does not correspond to the '
-                    f'documented number of samples ({data_nominal_samples}). Number of samples '
-                    f'will assumed to be be {data_shape[0]}.',
-                    Warning,
-                    stacklevel=2,
+                self.logger.warning(
+                    'Input sample count mismatch; using row count',
+                    expected_samples=data_nominal_samples,
+                    samples=data_shape[0],
+                    channels=data_shape[1],
                 )
                 self.num_samples, self.num_channels = data_shape
 

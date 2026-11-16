@@ -346,12 +346,16 @@ class PowerSpectra(BaseSpectra):
             eigvals_dtype = 'float64'
         elif self.precision == 'complex64':
             eigvals_dtype = 'float32'
-        csm_shape = self.csm.shape
-        eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
-        eigvecs = np.empty(csm_shape, dtype=self.precision)
-        for i in range(csm_shape[0]):
-            (eigvals[i], eigvecs[i]) = np.linalg.eigh(self.csm[i])
-        return (eigvals, eigvecs)
+        with self.logger.operation('Computing eigendecompositions', 'Computed eigendecompositions') as task:
+            csm_shape = self.csm.shape
+            task.fields.update(frequencies=csm_shape[0], channels=csm_shape[1])
+            task.update(total=csm_shape[0])
+            eigvals = np.empty(csm_shape[0:2], dtype=eigvals_dtype)
+            eigvecs = np.empty(csm_shape, dtype=self.precision)
+            for i in range(csm_shape[0]):
+                (eigvals[i], eigvecs[i]) = np.linalg.eigh(self.csm[i])
+                task.advance()
+            return (eigvals, eigvecs)
 
     def calc_csm(self):
         """
@@ -380,30 +384,38 @@ class PowerSpectra(BaseSpectra):
         >>> print(ts.num_channels, ts.num_samples, ts.sample_freq)
         4 1000 51200.0
         >>> ps = PowerSpectra(source=ts, block_size=128, window='Blackman')
-        >>> ps.csm.shape
-        (65, 4, 4)
+        >>> ps.csm.shape == (65, 4, 4)
+        True
         """
         t = self.source
         if t.num_samples == -1:
             msg = 'PowerSpectra requires a finite source'
             raise ValueError(msg)
 
-        wind = self.window_(self.block_size)
-        weight = np.dot(wind, wind)
-        wind = wind[np.newaxis, :].swapaxes(0, 1)
-        numfreq = int(self.block_size / 2 + 1)
-        csm_shape = (numfreq, t.num_channels, t.num_channels)
-        csm_upper = np.zeros(csm_shape, dtype=self.precision)
-        # get time data blockwise
-        for data in self._get_source_data():
-            ft = fft.rfft(data * wind, None, 0).astype(self.precision)
-            calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated (for speed reasons)
-        # create the full csm matrix via transposing and complex conj.
-        csm_lower = csm_upper.conj().transpose(0, 2, 1)
-        [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
-        csm = csm_lower + csm_upper
-        # onesided spectrum: multiplication by 2.0=sqrt(2)^2
-        return csm * (2.0 / self.block_size / weight / self.num_blocks)
+        with self.logger.operation(
+            'Computing cross-spectral matrices',
+            'Computed cross-spectral matrices',
+            count='fft_blocks',
+        ) as task:
+            wind = self.window_(self.block_size)
+            weight = np.dot(wind, wind)
+            wind = wind[np.newaxis, :].swapaxes(0, 1)
+            numfreq = int(self.block_size / 2 + 1)
+            csm_shape = (numfreq, t.num_channels, t.num_channels)
+            task.fields.update(frequencies=numfreq, channels=csm_shape[1])
+            task.update(total=max(0, int(self.num_blocks)))
+            csm_upper = np.zeros(csm_shape, dtype=self.precision)
+            # get time data blockwise
+            for data in self._get_source_data():
+                ft = fft.rfft(data * wind, None, 0).astype(self.precision)
+                calcCSM(csm_upper, ft)  # only upper triangular part of matrix is calculated
+                task.advance()
+            # create the full csm matrix via transposing and complex conj.
+            csm_lower = csm_upper.conj().transpose(0, 2, 1)
+            [np.fill_diagonal(csm_lower[cntFreq, :, :], 0) for cntFreq in range(csm_lower.shape[0])]
+            csm = csm_lower + csm_upper
+            # onesided spectrum: multiplication by 2.0=sqrt(2)^2
+            return csm * (2.0 / self.block_size / weight / self.num_blocks)
 
     def calc_ev(self):
         """
@@ -482,20 +494,19 @@ class PowerSpectra(BaseSpectra):
 
         nodename = traitname + '_' + self.digest
         if config.global_caching == 'overwrite' and self._h5f.is_cached(nodename):
-            # print("remove existing node",nodename)
             self._h5f.remove_data(nodename)  # remove old data before writing in overwrite mode
 
         if not self._h5f.is_cached(nodename):
             if config.global_caching == 'readonly':
                 return func()
-            #            print("create array, data not cached for",nodename)
             self._h5f.create_compressible_array(nodename, shape, precision)
 
         ac = self._h5f.get_data_by_reference(nodename)
         if ac[:].sum() == 0:  # only initialized
-            #            print("write {} to:".format(traitname),nodename)
             ac[:] = func()
             self._h5f.flush()
+        else:
+            self.logger.info('Reused cached spectra', result=traitname, frequencies=shape[0], channels=shape[1])
         return ac
 
     @property_depends_on(['digest'])
