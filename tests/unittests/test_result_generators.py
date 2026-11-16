@@ -18,7 +18,7 @@ from pytest_cases import parametrize, parametrize_with_cases
 # @settings(max_examples=4, suppress_health_check=HealthCheck)
 @parametrize('num', [1, 32], ids=['num=1', 'num=32'])
 @parametrize_with_cases('obj', cases=Generators)
-def test_result_generator(obj, num):  # don't use default value if @parametrize is used
+def test_result_generator(obj, num, request):  # don't use default value if @parametrize is used
     """
     Test for result generators: checks block sizes and total sample count.
 
@@ -35,7 +35,8 @@ def test_result_generator(obj, num):  # don't use default value if @parametrize 
     }
     for generator, reason in xfails.items():
         if isinstance(obj, generator):
-            pytest.xfail(reason)
+            request.node.add_marker(pytest.mark.xfail(reason=reason, strict=True, raises=AssertionError))
+            break
 
     blocks = get_result(obj, num=num, f=list)
     assert len(blocks) > 0, 'Generator did not yield any blocks.'
@@ -95,11 +96,10 @@ def _retained_blocks(generator):
 
 @parametrize('num', [1])
 @parametrize_with_cases('obj', cases=Generators)
-def test_result_block_stability(obj, num):
+def test_result_block_stability(obj, num, request):
     """A retained block must not change when its generator advances."""
     xfails = {
         ac.IntegratorSectorTime: 'Issue #654',
-        ac.MaskedTimeOut: 'Issue #654',
         ac.MovingPointSourceDipole: 'Issue #654',
         ac.OctaveFilterBank: 'Issue #654',
         ac.PointSource: 'Issue #654',
@@ -107,11 +107,11 @@ def test_result_block_stability(obj, num):
         ac.TimeReverse: 'Issue #654',
     }
     if reason := xfails.get(type(obj)):
-        pytest.xfail(reason)
+        request.node.add_marker(pytest.mark.xfail(reason=reason, strict=True, raises=AssertionError))
 
     retained_blocks = get_result(obj, num=num, f=_retained_blocks)
     if retained_blocks is None:
-        return
+        pytest.skip('Generator produced fewer than two blocks.')
     first, expected, second = retained_blocks
 
     np.testing.assert_array_equal(first, expected)
@@ -122,15 +122,37 @@ def test_result_block_stability(obj, num):
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_does_not_modify_source_blocks(obj, num):
     """Processors must not modify data owned by their input source."""
-    xfails = {
-        ac.Mixer: 'Issue #595',
-        ac.SourceMixer: 'Issue #595',
-    }
-    if reason := xfails.get(type(obj)):
-        pytest.xfail(reason)
+    source_data = [
+        (source, source.data.copy()) for source in _time_samples_sources(obj) if isinstance(source.data, np.ndarray)
+    ]
+    if not source_data:
+        pytest.skip('No in-memory TimeSamples source to check.')
 
-    source_data = [(source, np.array(source.data, copy=True)) for source in _time_samples_sources(obj)]
-    get_result(obj, num=num)
+    try:
+        for _ in get_result(obj, num=num, f=iter):
+            pass
+        for source, expected in source_data:
+            np.testing.assert_array_equal(source.data, expected)
+    finally:
+        # Some cases share their source across tests, including the known mutating cases.
+        for source, expected in source_data:
+            source.data[...] = expected
 
-    for source, expected in source_data:
-        np.testing.assert_array_equal(source.data, expected)
+
+@pytest.mark.xfail(reason='Issue #654', strict=True, raises=AssertionError)
+def test_masked_timeout_retained_block_with_offset():
+    source = ac.TimeSamples(data=np.arange(10.0).reshape(-1, 1), sample_freq=1000)
+    obj = ac.MaskedTimeOut(source=source, start=1, stop=9)
+    first, expected, _ = _retained_blocks(obj.result(3))
+    np.testing.assert_array_equal(first, expected)
+
+
+@pytest.mark.parametrize('mixer_cls', [ac.Mixer, ac.SourceMixer])
+@pytest.mark.xfail(reason='Issue #595', strict=True, raises=AssertionError)
+def test_mixer_does_not_modify_sources(mixer_cls):
+    data = np.arange(12.0).reshape(6, 2)
+    sources = [ac.TimeSamples(data=data.copy(), sample_freq=1000) for _ in range(2)]
+    obj = mixer_cls(source=sources[0], sources=sources[1:]) if mixer_cls is ac.Mixer else mixer_cls(sources=sources)
+    list(obj.result(2))
+    for source in sources:
+        np.testing.assert_array_equal(source.data, data)
