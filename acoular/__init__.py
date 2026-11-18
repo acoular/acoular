@@ -61,6 +61,7 @@ from .grids import (
     LineGrid,
     MergeGrid,
     MultiSector,
+    PolarGrid,
     PolySector,
     RectGrid,
     RectGrid3D,
