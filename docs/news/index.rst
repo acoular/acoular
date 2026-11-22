@@ -33,6 +33,7 @@ Upcoming
     - fixes the sign of the radial Mach number in :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) used for ``conv_amp=True``, which is now consistent with :class:`~acoular.sources.MovingPointSource`; results of the trajectory beamformers with ``conv_amp=True`` change
     - preserves blocks returned by :class:`~acoular.process.SamplesBuffer` across refills, including buffered :class:`~acoular.fprocess.IRFFT` output
     - fixes ``weights='power'`` in the time-domain beamformers: :func:`~acoular.tbeamform.const_power_weight` returned weights of wrong shape with numpy >= 2.0, and :class:`~acoular.tbeamform.BeamformerTimeTraj` (and derived classes) failed with ``precision=32``
+    - fixes :class:`~acoular.tprocess.Mixer` and :class:`~acoular.sources.SourceMixer` scaling and summing the primary block in place, which overwrote the samples of the primary source and made a repeated evaluation return different blocks
 
 26.08
 ------------------------
