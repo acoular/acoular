@@ -1566,6 +1566,8 @@ class Mixer(TimeOut):
 
         gens = [i.result(num) for i in self.sources]
         for temp in self.source.result(num):
+            # copy on first use: the block belongs to the source and must not be written to
+            temp = temp.copy()
             sh = temp.shape[0]
             for g in gens:
                 try:

@@ -122,15 +122,38 @@ def test_result_block_stability(obj, num):
 @parametrize_with_cases('obj', cases=Generators)
 def test_result_does_not_modify_source_blocks(obj, num):
     """Processors must not modify data owned by their input source."""
-    xfails = {
-        ac.Mixer: 'Issue #595',
-        ac.SourceMixer: 'Issue #595',
-    }
-    if reason := xfails.get(type(obj)):
-        pytest.xfail(reason)
-
     source_data = [(source, np.array(source.data, copy=True)) for source in _time_samples_sources(obj)]
     get_result(obj, num=num)
 
     for source, expected in source_data:
         np.testing.assert_array_equal(source.data, expected)
+
+
+@parametrize('num', [1, 3])
+def test_mixers_do_not_modify_source_blocks(num):
+    """Mixers must mix into a copy, not into a block owned by a source.
+
+    The generator cases above build every mixer with a single source (or with unit weights), for
+    which scaling a block in place is an identity write and cannot expose the bug. Mixing two
+    sources with non-unit weights does: the in-place scaling used to overwrite the first source's
+    samples, so reading ``TimeSamples.data`` after mixing returned the mixed signal and a second
+    evaluation could not reproduce the first.
+    """
+    first = np.arange(16, dtype=float).reshape(-1, 2, order='F')
+    second = first + 10
+    weight_first, weight_second = 2.0, 3.0
+
+    source1 = ac.TimeSamples(data=first.copy(), sample_freq=1)
+    source2 = ac.TimeSamples(data=second.copy(), sample_freq=1)
+    mixer = ac.Mixer(source=source1, sources=[source2])
+
+    np.testing.assert_array_equal(np.vstack([b.copy() for b in mixer.result(num)]), first + second)
+    np.testing.assert_array_equal(source1.data, first)
+
+    source1 = ac.TimeSamples(data=first.copy(), sample_freq=1)
+    source2 = ac.TimeSamples(data=second.copy(), sample_freq=1)
+    mixer = ac.SourceMixer(sources=[source1, source2], weights=[weight_first, weight_second])
+
+    expected = weight_first * first + weight_second * second
+    np.testing.assert_array_equal(np.vstack([b.copy() for b in mixer.result(num)]), expected)
+    np.testing.assert_array_equal(source1.data, first)

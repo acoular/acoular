@@ -2141,7 +2141,8 @@ class SourceMixer(SamplesGenerator):
             msg = f'weights must match the number of sources ({len(self.sources)})'
             raise ValueError(msg)
         for temp in self.sources[0].result(num):
-            temp *= weights[0]
+            # copy on first use: the block belongs to the source and must not be written to
+            temp = temp * weights[0]
             sh = temp.shape[0]
             for j, g in enumerate(gens):
                 temp1 = next(g) * weights[j + 1]
