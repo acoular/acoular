@@ -35,6 +35,7 @@ Implements acoustic environments with and without flow.
     spiral_sphere
 """
 
+import contextlib
 from abc import abstractmethod
 from warnings import warn as _warn
 
@@ -43,7 +44,6 @@ from .h5files import H5FileBase, _get_h5file_class
 from .internal import lazyjit
 from .tools.utils import get_file_basename
 
-import contextlib
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
@@ -348,6 +348,7 @@ class FlowField(AcoularBase):
             Location in the fluid for which to provide the data, shape (3,).
         """
 
+
 class FlowFieldImport(FlowField):
     """
     Measured or simulated flow field data.
@@ -420,6 +421,7 @@ class FlowFieldImport(FlowField):
     def v(self, xx):
         """
         Provide the flow field as a function of the location.
+
         Parameters
         ----------
         xx : :class:`numpy.ndarray` of :class:`floats<float>`
