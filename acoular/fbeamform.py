@@ -1685,21 +1685,24 @@ class BeamformerCMF(BeamformerBase):
             )
             raise ImportError(msg)
 
-    #: Cached index masks (triangular + real/imag selection) for the CMF problem.
+    #: Cached index masks and Frobenius-norm weights for the CMF problem.
     _csm_indices = Property(depends_on=['freq_data.num_channels', 'r_diag'])
 
     @cached_property
     def _get__csm_indices(self):
-        """Indices for the reduced Kronecker product / vectorized CSM entries."""
+        """Indices and weights for the reduced Kronecker product / vectorized CSM entries."""
         nc = self.freq_data.num_channels
         ind = np.reshape(np.tril(np.ones((nc, nc))), (nc * nc,)) > 0
         ind_im0 = (np.reshape(np.eye(nc), (nc * nc,)) == 0)[ind]
         ind_reim = np.hstack([ind_im0, ind_im0]) if self.r_diag else np.hstack([np.ones(np.size(ind_im0)) > 0, ind_im0])
-        return ind, ind_reim
+        # Each off-diagonal entry represents both Hermitian counterparts in the Frobenius norm.
+        weights = np.where(ind_im0, np.sqrt(2.0), 1.0)
+        weights = np.hstack([weights, weights])[ind_reim, np.newaxis]
+        return ind, ind_reim, weights
 
     def _build_dictionary(self, f):
-        """Build the real-valued CMF sensing matrix (dictionary) for one frequency."""
-        ind, ind_reim = self._csm_indices
+        """Build the Frobenius-norm-preserving real CMF dictionary for one frequency."""
+        ind, ind_reim, weights = self._csm_indices
         h = self.steer.transfer(f).T
         nc = h.shape[0]
         num_points = h.shape[1]
@@ -1708,14 +1711,14 @@ class BeamformerCMF(BeamformerBase):
         Ac = Bc.reshape(nc * nc, num_points)
 
         A = Ac[ind, :]
-        return np.vstack([A.real, A.imag])[ind_reim, :]
+        return np.vstack([A.real, A.imag])[ind_reim, :] * weights
 
     def _vectorize_csm(self, csm):
-        """Vectorize one CSM using the same reduction as `_build_dictionary`."""
-        ind, ind_reim = self._csm_indices
+        """Vectorize one CSM using the same norm-preserving reduction as `_build_dictionary`."""
+        ind, ind_reim, weights = self._csm_indices
         nc = csm.shape[-1]
         R = np.reshape(csm.T, (nc * nc, 1))[ind, :]
-        return np.vstack([R.real, R.imag])[ind_reim, :]
+        return np.vstack([R.real, R.imag])[ind_reim, :] * weights
 
     def _get_problem_for_method(self):
         """
