@@ -131,6 +131,17 @@ def sounddevice_properties(setup_sounddevice_mocks):
     return default_device['default_samplerate'], default_device['max_input_channels'], default_device['index'], num
 
 
+# FlowFieldImport Data
+
+
+@pytest.fixture(scope='session')
+def flow_field_data_h5_file():
+    """
+    Fixture for the h5 test file needed to test FlowFieldImport class
+    """
+    return Path(__file__).parent / 'data' / 'ac_openjet_sampled_v0_70.h5'
+
+
 # AIAA Benchmark Data
 
 

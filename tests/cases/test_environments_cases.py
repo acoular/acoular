@@ -15,6 +15,7 @@ ENV_SKIP_DEFAULT = [
 ]
 FLOW_SKIP_DEFAULT = [
     ac.FlowField,
+    ac.FlowFieldImport,
     ac.SlotJet,
     ac.OpenJet,
     ac.RotatingFlow,
@@ -48,6 +49,9 @@ class Flows:
 
     def case_RotatingFlow(self):
         return ac.RotatingFlow(v0=70.0, rps=-1000.0 / 60)
+
+    def case_FlowFieldImport(self, flow_field_data_h5_file):
+        return ac.FlowFieldImport(file=flow_field_data_h5_file)
 
 
 class Environments:
