@@ -6,6 +6,7 @@ Upcoming
 **New features**
 
     - Extends functionality of :class:`~acoular.aiaa.TimeSamplesAIAABenchmark` to handle transposed data
+    - New environment :class: `~acoular.environments.FlowFieldImport` for measured or simulated flow field data. 
 
 **Documentation**
 

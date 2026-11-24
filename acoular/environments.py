@@ -25,6 +25,7 @@ Implements acoustic environments with and without flow.
     UniformFlowEnvironment
     GeneralFlowEnvironment
     FlowField
+    FlowFieldImport
     OpenJet
     RotatingFlow
     SlotJet
@@ -34,27 +35,32 @@ Implements acoustic environments with and without flow.
     spiral_sphere
 """
 
+import contextlib
 from abc import abstractmethod
 from warnings import warn as _warn
 
 from .base import AcoularBase
+from .h5files import H5FileBase, _get_h5file_class
 from .internal import lazyjit
+from .tools.utils import get_file_basename
 
 import numba as nb
 import numpy as np
 import scipy.linalg as spla
 from scipy.integrate import ode
 from scipy.interpolate import LinearNDInterpolator
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, Delaunay
 from traits.api import (
     CArray,
     Dict,
+    File,
     Float,
     Instance,
     Int,
     Property,
     Union,
     cached_property,
+    observe,
 )
 
 f64ro = nb.types.Array(nb.types.float64, 2, 'C', readonly=True)
@@ -341,6 +347,119 @@ class FlowField(AcoularBase):
         xx : :class:`numpy.ndarray` of :class:`floats<float>`
             Location in the fluid for which to provide the data, shape (3,).
         """
+
+
+class FlowFieldImport(FlowField):
+    """
+    Measured or simulated flow field data.
+    This class reads measured or simulated flow field data from hdf5 file in terms of
+    spatial coordinates (x,y,z) and velocity vector components (u,v,w). It calculates
+    the velocity vector and its Jacobian matrix at a given location by triangulating the
+    input points and performing a piecewise linear interpolation.
+    """
+
+    #: Name of the .h5-file from which to read the data.
+    file = Union(None, File(filter=['*.h5'], exists=True))
+
+    #: Basename of the ``.h5`` file, set automatically from the :attr:`file` attribute.
+    basename = Property(depends_on=['file'])
+
+    #: HDF5 file object.
+    _h5f = Instance(H5FileBase, transient=True)
+
+    #: spatial coordinates (x,y,z) of the flow data points.
+    #: Each row of the 2-D numpy array corresponds to one point in 3-D space.
+    _coordinates = CArray(dtype=float)
+
+    #: velocity components (u,v,w) in the respective spatial directions (x,y,z) of flow data points.
+    #: Each row of the 2-D numpy array holds the values at one point in 3-D space.
+    _velocity_components = CArray(dtype=float)
+
+    #: Delauny triangulation
+    _tri = Instance(Delaunay)
+
+    # To Do: find alternatives for checksum,
+    # since this will be changed in TimeSamples in the future as well...
+
+    # Checksum over first data entries of all coordinates
+    _xyzchecksum = Property(depends_on=['_coordinates'])
+
+    # Checksum over first data entries of all velocity components
+    _uvwchecksum = Property(depends_on=['_velocity_components'])
+
+    #: A unique identifier for the samples, based on its properties. (read-only)
+    digest = Property(fget=AcoularBase._get_digest, depends_on=['basename', '_xyzchecksum', '_uvwchecksum'])
+
+    def _get__xyzchecksum(self):
+        if self._coordinates.size == 0:
+            return 0
+        return self._coordinates[0, :].sum()
+
+    def _get__uvwchecksum(self):
+        if self._velocity_components.size == 0:
+            return 0
+        return self._velocity_components[0, :].sum()
+
+    @cached_property
+    def _get_basename(self):
+        return get_file_basename(self.file)
+
+    @observe('basename')
+    def _import_data(self, event):
+        # Open the .h5 file and set attributes.
+        if self._h5f is not None:
+            with contextlib.suppress(OSError):
+                self._h5f.close()
+        H5File = _get_h5file_class()
+        self._h5f = H5File(self.file)
+        self._load_flowdata_and_triangulate()
+
+    def _load_flowdata_and_triangulate(self):
+        # Loads flow data from :attr:`.h5 file<file>`. Only for internal use.
+        self._coordinates = self._h5f.get_data_by_reference('coordinates')[:]
+        self._velocity_components = self._h5f.get_data_by_reference('velocity_components')[:]
+        # triangulate points in _coordinates
+        self._tri = Delaunay(self._coordinates)
+
+    def v(self, xx):
+        """
+        Provide the flow field as a function of the location.
+
+        Parameters
+        ----------
+        xx : :class:`numpy.ndarray` of :class:`floats<float>`
+            Location in the fluid for which to provide the data, shape (3,).
+        """
+        # find simplex in which xx is located and return index
+        # (-1 when point is outside of the triangulation):
+        ids = self._tri.find_simplex(xx)
+
+        if ids != -1:
+            idv = self._tri.simplices[ids]
+        else:
+            return np.zeros(3), np.zeros((3, 3))
+
+        # get vertex coordinates and respective velocity components values of chosen simplex:
+        # X = self._coordinates[idv] # not used...
+        V = self._velocity_components[idv]
+
+        # extract affine transform of chosen simplex:
+        Trafo = self._tri.transform[ids]
+        B = Trafo[:3, :]  # (3, 3)
+        r = Trafo[3, :]  # (3,)
+
+        # Vector differences, with the fourth vertex as reference
+        D = (V[:3] - V[3]).T  # (3, 3)
+
+        # Vector field v(x) = a + A @ x
+        A = D @ B
+        a = V[3] - A @ r
+
+        # Evaluate the interpolated vector at xx
+        v = a + A @ xx
+
+        # v and A are the interpolated vector and the Jacobian!
+        return v, A
 
 
 class SlotJet(FlowField):

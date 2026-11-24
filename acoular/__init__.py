@@ -23,6 +23,7 @@ from .calib import Calib
 from .environments import (
     Environment,
     FlowField,
+    FlowFieldImport,
     GeneralFlowEnvironment,
     OpenJet,
     RotatingFlow,
