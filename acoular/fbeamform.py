@@ -346,7 +346,7 @@ class BeamformerBase(HasStrictTraits):
     _collect_solver_info = Bool(False, transient=True)
 
     #: Holds the solver info per frequency index.
-    #: Values retain their backend-specific scaling. 
+    #: Values retain their backend-specific scaling.
     #: This mapping is not persisted in the H5 cache.
     _solver_info = Dict(key_trait=Int, value_trait=Dict, transient=True)
 
@@ -1639,13 +1639,13 @@ class BeamformerCMF(BeamformerBase):
     ...     ),
     ... )  # doctest: +SKIP
 
-    Concrete solver backends are implemented and used by :meth:`_calc`. If :attr:`problem`
+    Concrete solver backends are implemented and used by `_calc`. If :attr:`problem`
     is not explicitly set, a default is derived from the built-in :attr:`method` trait
     (and related traits such as :attr:`alpha`, :attr:`n_iter`, and :attr:`show`) for
     backward compatibility.
     """
 
-    #: Optional problem/solver abstraction. If not set, :meth:`_calc` derives a default
+    #: Optional problem/solver abstraction. If not set, `_calc` derives a default
     #: from the legacy :attr:`method` configuration.
     problem = Instance(LeastSquaresProblem)
 

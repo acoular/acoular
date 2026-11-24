@@ -144,6 +144,13 @@ and ``dictionary_scaling``. Most built-in solvers also accept a ``backend``
 keyword to select which library implementation is used, for example
 ``LassoLarsSolver(backend='sklearn')``.
 
+Custom scaling functions can also be registered using
+:func:`~acoular.solvers.register_problem_scaling`:
+
+.. literalinclude:: ../../examples/introductory_examples/example_cmf_solver_architecture.py
+   :start-after: # A custom scaling is just a function with the same
+   :end-before: # %%
+
 
 Writing a New Solver
 ^^^^^^^^^^^^^^^^^^^^
@@ -155,6 +162,10 @@ returning a :class:`~acoular.solvers.SolverOutput`. The resulting solver is
 attached the same way the built-in solvers are, via the ``solver`` argument
 of :class:`~acoular.solvers.LeastSquaresProblem` or
 :class:`~acoular.solvers.L1RegularizedLeastSquaresProblem`.
+
+.. literalinclude:: ../../examples/introductory_examples/example_cmf_solver_architecture.py
+   :start-after: # Adding a solver that was never one of the 7 built-in methods only needs a
+   :end-before: # %%
 
 ``solve`` receives the already-scaled dictionary matrix and data for one
 frequency bin. Scaling is handled by the attached
@@ -168,6 +179,10 @@ For a solver that should support multiple interchangeable backends the way
 the built-in solvers do, subclass :class:`~acoular.solvers.BackendDispatchSolver`
 instead and register one or more backend functions via
 :func:`~acoular.solvers.register_solver_backend`.
+
+.. literalinclude:: ../../examples/introductory_examples/example_cmf_solver_architecture.py
+   :start-after: # A custom backend is a function with the same
+
 
 
 
