@@ -378,7 +378,7 @@ class FlowFieldImport(FlowField):
     #: Delauny triangulation
     _tri = Instance(Delaunay)
 
-    # find alternatives for checksum,
+    # To Do: find alternatives for checksum,
     # since this will be changed in TimeSamples in the future as well...
 
     # Checksum over first data entries of all coordinates
@@ -391,10 +391,13 @@ class FlowFieldImport(FlowField):
     digest = Property(fget=AcoularBase._get_digest, depends_on=['basename', '_xyzchecksum', '_uvwchecksum'])
 
     def _get__xyzchecksum(self):
-        # print(f'\n\n shape of _coordinates: {self._coordinates.shape} \n\n')
+        if self._coordinates.size == 0:
+            return 0
         return self._coordinates[0, :].sum()
 
     def _get__uvwchecksum(self):
+        if self._velocity_components.size == 0:
+            return 0
         return self._velocity_components[0, :].sum()
 
     @cached_property
@@ -416,7 +419,7 @@ class FlowFieldImport(FlowField):
         self._coordinates = self._h5f.get_data_by_reference('coordinates')[:]
         self._velocity_components = self._h5f.get_data_by_reference('velocity_components')[:]
         # triangulate points in _coordinates
-        self._tri = Delaunay(self._coordinates)  # does it load only once?!
+        self._tri = Delaunay(self._coordinates)
 
     def v(self, xx):
         """
@@ -434,12 +437,10 @@ class FlowFieldImport(FlowField):
         if ids != -1:
             idv = self._tri.simplices[ids]
         else:
-            # msg = f'xx = {xx} is outside the flow field domain!'
-            # raise ValueError(msg)
             return np.zeros(3), np.zeros((3, 3))
 
         # get vertex coordinates and respective velocity components values of chosen simplex:
-        # X = self._coordinates[idv]
+        # X = self._coordinates[idv] # not used...
         V = self._velocity_components[idv]
 
         # extract affine transform of chosen simplex:
